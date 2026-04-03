@@ -91,6 +91,50 @@ export function GradeCalculator({
     latestRowsRef.current = rows
   }, [rows])
 
+  const targetGradeValue = parseFloat(targetGrade) || 80
+  const buildResult = useCallback(
+    (
+      nextRows: GradeRow[],
+      nextGradeType: GradeType,
+      thresholds?: LetterGradeThreshold[]
+    ): CalculationResult | null => {
+      const calcResult = calculateWeightedAverage(nextRows, nextGradeType)
+      if (!calcResult) {
+        return null
+      }
+
+      const remainingWeight = 100 - calcResult.totalWeight
+      const needed =
+        remainingWeight > 0
+          ? calculateNeededGrade(
+              calcResult.average,
+              calcResult.totalWeight,
+              targetGradeValue
+            )
+          : null
+
+      const averageOnCompletedWork = calcResult.average
+      const overallCoursePercentSoFar = calcResult.weightedSum / 100
+
+      return {
+        averageOnCompletedWork,
+        averageOnCompletedWorkLetter: percentageToLetter(
+          averageOnCompletedWork,
+          thresholds
+        ),
+        overallCoursePercentSoFar,
+        overallCoursePercentSoFarLetter: percentageToLetter(
+          overallCoursePercentSoFar,
+          thresholds
+        ),
+        totalWeight: calcResult.totalWeight,
+        remainingWeight,
+        neededGrade: needed,
+      }
+    },
+    [targetGradeValue]
+  )
+
   const lastLoadedCourseIdRef = useRef<Course['_id'] | null>(null)
   useEffect(() => {
     if (!selectedCourseId) {
@@ -114,13 +158,22 @@ export function GradeCalculator({
         weight: g.weightInput ?? String(g.weight ?? ''),
       }))
 
-    setRows(
+    const nextRows =
       mapped.length > 0
         ? mapped
         : [createEmptyRow(), createEmptyRow(), createEmptyRow()]
-    )
-    setResult(null)
-  }, [selectedCourseId, savedGrades])
+    const nextGradeType = (selectedCourse?.gradeType ?? 'percentage') as GradeType
+    const thresholds = selectedCourse?.letterGradeThresholds
+
+    setRows(nextRows)
+    setResult(buildResult(nextRows, nextGradeType, thresholds))
+  }, [
+    buildResult,
+    savedGrades,
+    selectedCourse?.gradeType,
+    selectedCourse?.letterGradeThresholds,
+    selectedCourseId,
+  ])
 
   useEffect(() => {
     if (!selectedCourseId) return
@@ -185,7 +238,7 @@ export function GradeCalculator({
       setRows((prev) =>
         prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
       )
-      setResult(null) // Clear results when input changes
+      setResult(null)
 
       scheduleSaveRow(id)
     },
@@ -208,6 +261,7 @@ export function GradeCalculator({
 
   const handleAddRow = useCallback(() => {
     setRows((prev) => [...prev, createEmptyRow()])
+    setResult(null)
   }, [])
 
   const handleGradeTypeChange = (value: string) => {
@@ -226,40 +280,9 @@ export function GradeCalculator({
     }
   }
 
-  const handleCalculate = () => {
-    const calcResult = calculateWeightedAverage(rows, gradeType)
-    if (!calcResult) {
-      setResult(null)
-      return
-    }
-
-    const remainingWeight = 100 - calcResult.totalWeight
-    const target = parseFloat(targetGrade) || 80
-    const needed =
-      remainingWeight > 0
-        ? calculateNeededGrade(calcResult.average, calcResult.totalWeight, target)
-        : null
-
-    const averageOnCompletedWork = calcResult.average
-    const overallCoursePercentSoFar = calcResult.weightedSum / 100
-    const thresholds = selectedCourse?.letterGradeThresholds
-
-    setResult({
-      averageOnCompletedWork,
-      averageOnCompletedWorkLetter: percentageToLetter(
-        averageOnCompletedWork,
-        thresholds
-      ),
-      overallCoursePercentSoFar,
-      overallCoursePercentSoFarLetter: percentageToLetter(
-        overallCoursePercentSoFar,
-        thresholds
-      ),
-      totalWeight: calcResult.totalWeight,
-      remainingWeight,
-      neededGrade: needed,
-    })
-  }
+  const handleCalculate = useCallback(() => {
+    setResult(buildResult(rows, gradeType, selectedCourse?.letterGradeThresholds))
+  }, [buildResult, gradeType, rows, selectedCourse?.letterGradeThresholds])
 
   const handleReset = () => {
     setRows([createEmptyRow(), createEmptyRow(), createEmptyRow()])
@@ -512,7 +535,7 @@ export function GradeCalculator({
       <ResultDisplay
         result={result}
         decimalPlaces={decimalPlaces}
-        targetGrade={parseFloat(targetGrade) || 80}
+        targetGrade={targetGradeValue}
       />
 
       {/* Sign-in prompt for anonymous users */}
