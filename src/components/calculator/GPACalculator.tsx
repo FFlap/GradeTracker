@@ -228,7 +228,7 @@ export function GPACalculator() {
 
       {/* Results */}
       {result && (
-        <Card className="border-border overflow-hidden">
+        <Card className="border-border overflow-hidden py-0">
           <CardContent className="p-0">
             <div className="p-6 bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border">
               <div className="text-sm text-muted-foreground mb-1">Your GPA</div>

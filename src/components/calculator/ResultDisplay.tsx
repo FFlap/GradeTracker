@@ -33,7 +33,7 @@ export function ResultDisplay({
   }
 
   return (
-    <Card className="bg-card border-border overflow-hidden">
+    <Card className="bg-card border-border overflow-hidden py-0">
       <CardContent className="p-0">
         {/* Main Result */}
         <div className="p-6 bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border">
