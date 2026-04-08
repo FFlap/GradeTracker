@@ -85,17 +85,18 @@ export function GradeCalculator({
   const removeGradeRow = useMutation(api.grades.removeRow)
   const removeGradesByCourse = useMutation(api.grades.removeByCourse)
   const updateCourseGradeType = useMutation(api.courses.updateGradeType)
+  const updateCourseTargetGrade = useMutation(api.courses.updateTargetGrade)
 
   const latestRowsRef = useRef<GradeRow[]>(rows)
   useEffect(() => {
     latestRowsRef.current = rows
   }, [rows])
 
-  const targetGradeValue = parseFloat(targetGrade) || 80
   const buildResult = useCallback(
     (
       nextRows: GradeRow[],
       nextGradeType: GradeType,
+      nextTargetGradeValue: number,
       thresholds?: LetterGradeThreshold[]
     ): CalculationResult | null => {
       const calcResult = calculateWeightedAverage(nextRows, nextGradeType)
@@ -109,7 +110,7 @@ export function GradeCalculator({
           ? calculateNeededGrade(
               calcResult.average,
               calcResult.totalWeight,
-              targetGradeValue
+              nextTargetGradeValue
             )
           : null
 
@@ -132,7 +133,7 @@ export function GradeCalculator({
         neededGrade: needed,
       }
     },
-    [targetGradeValue]
+    []
   )
 
   const lastLoadedCourseIdRef = useRef<Course['_id'] | null>(null)
@@ -140,9 +141,12 @@ export function GradeCalculator({
     if (!selectedCourseId) {
       lastLoadedCourseIdRef.current = null
       setRows([createEmptyRow(), createEmptyRow(), createEmptyRow()])
+      setGradeType('percentage')
+      setTargetGrade('80')
       setResult(null)
       return
     }
+    if (!selectedCourse) return
     if (lastLoadedCourseIdRef.current === selectedCourseId) return
     if (!savedGrades) return
 
@@ -162,24 +166,20 @@ export function GradeCalculator({
       mapped.length > 0
         ? mapped
         : [createEmptyRow(), createEmptyRow(), createEmptyRow()]
-    const nextGradeType = (selectedCourse?.gradeType ?? 'percentage') as GradeType
-    const thresholds = selectedCourse?.letterGradeThresholds
+    const nextGradeType = (selectedCourse.gradeType ?? 'percentage') as GradeType
+    const nextTargetGradeValue = selectedCourse.targetGrade ?? 80
+    const thresholds = selectedCourse.letterGradeThresholds
 
+    setGradeType(nextGradeType)
+    setTargetGrade(String(nextTargetGradeValue))
     setRows(nextRows)
-    setResult(buildResult(nextRows, nextGradeType, thresholds))
+    setResult(buildResult(nextRows, nextGradeType, nextTargetGradeValue, thresholds))
   }, [
     buildResult,
     savedGrades,
-    selectedCourse?.gradeType,
-    selectedCourse?.letterGradeThresholds,
+    selectedCourse,
     selectedCourseId,
   ])
-
-  useEffect(() => {
-    if (!selectedCourseId) return
-    const next = (selectedCourse?.gradeType ?? 'percentage') as GradeType
-    setGradeType(next)
-  }, [selectedCourseId, selectedCourse?.gradeType])
 
   const [isEditingScale, setIsEditingScale] = useState(false)
   const [scaleDraft, setScaleDraft] = useState<LetterGradeThreshold[]>([])
@@ -191,6 +191,7 @@ export function GradeCalculator({
   }, [isEditingScale, selectedCourse])
 
   const saveTimeoutsRef = useRef<Map<string, number>>(new Map())
+  const targetGradeSaveTimeoutsRef = useRef<Map<string, number>>(new Map())
   const scheduleSaveRow = useCallback(
     (rowId: string) => {
       if (!isSignedIn || !selectedCourseId) return
@@ -231,6 +232,31 @@ export function GradeCalculator({
       saveTimeoutsRef.current.set(rowId, handle)
     },
     [gradeType, isSignedIn, selectedCourseId, upsertGradeRow]
+  )
+
+  const scheduleSaveTargetGrade = useCallback(
+    (courseId: Course['_id'], value: string) => {
+      if (!isSignedIn) return
+
+      const key = String(courseId)
+      const existing = targetGradeSaveTimeoutsRef.current.get(key)
+      if (existing) window.clearTimeout(existing)
+
+      const handle = window.setTimeout(async () => {
+        const parsed = parseFloat(value)
+        const nextTargetGrade = Number.isFinite(parsed) ? parsed : 80
+
+        await updateCourseTargetGrade({
+          id: courseId,
+          targetGrade: nextTargetGrade,
+        })
+
+        targetGradeSaveTimeoutsRef.current.delete(key)
+      }, 350)
+
+      targetGradeSaveTimeoutsRef.current.set(key, handle)
+    },
+    [isSignedIn, updateCourseTargetGrade]
   )
 
   const handleUpdateRow = useCallback(
@@ -281,8 +307,28 @@ export function GradeCalculator({
   }
 
   const handleCalculate = useCallback(() => {
-    setResult(buildResult(rows, gradeType, selectedCourse?.letterGradeThresholds))
-  }, [buildResult, gradeType, rows, selectedCourse?.letterGradeThresholds])
+    const targetGradeValue = parseFloat(targetGrade) || 80
+    setResult(
+      buildResult(
+        rows,
+        gradeType,
+        targetGradeValue,
+        selectedCourse?.letterGradeThresholds
+      )
+    )
+  }, [buildResult, gradeType, rows, selectedCourse?.letterGradeThresholds, targetGrade])
+
+  const handleTargetGradeChange = useCallback(
+    (value: string) => {
+      setTargetGrade(value)
+      setResult(null)
+
+      if (selectedCourseId) {
+        scheduleSaveTargetGrade(selectedCourseId, value)
+      }
+    },
+    [scheduleSaveTargetGrade, selectedCourseId]
+  )
 
   const handleReset = () => {
     setRows([createEmptyRow(), createEmptyRow(), createEmptyRow()])
@@ -291,8 +337,11 @@ export function GradeCalculator({
 
     if (isSignedIn && selectedCourseId) {
       removeGradesByCourse({ courseId: selectedCourseId })
+      scheduleSaveTargetGrade(selectedCourseId, '80')
     }
   }
+
+  const targetGradeValue = parseFloat(targetGrade) || 80
 
   return (
     <div className="space-y-6">
@@ -477,7 +526,7 @@ export function GradeCalculator({
                 <Input
                   type="number"
                   value={targetGrade}
-                  onChange={(e) => setTargetGrade(e.target.value)}
+                  onChange={(e) => handleTargetGradeChange(e.target.value)}
                   className="w-20 text-center border-border"
                 />
                 <span className="text-sm text-muted-foreground">%</span>

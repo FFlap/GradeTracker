@@ -21,6 +21,7 @@ export const add = mutation({
     name: v.string(),
     semesterId: v.optional(v.id('semesters')),
     credits: v.optional(v.number()),
+    targetGrade: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
@@ -38,6 +39,7 @@ export const add = mutation({
       name: args.name,
       semesterId: args.semesterId,
       credits: args.credits ?? 3,
+      targetGrade: args.targetGrade ?? 80,
       createdAt: Date.now(),
     })
   },
@@ -89,6 +91,21 @@ export const updateGradeType = mutation({
       throw new Error('Invalid grade type')
     }
     return await ctx.db.patch(args.id, { gradeType: args.gradeType })
+  },
+})
+
+export const updateTargetGrade = mutation({
+  args: { id: v.id('courses'), targetGrade: v.number() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) {
+      throw new Error('Not authenticated')
+    }
+    const course = await ctx.db.get(args.id)
+    if (!course || course.userId !== identity.subject) {
+      throw new Error('Course not found')
+    }
+    return await ctx.db.patch(args.id, { targetGrade: args.targetGrade })
   },
 })
 

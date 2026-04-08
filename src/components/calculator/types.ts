@@ -29,6 +29,7 @@ export interface Course {
   name: string
   credits?: number
   gradeType?: GradeType
+  targetGrade?: number
   letterGradeThresholds?: LetterGradeThreshold[]
   createdAt: number
 }

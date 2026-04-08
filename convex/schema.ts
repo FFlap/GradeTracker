@@ -32,6 +32,7 @@ export default defineSchema({
     name: v.string(),
     credits: v.optional(v.number()),
     gradeType: v.optional(v.string()),
+    targetGrade: v.optional(v.number()),
     letterGradeThresholds: v.optional(
       v.array(
         v.object({
