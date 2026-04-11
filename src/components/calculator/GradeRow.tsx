@@ -2,11 +2,14 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { CalendarDays, X } from 'lucide-react'
 import { useRef } from 'react'
-import type { GradeRow as GradeRowType, GradeType } from './types'
+import {
+  sanitizeGradeInput,
+  sanitizeNumberInput,
+  type GradeRow as GradeRowType,
+} from './types'
 
 interface GradeRowProps {
   row: GradeRowType
-  gradeType: GradeType
   onUpdate: (id: string, field: keyof GradeRowType, value: string) => void
   onDelete: (id: string) => void
   showDelete: boolean
@@ -14,29 +17,11 @@ interface GradeRowProps {
 
 export function GradeRow({
   row,
-  gradeType,
   onUpdate,
   onDelete,
   showDelete,
 }: GradeRowProps) {
   const dateInputRef = useRef<HTMLInputElement | null>(null)
-
-  const getGradePlaceholder = () => {
-    switch (gradeType) {
-      case 'percentage':
-        return '85'
-      case 'letters':
-        return 'A-'
-      case 'points':
-        return '85'
-      default:
-        return ''
-    }
-  }
-
-  const getGradeInputType = () => {
-    return gradeType === 'letters' ? 'text' : 'number'
-  }
 
   return (
     <div className="grid grid-cols-1 gap-2 items-center group sm:grid-cols-[1fr_150px_100px_100px_40px]">
@@ -88,17 +73,20 @@ export function GradeRow({
         )}
       </div>
       <Input
-        type={getGradeInputType()}
-        placeholder={getGradePlaceholder()}
+        type="text"
         value={row.grade}
-        onChange={(e) => onUpdate(row.id, 'grade', e.target.value)}
+        onChange={(e) =>
+          onUpdate(row.id, 'grade', sanitizeGradeInput(e.target.value))
+        }
         className="bg-input border-border text-center"
       />
       <Input
-        type="number"
-        placeholder="20"
+        type="text"
+        inputMode="decimal"
         value={row.weight}
-        onChange={(e) => onUpdate(row.id, 'weight', e.target.value)}
+        onChange={(e) =>
+          onUpdate(row.id, 'weight', sanitizeNumberInput(e.target.value))
+        }
         className="bg-input border-border text-center"
       />
       <Button

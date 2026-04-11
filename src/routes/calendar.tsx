@@ -7,7 +7,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Calendar, ChevronLeft, ChevronRight, Dot, Filter } from 'lucide-react'
-import type { Course, Grade } from '@/components/calculator/types'
+import {
+  formatGradeInputForDisplay,
+  type Course,
+  type Grade,
+} from '@/components/calculator/types'
 import {
   Select,
   SelectContent,
@@ -561,7 +565,7 @@ function CalendarPage() {
                             <div className="text-xs text-muted-foreground truncate">
                               {e.courseName}
                               {done
-                                ? ` · ${e.gradeInput ?? ''}${e.gradeType === 'letters' ? '' : '%'} · ${e.weightInput ?? ''}%`
+                                ? ` · ${formatGradeInputForDisplay(e.gradeInput ?? '')} · ${e.weightInput ?? ''}%`
                                 : ' · Not graded yet'}
                             </div>
                           </div>

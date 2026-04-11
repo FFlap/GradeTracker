@@ -10,10 +10,10 @@ import {
   calculateWeightedAverage,
   LETTER_GRADE_THRESHOLDS,
   percentageToLetter,
+  sanitizeNumberInput,
   type Course,
   type Grade,
   type GradeRow,
-  type GradeType,
   type Semester,
 } from '@/components/calculator/types'
 import {
@@ -134,17 +134,7 @@ function SemestersPage() {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 3
   }
 
-  const getCourseRowsForCalc = (
-    course: Course,
-    courseGrades: Grade[]
-  ): { rows: GradeRow[]; gradeType: GradeType } => {
-    const rawType = (course.gradeType ?? 'percentage') as GradeType
-    const hasLetterInputs =
-      rawType === 'letters' &&
-      courseGrades.some((g) => (g.gradeInput ?? '').trim().length > 0)
-    const gradeType: GradeType =
-      rawType === 'letters' && !hasLetterInputs ? 'percentage' : rawType
-
+  const getCourseRowsForCalc = (courseGrades: Grade[]): GradeRow[] => {
     const rows = courseGrades.map((g) => ({
       id: String(g.clientRowId ?? g._id),
       assignment: g.assignmentName ?? '',
@@ -152,13 +142,13 @@ function SemestersPage() {
       grade: g.gradeInput ?? String(g.grade ?? ''),
       weight: g.weightInput ?? String(g.weight ?? ''),
     }))
-    return { rows, gradeType }
+    return rows
   }
 
   const getCoursePercent = (course: Course) => {
     const courseGrades = gradesByCourseId.get(String(course._id)) ?? []
-    const { rows, gradeType } = getCourseRowsForCalc(course, courseGrades)
-    const calc = calculateWeightedAverage(rows, gradeType)
+    const rows = getCourseRowsForCalc(courseGrades)
+    const calc = calculateWeightedAverage(rows)
     return calc?.average ?? null
   }
 
@@ -704,9 +694,12 @@ function SemestersPage() {
                 <div className="space-y-1">
                   <div className="text-xs text-muted-foreground">Credits</div>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={newCourseCredits}
-                    onChange={(e) => setNewCourseCredits(e.target.value)}
+                    onChange={(e) =>
+                      setNewCourseCredits(sanitizeNumberInput(e.target.value))
+                    }
                     placeholder="3"
                   />
                 </div>
@@ -777,9 +770,12 @@ function SemestersPage() {
                       <div className="space-y-1">
                         <div className="text-xs text-muted-foreground">Credits</div>
                         <Input
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
                           value={courseSettingsCredits}
-                          onChange={(e) => setCourseSettingsCredits(e.target.value)}
+                          onChange={(e) =>
+                            setCourseSettingsCredits(sanitizeNumberInput(e.target.value))
+                          }
                           placeholder="3"
                         />
                       </div>

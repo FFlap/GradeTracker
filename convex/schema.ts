@@ -9,16 +9,10 @@ export default defineSchema({
     assignmentName: v.optional(v.string()),
     dueDate: v.optional(v.string()), // YYYY-MM-DD
     gradeInput: v.optional(v.string()),
-    grade: v.number(),                       // The grade value (percentage, points, or converted from letter)
-    gradeType: v.string(),                   // 'percentage' | 'letter' | 'points'
+    grade: v.number(),                       // The grade value as a percentage
     weightInput: v.optional(v.string()),
     weight: v.number(),                      // Weight of this grade item
     createdAt: v.number(),
-    // Legacy fields - kept for backward compatibility
-    courseName: v.optional(v.string()),
-    earnedPoints: v.optional(v.number()),
-    totalPoints: v.optional(v.number()),
-    category: v.optional(v.string()),
   })
     .index('by_user', ['userId'])
     .index('by_course', ['courseId'])
@@ -31,7 +25,6 @@ export default defineSchema({
     semesterId: v.optional(v.id('semesters')),
     name: v.string(),
     credits: v.optional(v.number()),
-    gradeType: v.optional(v.string()),
     targetGrade: v.optional(v.number()),
     letterGradeThresholds: v.optional(
       v.array(

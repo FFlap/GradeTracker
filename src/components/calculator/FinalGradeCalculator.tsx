@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Calculator, RotateCcw } from 'lucide-react'
-import { percentageToLetter } from './types'
+import { percentageToLetter, sanitizeNumberInput } from './types'
 
 interface FinalResult {
   neededGrade: number
@@ -17,19 +17,23 @@ export function FinalGradeCalculator() {
   const [finalWeight, setFinalWeight] = useState('')
   const [targetGrade, setTargetGrade] = useState('')
   const [result, setResult] = useState<FinalResult | null>(null)
+  const [invalidMessage, setInvalidMessage] = useState<string | null>(null)
+  const targetGradePercent = Number.parseFloat(targetGrade)
 
   const handleCalculate = () => {
-    const current = parseFloat(currentGrade)
+    const current = Number.parseFloat(currentGrade)
     const weight = parseFloat(finalWeight)
-    const target = parseFloat(targetGrade)
+    const target = Number.parseFloat(targetGrade)
 
-    if (isNaN(current) || isNaN(weight) || isNaN(target)) {
+    if (!Number.isFinite(current) || isNaN(weight) || !Number.isFinite(target)) {
       setResult(null)
+      setInvalidMessage('Enter a current grade, final exam weight, and target grade.')
       return
     }
 
     if (weight <= 0 || weight > 100) {
       setResult(null)
+      setInvalidMessage('Final exam weight must be greater than 0 and no more than 100.')
       return
     }
 
@@ -43,6 +47,7 @@ export function FinalGradeCalculator() {
       isPossible: needed <= 100 && needed >= 0,
       letterGrade: percentageToLetter(needed),
     })
+    setInvalidMessage(null)
   }
 
   const handleReset = () => {
@@ -50,6 +55,7 @@ export function FinalGradeCalculator() {
     setFinalWeight('')
     setTargetGrade('')
     setResult(null)
+    setInvalidMessage(null)
   }
 
   return (
@@ -69,15 +75,15 @@ export function FinalGradeCalculator() {
               <div className="relative">
                 <Input
                   id="current-grade"
-                  type="number"
-                  placeholder="85"
+                  type="text"
                   value={currentGrade}
-                  onChange={(e) => setCurrentGrade(e.target.value)}
-                  className="pr-8 border-border"
+                  onChange={(e) => {
+                    setCurrentGrade(sanitizeNumberInput(e.target.value))
+                    setResult(null)
+                    setInvalidMessage(null)
+                  }}
+                  className="border-border"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  %
-                </span>
               </div>
             </div>
 
@@ -88,10 +94,14 @@ export function FinalGradeCalculator() {
               <div className="relative">
                 <Input
                   id="final-weight"
-                  type="number"
-                  placeholder="30"
+                  type="text"
+                  inputMode="decimal"
                   value={finalWeight}
-                  onChange={(e) => setFinalWeight(e.target.value)}
+                  onChange={(e) => {
+                    setFinalWeight(sanitizeNumberInput(e.target.value))
+                    setResult(null)
+                    setInvalidMessage(null)
+                  }}
                   className="pr-8 border-border"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -107,15 +117,15 @@ export function FinalGradeCalculator() {
               <div className="relative">
                 <Input
                   id="target-grade"
-                  type="number"
-                  placeholder="80"
+                  type="text"
                   value={targetGrade}
-                  onChange={(e) => setTargetGrade(e.target.value)}
-                  className="pr-8 border-border"
+                  onChange={(e) => {
+                    setTargetGrade(sanitizeNumberInput(e.target.value))
+                    setResult(null)
+                    setInvalidMessage(null)
+                  }}
+                  className="border-border"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  %
-                </span>
               </div>
             </div>
           </div>
@@ -152,7 +162,7 @@ export function FinalGradeCalculator() {
                     </span>
                   </div>
                   <div className="text-sm text-muted-foreground mt-2">
-                    on your final exam to reach {targetGrade}% overall
+                    on your final exam to reach {(targetGradePercent ?? 0).toFixed(1)}% overall
                   </div>
                 </>
               ) : result.neededGrade > 100 ? (
@@ -181,10 +191,22 @@ export function FinalGradeCalculator() {
       )}
 
       {!result && (
-        <Card className="bg-muted/50 border-border">
-          <CardContent className="p-6 text-center text-muted-foreground">
-            Enter your current grade, final exam weight, and target grade to see
-            what you need on the final.
+        <Card
+          className={
+            invalidMessage
+              ? 'bg-destructive/5 border-destructive/30'
+              : 'bg-muted/50 border-border'
+          }
+        >
+          <CardContent
+            className={
+              invalidMessage
+                ? 'p-6 text-center text-destructive'
+                : 'p-6 text-center text-muted-foreground'
+            }
+          >
+            {invalidMessage ??
+              'Enter your current grade, final exam weight, and target grade to see what you need on the final.'}
           </CardContent>
         </Card>
       )}

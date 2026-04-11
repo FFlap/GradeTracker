@@ -1,7 +1,5 @@
 import type { Id } from '../../../convex/_generated/dataModel'
 
-export type GradeType = 'percentage' | 'letters' | 'points'
-
 export type LetterGradeThreshold = { min: number; letter: string }
 
 export interface GradeRow {
@@ -28,7 +26,6 @@ export interface Course {
   semesterId?: Id<'semesters'>
   name: string
   credits?: number
-  gradeType?: GradeType
   targetGrade?: number
   letterGradeThresholds?: LetterGradeThreshold[]
   createdAt: number
@@ -43,7 +40,6 @@ export interface Grade {
   dueDate?: string
   gradeInput?: string
   grade: number
-  gradeType: GradeType
   weightInput?: string
   weight: number
   createdAt: number
@@ -96,6 +92,142 @@ export function letterToPercentage(letter: string): number | null {
   return LETTER_GRADES[upperLetter] ?? null
 }
 
+export function sanitizeGradeInput(input: string): string {
+  const raw = input.toUpperCase().replace(/[^0-9A-F+\-./%\s]/g, '')
+  const trimmed = raw.trimStart()
+  const first = trimmed[0]
+
+  if (first && /[A-F]/.test(first)) {
+    const firstIndex = raw.indexOf(first)
+    const sign = raw.slice(firstIndex + 1).match(/[+-]/)?.[0] ?? ''
+    return `${first}${sign}`
+  }
+
+  const numeric = raw.replace(/[A-F+\-\s]/g, '')
+  let sanitized = ''
+  let hasSlash = false
+  let hasDecimalInSegment = false
+
+  for (const char of numeric) {
+    if (sanitized.includes('%')) continue
+
+    if (/\d/.test(char)) {
+      sanitized += char
+      continue
+    }
+
+    if (char === '.' && !hasDecimalInSegment) {
+      sanitized += char
+      hasDecimalInSegment = true
+      continue
+    }
+
+    if (char === '/' && !hasSlash && /\d$/.test(sanitized)) {
+      sanitized += char
+      hasSlash = true
+      hasDecimalInSegment = false
+      continue
+    }
+
+    if (char === '%' && !hasSlash) {
+      sanitized += char
+    }
+  }
+
+  return sanitized
+}
+
+export function sanitizeNumberInput(input: string): string {
+  let sanitized = ''
+  let hasDecimal = false
+
+  for (const char of input) {
+    if (/\d/.test(char)) {
+      sanitized += char
+      continue
+    }
+
+    if (char === '.' && !hasDecimal) {
+      sanitized += char
+      hasDecimal = true
+    }
+  }
+
+  return sanitized
+}
+
+export function parseGradeInput(input: string): number | null {
+  const trimmed = input.trim()
+  if (!trimmed) return null
+
+  const letterValue = letterToPercentage(trimmed)
+  if (letterValue !== null) {
+    return letterValue
+  }
+
+  const fractionMatch = trimmed.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/)
+  if (fractionMatch) {
+    const earned = Number.parseFloat(fractionMatch[1]!)
+    const total = Number.parseFloat(fractionMatch[2]!)
+    if (!Number.isFinite(earned) || !Number.isFinite(total) || total === 0) {
+      return null
+    }
+    return (earned / total) * 100
+  }
+
+  if (!/^(?:\d+(?:\.\d+)?|\.\d+)%?$/.test(trimmed)) {
+    return null
+  }
+
+  const numeric = Number.parseFloat(trimmed.replace(/%$/, ''))
+  return Number.isFinite(numeric) ? numeric : null
+}
+
+export function getGradeInputError(input: string): string | null {
+  const trimmed = input.trim()
+  if (!trimmed) return null
+
+  if (trimmed.includes('/')) {
+    const parts = trimmed.split('/')
+    if (
+      parts.length !== 2 ||
+      parts[0]!.trim().length === 0 ||
+      parts[1]!.trim().length === 0
+    ) {
+      return 'Fractions need a number on both sides of /.'
+    }
+  }
+
+  if (parseGradeInput(trimmed) === null) {
+    return 'Enter a percentage, a points fraction, or a letter grade.'
+  }
+
+  return null
+}
+
+export function parseWeightInput(input: string): number | null {
+  const trimmed = input.trim()
+  if (!trimmed) return null
+
+  const numeric = Number.parseFloat(trimmed.replace(/%$/, ''))
+  return Number.isFinite(numeric) ? numeric : null
+}
+
+export function formatGradeInputForDisplay(input: string): string {
+  const trimmed = input.trim()
+  if (!trimmed) return ''
+
+  if (trimmed.includes('/') || trimmed.includes('%')) {
+    return trimmed
+  }
+
+  if (letterToPercentage(trimmed) !== null) {
+    return trimmed.toUpperCase()
+  }
+
+  return `${trimmed}%`
+}
+
 export function percentageToLetter(
   percent: number,
   thresholds: LetterGradeThreshold[] = LETTER_GRADE_THRESHOLDS
@@ -109,25 +241,15 @@ export function percentageToLetter(
 }
 
 export function calculateWeightedAverage(
-  rows: GradeRow[],
-  gradeType: GradeType
+  rows: GradeRow[]
 ): { average: number; totalWeight: number; weightedSum: number } | null {
   let totalWeightedScore = 0
   let totalWeight = 0
 
   for (const row of rows) {
-    const weight = parseFloat(row.weight)
-    if (isNaN(weight) || weight <= 0) continue
-
-    let gradeValue: number | null = null
-
-    if (gradeType === 'percentage' || gradeType === 'points') {
-      gradeValue = parseFloat(row.grade)
-    } else if (gradeType === 'letters') {
-      gradeValue = letterToPercentage(row.grade)
-    }
-
-    if (gradeValue === null || isNaN(gradeValue)) continue
+    const weight = parseWeightInput(row.weight)
+    const gradeValue = parseGradeInput(row.grade)
+    if (weight === null || weight <= 0 || gradeValue === null) continue
 
     totalWeightedScore += gradeValue * weight
     totalWeight += weight

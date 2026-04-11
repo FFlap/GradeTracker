@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Calculator, RotateCcw, Plus, X } from 'lucide-react'
+import { sanitizeNumberInput } from './types'
 
 interface CourseEntry {
   id: string
@@ -163,7 +164,7 @@ export function GPACalculator() {
                   }
                 >
                   <SelectTrigger className="bg-input border-border">
-                    <SelectValue placeholder="Grade" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {GRADE_OPTIONS.map((grade) => (
@@ -174,11 +175,16 @@ export function GPACalculator() {
                   </SelectContent>
                 </Select>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   placeholder="3"
                   value={course.credits}
                   onChange={(e) =>
-                    handleUpdateCourse(course.id, 'credits', e.target.value)
+                    handleUpdateCourse(
+                      course.id,
+                      'credits',
+                      sanitizeNumberInput(e.target.value)
+                    )
                   }
                   className="bg-input border-border text-center"
                 />

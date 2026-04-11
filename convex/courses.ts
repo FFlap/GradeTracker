@@ -75,25 +75,6 @@ export const updateCredits = mutation({
   },
 })
 
-export const updateGradeType = mutation({
-  args: { id: v.id('courses'), gradeType: v.string() },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) {
-      throw new Error('Not authenticated')
-    }
-    const course = await ctx.db.get(args.id)
-    if (!course || course.userId !== identity.subject) {
-      throw new Error('Course not found')
-    }
-    const allowed = new Set(['percentage', 'letters', 'points'])
-    if (!allowed.has(args.gradeType)) {
-      throw new Error('Invalid grade type')
-    }
-    return await ctx.db.patch(args.id, { gradeType: args.gradeType })
-  },
-})
-
 export const updateTargetGrade = mutation({
   args: { id: v.id('courses'), targetGrade: v.number() },
   handler: async (ctx, args) => {

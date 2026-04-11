@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Calculator, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { GradeTable } from './GradeTable'
 import { ResultDisplay } from './ResultDisplay'
@@ -13,15 +12,16 @@ import { CourseSelector } from './CourseSelector'
 import {
   type Grade,
   type GradeRow,
-  type GradeType,
   type CalculationResult,
   type Course,
   type LetterGradeThreshold,
   calculateWeightedAverage,
   calculateNeededGrade,
+  getGradeInputError,
   LETTER_GRADE_THRESHOLDS,
-  letterToPercentage,
+  parseGradeInput,
   percentageToLetter,
+  sanitizeNumberInput,
 } from './types'
 
 interface GradeCalculatorProps {
@@ -62,7 +62,6 @@ export function GradeCalculator({
   onDeleteCourse,
   onUpdateLetterGradeThresholds,
 }: GradeCalculatorProps) {
-  const [gradeType, setGradeType] = useState<GradeType>('percentage')
   const [rows, setRows] = useState<GradeRow[]>([
     createEmptyRow(),
     createEmptyRow(),
@@ -70,6 +69,7 @@ export function GradeCalculator({
   ])
   const [targetGrade, setTargetGrade] = useState('80')
   const [result, setResult] = useState<CalculationResult | null>(null)
+  const [invalidMessage, setInvalidMessage] = useState<string | null>(null)
 
   const selectedCourse = useMemo(
     () => (selectedCourseId ? courses.find((c) => c._id === selectedCourseId) ?? null : null),
@@ -83,7 +83,6 @@ export function GradeCalculator({
   const upsertGradeRow = useMutation(api.grades.upsertRow)
   const removeGradeRow = useMutation(api.grades.removeRow)
   const removeGradesByCourse = useMutation(api.grades.removeByCourse)
-  const updateCourseGradeType = useMutation(api.courses.updateGradeType)
   const updateCourseTargetGrade = useMutation(api.courses.updateTargetGrade)
 
   const latestRowsRef = useRef<GradeRow[]>(rows)
@@ -94,11 +93,10 @@ export function GradeCalculator({
   const buildResult = useCallback(
     (
       nextRows: GradeRow[],
-      nextGradeType: GradeType,
       nextTargetGradeValue: number,
       thresholds?: LetterGradeThreshold[]
     ): CalculationResult | null => {
-      const calcResult = calculateWeightedAverage(nextRows, nextGradeType)
+      const calcResult = calculateWeightedAverage(nextRows)
       if (!calcResult) {
         return null
       }
@@ -140,9 +138,9 @@ export function GradeCalculator({
     if (!selectedCourseId) {
       lastLoadedCourseIdRef.current = null
       setRows([createEmptyRow(), createEmptyRow(), createEmptyRow()])
-      setGradeType('percentage')
       setTargetGrade('80')
       setResult(null)
+      setInvalidMessage(null)
       return
     }
     if (!selectedCourse) return
@@ -165,14 +163,13 @@ export function GradeCalculator({
       mapped.length > 0
         ? mapped
         : [createEmptyRow(), createEmptyRow(), createEmptyRow()]
-    const nextGradeType = (selectedCourse.gradeType ?? 'percentage') as GradeType
     const nextTargetGradeValue = selectedCourse.targetGrade ?? 80
     const thresholds = selectedCourse.letterGradeThresholds
 
-    setGradeType(nextGradeType)
     setTargetGrade(String(nextTargetGradeValue))
     setRows(nextRows)
-    setResult(buildResult(nextRows, nextGradeType, nextTargetGradeValue, thresholds))
+    setResult(buildResult(nextRows, nextTargetGradeValue, thresholds))
+    setInvalidMessage(null)
   }, [
     buildResult,
     savedGrades,
@@ -202,16 +199,9 @@ export function GradeCalculator({
         const row = latestRowsRef.current.find((r) => r.id === rowId)
         if (!row) return
 
-        const weightParsed = parseFloat(row.weight)
+        const weightParsed = Number.parseFloat(row.weight.trim().replace(/%$/, ''))
         const weight = Number.isFinite(weightParsed) && weightParsed > 0 ? weightParsed : 0
-
-        let gradeValue = 0
-        if (gradeType === 'letters') {
-          gradeValue = letterToPercentage(row.grade) ?? 0
-        } else {
-          const parsed = parseFloat(row.grade)
-          gradeValue = Number.isFinite(parsed) ? parsed : 0
-        }
+        const gradeValue = parseGradeInput(row.grade) ?? 0
 
         await upsertGradeRow({
           courseId: selectedCourseId,
@@ -220,7 +210,6 @@ export function GradeCalculator({
           dueDate: row.date,
           gradeInput: row.grade,
           grade: gradeValue,
-          gradeType,
           weightInput: row.weight,
           weight,
         })
@@ -230,7 +219,7 @@ export function GradeCalculator({
 
       saveTimeoutsRef.current.set(rowId, handle)
     },
-    [gradeType, isSignedIn, selectedCourseId, upsertGradeRow]
+    [isSignedIn, selectedCourseId, upsertGradeRow]
   )
 
   const scheduleSaveTargetGrade = useCallback(
@@ -242,8 +231,11 @@ export function GradeCalculator({
       if (existing) window.clearTimeout(existing)
 
       const handle = window.setTimeout(async () => {
-        const parsed = parseFloat(value)
-        const nextTargetGrade = Number.isFinite(parsed) ? parsed : 80
+        const nextTargetGrade = Number.parseFloat(value)
+        if (!Number.isFinite(nextTargetGrade)) {
+          targetGradeSaveTimeoutsRef.current.delete(key)
+          return
+        }
 
         await updateCourseTargetGrade({
           id: courseId,
@@ -264,6 +256,7 @@ export function GradeCalculator({
         prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
       )
       setResult(null)
+      setInvalidMessage(null)
 
       scheduleSaveRow(id)
     },
@@ -274,6 +267,7 @@ export function GradeCalculator({
     (id: string) => {
       setRows((prev) => prev.filter((row) => row.id !== id))
       setResult(null)
+      setInvalidMessage(null)
 
       if (isSignedIn && selectedCourseId) {
         removeGradeRow({ courseId: selectedCourseId, clientRowId: id }).catch(
@@ -287,40 +281,36 @@ export function GradeCalculator({
   const handleAddRow = useCallback(() => {
     setRows((prev) => [...prev, createEmptyRow()])
     setResult(null)
+    setInvalidMessage(null)
   }, [])
 
-  const handleGradeTypeChange = (value: string) => {
-    if (value) {
-      const next = value as GradeType
-      setGradeType(next)
-      setResult(null)
-
-      if (isSignedIn && selectedCourseId) {
-        updateCourseGradeType({ id: selectedCourseId, gradeType: next })
-        // Re-save rows under the new grade type so Semesters reflects the change.
-        for (const row of latestRowsRef.current) {
-          scheduleSaveRow(row.id)
-        }
-      }
-    }
-  }
-
   const handleCalculate = useCallback(() => {
-    const targetGradeValue = parseFloat(targetGrade) || 80
+    for (const [index, row] of rows.entries()) {
+      const gradeError = getGradeInputError(row.grade)
+      if (!gradeError) continue
+
+      const rowName = row.assignment.trim() || `row ${index + 1}`
+      setResult(null)
+      setInvalidMessage(`Grade for ${rowName} is invalid. ${gradeError}`)
+      return
+    }
+
+    const targetGradeValue = Number.parseFloat(targetGrade) || 80
+    setInvalidMessage(null)
     setResult(
       buildResult(
         rows,
-        gradeType,
         targetGradeValue,
         selectedCourse?.letterGradeThresholds
       )
     )
-  }, [buildResult, gradeType, rows, selectedCourse?.letterGradeThresholds, targetGrade])
+  }, [buildResult, rows, selectedCourse?.letterGradeThresholds, targetGrade])
 
   const handleTargetGradeChange = useCallback(
     (value: string) => {
       setTargetGrade(value)
       setResult(null)
+      setInvalidMessage(null)
 
       if (selectedCourseId) {
         scheduleSaveTargetGrade(selectedCourseId, value)
@@ -333,6 +323,7 @@ export function GradeCalculator({
     setRows([createEmptyRow(), createEmptyRow(), createEmptyRow()])
     setTargetGrade('80')
     setResult(null)
+    setInvalidMessage(null)
 
     if (isSignedIn && selectedCourseId) {
       removeGradesByCourse({ courseId: selectedCourseId })
@@ -340,7 +331,7 @@ export function GradeCalculator({
     }
   }
 
-  const targetGradeValue = parseFloat(targetGrade) || 80
+  const targetGradeValue = Number.parseFloat(targetGrade) || 80
 
   return (
     <div className="space-y-6">
@@ -351,39 +342,6 @@ export function GradeCalculator({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Grade Type Toggle */}
-          <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">
-              Select grade type
-            </Label>
-            <ToggleGroup
-              type="single"
-              value={gradeType}
-              onValueChange={handleGradeTypeChange}
-              spacing={1}
-              className="bg-muted p-1 rounded-xl inline-flex justify-start border border-border"
-            >
-              <ToggleGroupItem
-                value="percentage"
-                className="px-6 py-2 rounded-md text-sm font-medium transition-all data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:shadow-sm border-transparent hover:bg-transparent"
-              >
-                Percentage
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="letters"
-                className="px-6 py-2 rounded-md text-sm font-medium transition-all data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:shadow-sm border-transparent hover:bg-transparent"
-              >
-                Letters
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="points"
-                className="px-6 py-2 rounded-md text-sm font-medium transition-all data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:shadow-sm border-transparent hover:bg-transparent"
-              >
-                Points
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-
           {/* Course Selector */}
           <div className="space-y-2">
             <Label className="text-sm text-muted-foreground">
@@ -429,11 +387,12 @@ export function GradeCalculator({
                               {t.letter}
                             </div>
                             <Input
-                              type="number"
+                              type="text"
+                              inputMode="decimal"
                               value={t.min}
                               disabled={t.letter.toUpperCase() === 'F'}
                               onChange={(e) => {
-                                const value = Number(e.target.value)
+                                const value = Number(sanitizeNumberInput(e.target.value))
                                 setScaleDraft((prev) =>
                                   prev.map((p, i) =>
                                     i === idx ? { ...p, min: Number.isFinite(value) ? value : p.min } : p
@@ -501,13 +460,17 @@ export function GradeCalculator({
           </div>
 
           {/* Grade Input Table */}
-          <GradeTable
-            rows={rows}
-            gradeType={gradeType}
-            onUpdateRow={handleUpdateRow}
-            onDeleteRow={handleDeleteRow}
-            onAddRow={handleAddRow}
-          />
+          <div className="space-y-2">
+            <div className="text-sm text-muted-foreground">
+              Enter grades as percentages, point fractions like <span className="font-medium text-foreground">17/20</span>, or letters like <span className="font-medium text-foreground">A-</span>.
+            </div>
+            <GradeTable
+              rows={rows}
+              onUpdateRow={handleUpdateRow}
+              onDeleteRow={handleDeleteRow}
+              onAddRow={handleAddRow}
+            />
+          </div>
 
           {/* Divider */}
           <div className="border-t border-border" />
@@ -523,12 +486,13 @@ export function GradeCalculator({
                   Find grade needed to get
                 </span>
                 <Input
-                  type="number"
+                  type="text"
                   value={targetGrade}
-                  onChange={(e) => handleTargetGradeChange(e.target.value)}
-                  className="w-20 text-center border-border"
+                  onChange={(e) =>
+                    handleTargetGradeChange(sanitizeNumberInput(e.target.value))
+                  }
+                  className="w-32 text-center border-border"
                 />
-                <span className="text-sm text-muted-foreground">%</span>
               </div>
             </div>
           </div>
@@ -551,6 +515,7 @@ export function GradeCalculator({
       <ResultDisplay
         result={result}
         targetGrade={targetGradeValue}
+        invalidMessage={invalidMessage}
       />
 
       {/* Sign-in prompt for anonymous users */}

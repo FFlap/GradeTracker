@@ -4,17 +4,32 @@ import type { CalculationResult } from './types'
 interface ResultDisplayProps {
   result: CalculationResult | null
   targetGrade: number
+  invalidMessage?: string | null
 }
 
 export function ResultDisplay({
   result,
   targetGrade,
+  invalidMessage,
 }: ResultDisplayProps) {
   if (!result) {
     return (
-      <Card className="bg-muted/50 border-border">
-        <CardContent className="p-6 text-center text-muted-foreground">
-          Enter grades and weights above, then click Calculate to see your results.
+      <Card
+        className={
+          invalidMessage
+            ? 'bg-destructive/5 border-destructive/30'
+            : 'bg-muted/50 border-border'
+        }
+      >
+        <CardContent
+          className={
+            invalidMessage
+              ? 'p-6 text-center text-destructive'
+              : 'p-6 text-center text-muted-foreground'
+          }
+        >
+          {invalidMessage ??
+            'Enter grades and weights above, then click Calculate to see your results.'}
         </CardContent>
       </Card>
     )
