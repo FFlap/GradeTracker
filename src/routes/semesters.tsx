@@ -90,21 +90,29 @@ function SemestersPage() {
     return semesters.find((s) => s.isCurrent) ?? null
   }, [semesters])
 
-  const [openSemesterId, setOpenSemesterId] = useState<string | null>(null)
+  const [openSemesterIds, setOpenSemesterIds] = useState<Set<string>>(new Set())
   const didInitOpenRef = useRef(false)
   useEffect(() => {
     if (didInitOpenRef.current) return
-    if (openSemesterId !== null) return
     if (currentSemester) {
-      setOpenSemesterId(String(currentSemester._id))
+      setOpenSemesterIds(new Set([String(currentSemester._id)]))
       didInitOpenRef.current = true
       return
     }
     if (sortedSemesters[0]) {
-      setOpenSemesterId(String(sortedSemesters[0]._id))
+      setOpenSemesterIds(new Set([String(sortedSemesters[0]._id)]))
       didInitOpenRef.current = true
     }
-  }, [currentSemester, openSemesterId, sortedSemesters])
+  }, [currentSemester, sortedSemesters])
+
+  useEffect(() => {
+    if (!currentSemester) return
+    const currentId = String(currentSemester._id)
+    setOpenSemesterIds((prev) => {
+      if (prev.has(currentId)) return prev
+      return new Set([...prev, currentId])
+    })
+  }, [currentSemester])
 
   const [settingsSemesterId, setSettingsSemesterId] = useState<string | null>(null)
 
@@ -310,7 +318,7 @@ function SemestersPage() {
 
   const semesterCards = sortedSemesters.map((semester) => {
     const semId = String(semester._id)
-    const isOpen = openSemesterId === semId
+    const isOpen = openSemesterIds.has(semId)
     const termCredits = getTermCredits(semId)
     const termGpa = getTermGpa(semId)
 
@@ -331,9 +339,11 @@ function SemestersPage() {
           type="button"
           onClick={() => {
             setSettingsCourseId(null)
-            setOpenSemesterId((prev) => {
-              const next = prev === semId ? null : semId
-              if (next === null) setSettingsSemesterId(null)
+            setOpenSemesterIds((prev) => {
+              const next = new Set(prev)
+              if (next.has(semId)) next.delete(semId)
+              else next.add(semId)
+              if (!next.has(semId)) setSettingsSemesterId(null)
               return next
             })
           }}
@@ -390,7 +400,7 @@ function SemestersPage() {
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              setOpenSemesterId(semId)
+              setOpenSemesterIds((prev) => new Set([...prev, semId]))
               setSettingsSemesterId(semId)
               setIsAddSemesterOpen(false)
               setIsAddCourseOpen(false)
@@ -886,7 +896,11 @@ function SemestersPage() {
                             }
                             await removeSemester({ id: sem._id })
                             setSettingsSemesterId(null)
-                            setOpenSemesterId(null)
+                            setOpenSemesterIds((prev) => {
+                              const next = new Set(prev)
+                              next.delete(String(sem._id))
+                              return next
+                            })
                           }}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
