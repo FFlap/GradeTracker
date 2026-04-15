@@ -56,6 +56,7 @@ function SemestersPage() {
   const addSemester = useMutation(api.semesters.add)
   const updateSemesterStatus = useMutation(api.semesters.updateStatus)
   const removeSemester = useMutation(api.semesters.remove)
+  const updateSemesterName = useMutation(api.semesters.updateName)
   const addCourse = useMutation(api.courses.add)
   const updateCourseSemester = useMutation(api.courses.updateSemester)
   const updateCourseCredits = useMutation(api.courses.updateCredits)
@@ -116,6 +117,8 @@ function SemestersPage() {
   }, [currentSemester])
 
   const [settingsSemesterId, setSettingsSemesterId] = useState<string | null>(null)
+  const [semesterSettingsName, setSemesterSettingsName] = useState('')
+  const [isSemesterSettingsWorking, setIsSemesterSettingsWorking] = useState(false)
 
   const courseById = useMemo(() => {
     const map = new Map<string, Course>()
@@ -237,6 +240,16 @@ function SemestersPage() {
     setSettingsCourseId(null)
   }, [courseById, settingsCourseId])
 
+  useEffect(() => {
+    if (!settingsSemesterId) return
+    const sem = semesters.find((s) => String(s._id) === settingsSemesterId) ?? null
+    if (!sem) {
+      setSettingsSemesterId(null)
+      return
+    }
+    setSemesterSettingsName(sem.name ?? '')
+  }, [semesters, settingsSemesterId])
+
   const openCourseSettings = (course: Course) => {
     setSettingsCourseId(String(course._id))
     setCourseSettingsName(course.name ?? '')
@@ -316,6 +329,23 @@ function SemestersPage() {
       setSettingsCourseId(null)
     } finally {
       setIsCourseSettingsWorking(false)
+    }
+  }
+
+  const handleSaveSemesterSettings = async () => {
+    if (!settingsSemesterId) return
+    const sem = semesters.find((s) => String(s._id) === settingsSemesterId) ?? null
+    if (!sem) return
+
+    const name = semesterSettingsName.trim()
+    if (!name) return
+
+    try {
+      setIsSemesterSettingsWorking(true)
+      await updateSemesterName({ id: sem._id, name })
+      setSettingsSemesterId(null)
+    } finally {
+      setIsSemesterSettingsWorking(false)
     }
   }
 
@@ -926,10 +956,15 @@ function SemestersPage() {
                       Semester settings
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Update status or delete this semester.
+                      Rename, update status, or delete this semester.
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => setSettingsSemesterId(null)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSettingsSemesterId(null)}
+                    disabled={isSemesterSettingsWorking}
+                  >
                     Close
                   </Button>
                 </div>
@@ -944,8 +979,12 @@ function SemestersPage() {
                   return (
                     <>
                       <div className="space-y-1">
-                        <div className="text-xs text-muted-foreground">Semester</div>
-                        <div className="text-sm font-medium text-foreground">{sem.name}</div>
+                        <div className="text-xs text-muted-foreground">Semester name</div>
+                        <Input
+                          value={semesterSettingsName}
+                          onChange={(e) => setSemesterSettingsName(e.target.value)}
+                          autoFocus
+                        />
                       </div>
 
                       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -959,6 +998,7 @@ function SemestersPage() {
                                 status: e.target.value,
                               })
                             }
+                            disabled={isSemesterSettingsWorking}
                             className="w-full h-9 rounded-md border border-border bg-input px-3 text-sm text-foreground"
                           >
                             <option value="in_progress">In progress</option>
@@ -967,7 +1007,7 @@ function SemestersPage() {
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-border/60 flex justify-end">
+                      <div className="pt-2 border-t border-border/60 flex items-center justify-between gap-2">
                         <Button
                           variant="destructive"
                           onClick={async () => {
@@ -986,10 +1026,29 @@ function SemestersPage() {
                               return next
                             })
                           }}
+                          disabled={isSemesterSettingsWorking}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete semester
                         </Button>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setSettingsSemesterId(null)}
+                            disabled={isSemesterSettingsWorking}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleSaveSemesterSettings}
+                            disabled={
+                              !semesterSettingsName.trim() || isSemesterSettingsWorking
+                            }
+                          >
+                            Save
+                          </Button>
+                        </div>
                       </div>
                     </>
                   )
