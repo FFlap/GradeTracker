@@ -63,11 +63,10 @@ export function Sidebar({
                   'flex items-center gap-2 rounded-md font-semibold text-sidebar-foreground min-w-0 transition-colors',
                   collapsed ? 'justify-center w-full px-0 py-2.5' : 'px-3 py-2 hover:bg-sidebar-accent/50'
                 )}
-                title="Grade Calculator"
+                title="Grade Tracker"
               >
-                <Calculator className="h-4 w-4 text-primary shrink-0" />
                 <span className={cn('text-sm truncate', collapsed && 'sr-only')}>
-                  Grade Calculator
+                  Grade Tracker
                 </span>
               </Link>
             </div>

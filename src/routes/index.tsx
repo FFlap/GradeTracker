@@ -14,7 +14,7 @@ function AnonymousCalculatorPage() {
       <main className="container max-w-3xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-foreground mb-2">
-            Grade Calculator
+            Grade Tracker
           </h1>
           <p className="text-muted-foreground">
             Calculate your weighted grade average, find out what you need on your
