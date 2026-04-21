@@ -126,91 +126,90 @@ export function GPACalculator() {
 
   return (
     <div className="space-y-6">
-      <Card className="border-border">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-medium">
+      <Card className="border-border py-0 gap-0 overflow-hidden rounded-lg">
+        <CardHeader className="border-b border-border px-5 py-4">
+          <CardTitle className="text-base font-semibold">
             Calculate your cumulative GPA
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Table Header */}
-          <div className="grid grid-cols-[1fr_120px_80px_40px] gap-2 text-sm font-medium text-muted-foreground px-1">
-            <span>Course (optional)</span>
-            <span className="text-center">Grade</span>
-            <span className="text-center">Credits</span>
-            <span></span>
+        <CardContent className="space-y-4 p-5">
+          <div className="app-table-panel rounded-lg">
+            <div className="grid grid-cols-[1fr_120px_80px_40px] gap-3 border-b border-border bg-card px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <span>Course</span>
+              <span className="text-center">Grade</span>
+              <span className="text-center">Credits</span>
+              <span></span>
+            </div>
+
+            <div className="divide-y divide-border">
+              {courses.map((course) => (
+                <div
+                  key={course.id}
+                  className="grid grid-cols-[1fr_120px_80px_40px] gap-2 items-center px-3 py-2 group"
+                >
+                  <Input
+                    type="text"
+                    placeholder="e.g. Math 101"
+                    value={course.name}
+                    onChange={(e) =>
+                      handleUpdateCourse(course.id, 'name', e.target.value)
+                    }
+                    className="bg-input border-border rounded-md"
+                  />
+                  <Select
+                    value={course.grade}
+                    onValueChange={(value) =>
+                      handleUpdateCourse(course.id, 'grade', value)
+                    }
+                  >
+                    <SelectTrigger className="w-full bg-input border-border rounded-md">
+                      <SelectValue placeholder="Grade" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-md">
+                      {GRADE_OPTIONS.map((grade) => (
+                        <SelectItem key={grade} value={grade}>
+                          {grade}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="3"
+                    value={course.credits}
+                    onChange={(e) =>
+                      handleUpdateCourse(
+                        course.id,
+                        'credits',
+                        sanitizeNumberInput(e.target.value)
+                      )
+                    }
+                    className="bg-input border-border rounded-md text-center"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteCourse(course.id)}
+                    className={`h-8 w-8 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-opacity ${
+                      courses.length > 1
+                        ? 'opacity-100'
+                        : 'opacity-0 group-hover:opacity-100'
+                    }`}
+                    disabled={courses.length <= 1}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Course Rows */}
-          <div className="space-y-2">
-            {courses.map((course) => (
-              <div
-                key={course.id}
-                className="grid grid-cols-[1fr_120px_80px_40px] gap-2 items-center group"
-              >
-                <Input
-                  type="text"
-                  placeholder="e.g. Math 101"
-                  value={course.name}
-                  onChange={(e) =>
-                    handleUpdateCourse(course.id, 'name', e.target.value)
-                  }
-                  className="bg-input border-border"
-                />
-                <Select
-                  value={course.grade}
-                  onValueChange={(value) =>
-                    handleUpdateCourse(course.id, 'grade', value)
-                  }
-                >
-                  <SelectTrigger className="w-full bg-input border-border">
-                    <SelectValue placeholder="Grade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {GRADE_OPTIONS.map((grade) => (
-                      <SelectItem key={grade} value={grade}>
-                        {grade}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="3"
-                  value={course.credits}
-                  onChange={(e) =>
-                    handleUpdateCourse(
-                      course.id,
-                      'credits',
-                      sanitizeNumberInput(e.target.value)
-                    )
-                  }
-                  className="bg-input border-border text-center"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDeleteCourse(course.id)}
-                  className={`h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-opacity ${
-                    courses.length > 1
-                      ? 'opacity-100'
-                      : 'opacity-0 group-hover:opacity-100'
-                  }`}
-                  disabled={courses.length <= 1}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          {/* Add Course Button */}
           <Button
             variant="outline"
             size="sm"
             onClick={handleAddCourse}
-            className="w-full border-dashed border-border hover:border-primary hover:text-primary hover:bg-primary/5"
+            className="w-full rounded-md border-dashed border-border hover:border-primary hover:text-primary hover:bg-primary/5"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add course
@@ -220,11 +219,11 @@ export function GPACalculator() {
 
           {/* Action Buttons */}
           <div className="flex gap-3">
-            <Button onClick={handleCalculate} className="flex-1 sm:flex-none">
+            <Button onClick={handleCalculate} className="flex-1 rounded-md sm:flex-none">
               <Calculator className="h-4 w-4 mr-2" />
               Calculate
             </Button>
-            <Button variant="outline" onClick={handleReset}>
+            <Button variant="outline" onClick={handleReset} className="rounded-md">
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset
             </Button>
@@ -232,11 +231,10 @@ export function GPACalculator() {
         </CardContent>
       </Card>
 
-      {/* Results */}
       {result && (
-        <Card className="border-border overflow-hidden py-0">
+        <Card className="border-border overflow-hidden py-0 gap-0 rounded-lg">
           <CardContent className="p-0">
-            <div className="p-6 bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border">
+            <div className="p-6 bg-card border-b border-border">
               <div className="text-sm text-muted-foreground mb-1">Your GPA</div>
               <div className={`text-4xl font-bold ${getGPAColor(result.gpa)}`}>
                 {result.gpa.toFixed(2)}
@@ -257,7 +255,7 @@ export function GPACalculator() {
       )}
 
       {!result && (
-        <Card className="bg-muted/50 border-border">
+        <Card className="bg-card border-border py-0 rounded-lg">
           <CardContent className="p-6 text-center text-muted-foreground">
             Enter your courses with grades and credit hours to calculate your GPA.
           </CardContent>
@@ -265,7 +263,7 @@ export function GPACalculator() {
       )}
 
       {/* GPA Scale Reference */}
-      <Card className="border-border">
+      <Card className="border-border py-0 rounded-lg">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             GPA Scale Reference

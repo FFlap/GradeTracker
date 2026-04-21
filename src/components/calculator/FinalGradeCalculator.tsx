@@ -60,13 +60,13 @@ export function FinalGradeCalculator() {
 
   return (
     <div className="space-y-6">
-      <Card className="border-border">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-medium">
+      <Card className="border-border py-0 gap-0 overflow-hidden rounded-lg">
+        <CardHeader className="border-b border-border px-5 py-4">
+          <CardTitle className="text-base font-semibold">
             What do I need on my final?
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 p-5">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="current-grade" className="text-sm">
@@ -82,7 +82,7 @@ export function FinalGradeCalculator() {
                     setResult(null)
                     setInvalidMessage(null)
                   }}
-                  className="border-border"
+                  className="border-border rounded-md"
                 />
               </div>
             </div>
@@ -102,7 +102,7 @@ export function FinalGradeCalculator() {
                     setResult(null)
                     setInvalidMessage(null)
                   }}
-                  className="pr-8 border-border"
+                  className="pr-8 border-border rounded-md"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   %
@@ -124,18 +124,18 @@ export function FinalGradeCalculator() {
                     setResult(null)
                     setInvalidMessage(null)
                   }}
-                  className="border-border"
+                  className="border-border rounded-md"
                 />
               </div>
             </div>
           </div>
 
           <div className="flex gap-3">
-            <Button onClick={handleCalculate} className="flex-1 sm:flex-none">
+            <Button onClick={handleCalculate} className="flex-1 rounded-md sm:flex-none">
               <Calculator className="h-4 w-4 mr-2" />
               Calculate
             </Button>
-            <Button variant="outline" onClick={handleReset}>
+            <Button variant="outline" onClick={handleReset} className="rounded-md">
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset
             </Button>
@@ -145,9 +145,9 @@ export function FinalGradeCalculator() {
 
       {/* Results */}
       {result && (
-        <Card className="border-border overflow-hidden py-0">
+        <Card className="border-border overflow-hidden py-0 gap-0 rounded-lg">
           <CardContent className="p-0">
-            <div className="p-6 bg-gradient-to-r from-primary/5 to-primary/10">
+            <div className="p-6 bg-card">
               {result.isPossible ? (
                 <>
                   <div className="text-sm text-muted-foreground mb-1">
@@ -194,8 +194,8 @@ export function FinalGradeCalculator() {
         <Card
           className={
             invalidMessage
-              ? 'bg-destructive/5 border-destructive/30'
-              : 'bg-muted/50 border-border'
+              ? 'bg-destructive/5 border-destructive/30 py-0 rounded-lg'
+              : 'bg-card border-border py-0 rounded-lg'
           }
         >
           <CardContent

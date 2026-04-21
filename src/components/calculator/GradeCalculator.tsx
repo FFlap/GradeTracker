@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Calculator, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { GradeTable } from './GradeTable'
-import { ResultDisplay } from './ResultDisplay'
 import { CourseSelector } from './CourseSelector'
 import {
   type Grade,
@@ -331,139 +330,237 @@ export function GradeCalculator({
     }
   }
 
-  const targetGradeValue = Number.parseFloat(targetGrade) || 80
+  const currentAverage = result?.averageOnCompletedWork ?? null
+  const projectedGrade = result?.overallCoursePercentSoFar ?? null
+  const neededOnRemaining = result?.neededGrade ?? null
+
+  const formatPercent = (value: number | null) =>
+    value === null ? '—' : `${value.toFixed(1)}%`
 
   return (
-    <div className="space-y-6">
-      <Card className="border-border">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-medium">
-            Calculate your weighted grade average
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Course Selector */}
-          <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">
-              Course (save your grades + letter scale)
-            </Label>
-            <CourseSelector
-              isSignedIn={isSignedIn}
-              courses={courses}
-              selectedCourseId={selectedCourseId}
-              onSelectCourse={onSelectCourse}
-              onCreateCourse={onCreateCourse}
-              onRenameCourse={onRenameCourse}
-              onDeleteCourse={onDeleteCourse}
-            />
+    <div className="grid items-start gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
+      <div className="space-y-5">
+        <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
+          <CardContent className="space-y-6 p-6">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                Grade Weighting
+              </h2>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Select course
+              </Label>
+              <CourseSelector
+                isSignedIn={isSignedIn}
+                courses={courses}
+                selectedCourseId={selectedCourseId}
+                onSelectCourse={onSelectCourse}
+                onCreateCourse={onCreateCourse}
+                onRenameCourse={onRenameCourse}
+                onDeleteCourse={onDeleteCourse}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Target grade
+              </Label>
+              <div className="relative">
+                <Input
+                  type="text"
+                  value={targetGrade}
+                  onChange={(e) =>
+                    handleTargetGradeChange(sanitizeNumberInput(e.target.value))
+                  }
+                  className="h-12 rounded-xl pr-10 text-lg"
+                />
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg text-muted-foreground">
+                  %
+                </span>
+              </div>
+            </div>
 
             {isSignedIn && selectedCourseId && onUpdateLetterGradeThresholds && (
-                <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="text-sm">
-                      <span className="font-medium text-foreground">
-                        Letter grade scale:
-                      </span>{' '}
-                      <span className="text-muted-foreground">
-                        {selectedCourse?.letterGradeThresholds ? 'Custom' : 'Default'}
-                      </span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsEditingScale((v) => !v)}
-                    >
-                      <SlidersHorizontal className="h-4 w-4" />
-                      {isEditingScale ? 'Close' : 'Customize'}
-                    </Button>
+              <div className="space-y-3 border-t border-border/70 pt-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-sm">
+                    <span className="font-medium text-foreground">Letter scale</span>{' '}
+                    <span className="text-muted-foreground">
+                      {selectedCourse?.letterGradeThresholds ? 'Custom' : 'Default'}
+                    </span>
                   </div>
-
-                  {isEditingScale && (
-                    <div className="mt-3 space-y-3">
-                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        {scaleDraft.map((t, idx) => (
-                          <div key={t.letter} className="flex items-center gap-2">
-                            <div className="w-10 text-sm font-medium text-foreground">
-                              {t.letter}
-                            </div>
-                            <Input
-                              type="text"
-                              inputMode="decimal"
-                              value={t.min}
-                              disabled={t.letter.toUpperCase() === 'F'}
-                              onChange={(e) => {
-                                const value = Number(sanitizeNumberInput(e.target.value))
-                                setScaleDraft((prev) =>
-                                  prev.map((p, i) =>
-                                    i === idx ? { ...p, min: Number.isFinite(value) ? value : p.min } : p
-                                  )
-                                )
-                              }}
-                              className="h-9"
-                            />
-                            <div className="text-sm text-muted-foreground">%</div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setScaleDraft(LETTER_GRADE_THRESHOLDS)}
-                          disabled={isSavingScale}
-                        >
-                          Reset to default
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={async () => {
-                            const normalized = [...scaleDraft]
-                              .map((t) => ({
-                                letter: t.letter.trim(),
-                                min: Math.max(0, Math.min(100, Number(t.min) || 0)),
-                              }))
-                              .map((t) => (t.letter.toUpperCase() === 'F' ? { ...t, min: 0 } : t))
-
-                            // Ensure ordering matches the default and is descending.
-                            const byLetter = new Map(normalized.map((t) => [t.letter, t]))
-                            const ordered = LETTER_GRADE_THRESHOLDS.map(
-                              (t) => byLetter.get(t.letter) ?? t
-                            )
-                            const isDescending = ordered.every(
-                              (t, i) => i === 0 || ordered[i - 1]!.min >= t.min
-                            )
-                            if (!isDescending) {
-                              window.alert(
-                                'Thresholds must be in descending order (A+ ≥ A ≥ ... ≥ F).'
-                              )
-                              return
-                            }
-
-                            try {
-                              setIsSavingScale(true)
-                              await onUpdateLetterGradeThresholds(selectedCourseId, ordered)
-                              setIsEditingScale(false)
-                            } finally {
-                              setIsSavingScale(false)
-                            }
-                          }}
-                          disabled={isSavingScale}
-                        >
-                          Save scale
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditingScale((v) => !v)}
+                  >
+                    <SlidersHorizontal className="h-4 w-4" />
+                    {isEditingScale ? 'Close' : 'Customize'}
+                  </Button>
                 </div>
+
+                {isEditingScale && (
+                  <div className="space-y-3 rounded-xl border border-border/70 bg-muted/25 p-3.5">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {scaleDraft.map((t, idx) => (
+                        <div key={t.letter} className="flex items-center gap-2">
+                          <div className="w-8 text-sm font-medium text-foreground">
+                            {t.letter}
+                          </div>
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            value={t.min}
+                            disabled={t.letter.toUpperCase() === 'F'}
+                            onChange={(e) => {
+                              const value = Number(sanitizeNumberInput(e.target.value))
+                              setScaleDraft((prev) =>
+                                prev.map((p, i) =>
+                                  i === idx
+                                    ? { ...p, min: Number.isFinite(value) ? value : p.min }
+                                    : p
+                                )
+                              )
+                            }}
+                            className="h-8"
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setScaleDraft(LETTER_GRADE_THRESHOLDS)}
+                        disabled={isSavingScale}
+                      >
+                        Reset to default
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          const normalized = [...scaleDraft]
+                            .map((t) => ({
+                              letter: t.letter.trim(),
+                              min: Math.max(0, Math.min(100, Number(t.min) || 0)),
+                            }))
+                            .map((t) =>
+                              t.letter.toUpperCase() === 'F' ? { ...t, min: 0 } : t
+                            )
+
+                          const byLetter = new Map(normalized.map((t) => [t.letter, t]))
+                          const ordered = LETTER_GRADE_THRESHOLDS.map(
+                            (t) => byLetter.get(t.letter) ?? t
+                          )
+                          const isDescending = ordered.every(
+                            (t, i) => i === 0 || ordered[i - 1]!.min >= t.min
+                          )
+                          if (!isDescending) {
+                            window.alert(
+                              'Thresholds must be in descending order (A+ ≥ A ≥ ... ≥ F).'
+                            )
+                            return
+                          }
+
+                          try {
+                            setIsSavingScale(true)
+                            await onUpdateLetterGradeThresholds(selectedCourseId, ordered)
+                            setIsEditingScale(false)
+                          } finally {
+                            setIsSavingScale(false)
+                          }
+                        }}
+                        disabled={isSavingScale}
+                      >
+                        Save scale
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
+
+            {result && (
+              <div className="border-t border-border/70 pt-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-xl border border-border/70 bg-card/90 px-4 py-3.5">
+                    <div className="text-[0.72rem] leading-[1.35] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                      Current average
+                    </div>
+                    <div className="mt-6 text-4xl font-semibold leading-none text-primary">
+                      {formatPercent(currentAverage)}
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-border/70 bg-card/90 px-4 py-3.5">
+                    <div className="text-[0.72rem] leading-[1.35] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                      Overall
+                    </div>
+                    <div className="mt-6 text-4xl font-semibold leading-none text-foreground">
+                      {formatPercent(projectedGrade)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 px-4 py-4.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+                  <div className="text-[0.72rem] leading-[1.35] font-semibold uppercase tracking-[0.12em] text-primary">
+                    Required on remaining
+                  </div>
+                  <div className="mt-2.5 text-5xl font-semibold leading-none text-primary">
+                    {neededOnRemaining !== null &&
+                    neededOnRemaining < 0
+                      ? '0%'
+                      : `${neededOnRemaining?.toFixed(1)}%`}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {invalidMessage && (
+              <div className="rounded-xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                {invalidMessage}
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-1">
+              <Button onClick={handleCalculate} className="h-11 flex-1 rounded-xl">
+                <Calculator className="h-4 w-4 mr-2" />
+                Calculate
+              </Button>
+              <Button variant="outline" onClick={handleReset} className="h-11 flex-1 rounded-xl">
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reset
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {!isSignedIn && (
+          <Card className="bg-card border-border/70 py-0 rounded-2xl">
+            <CardContent className="p-4 text-sm text-muted-foreground">
+              Sign in to save your grades and create courses for easy access later.
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
+        <CardContent className="p-0">
+          <div className="border-b border-border/70 px-6 py-5">
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              Assignment Entry
+            </h2>
           </div>
 
-          {/* Grade Input Table */}
-          <div className="space-y-2">
-            <div className="text-sm text-muted-foreground">
-              Enter grades as percentages, point fractions like <span className="font-medium text-foreground">17/20</span>, or letters like <span className="font-medium text-foreground">A-</span>.
-            </div>
+          <div className="px-6 py-4 text-sm text-muted-foreground">
+            Enter grades as percentages, point fractions like{' '}
+            <span className="font-medium text-foreground">17/20</span>, or letters like{' '}
+            <span className="font-medium text-foreground">A-</span>.
+          </div>
+
+          <div className="px-2 pb-5">
             <GradeTable
               rows={rows}
               onUpdateRow={handleUpdateRow}
@@ -471,61 +568,8 @@ export function GradeCalculator({
               onAddRow={handleAddRow}
             />
           </div>
-
-          {/* Divider */}
-          <div className="border-t border-border" />
-
-          {/* Target Grade */}
-          <div className="flex flex-wrap items-end gap-6">
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">
-                Target grade
-              </Label>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  Find grade needed to get
-                </span>
-                <Input
-                  type="text"
-                  value={targetGrade}
-                  onChange={(e) =>
-                    handleTargetGradeChange(sanitizeNumberInput(e.target.value))
-                  }
-                  className="w-32 text-center border-border"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <Button onClick={handleCalculate} className="flex-1 sm:flex-none">
-              <Calculator className="h-4 w-4 mr-2" />
-              Calculate
-            </Button>
-            <Button variant="outline" onClick={handleReset}>
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Reset
-            </Button>
-          </div>
         </CardContent>
       </Card>
-
-      {/* Results Display */}
-      <ResultDisplay
-        result={result}
-        targetGrade={targetGradeValue}
-        invalidMessage={invalidMessage}
-      />
-
-      {/* Sign-in prompt for anonymous users */}
-      {!isSignedIn && (
-        <Card className="bg-accent/5 border-accent/20">
-          <CardContent className="p-4 text-center text-sm text-muted-foreground">
-            Sign in to save your grades and create courses for easy access later.
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }

@@ -66,24 +66,33 @@ function GradeCalculatorWithCourse() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container max-w-3xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground mb-2">
-            {currentCourse ? currentCourse.name : 'Grade Calculator'}
-          </h1>
-          <p className="text-muted-foreground">
-            Calculate your weighted grade average or find out what you need on your final.
-          </p>
-        </div>
+    <Tabs defaultValue="grade" className="app-page">
+      <section className="app-page-header">
+        <div className="app-page-header-inner">
+          <div className="app-page-title-row">
+            <div>
+              <h1 className="app-page-title">
+                {currentCourse ? currentCourse.name : 'Grade Calculator'}
+              </h1>
+              <p className="app-page-subtitle">
+                Monitor weighted grade average, saved assessments, and final exam targets.
+              </p>
+            </div>
+            <div className="app-muted-pill">
+              {courses.length} course{courses.length === 1 ? '' : 's'}
+            </div>
+          </div>
 
-        <Tabs defaultValue="grade" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="grade">Grade Calculator</TabsTrigger>
-            <TabsTrigger value="final">Final Grade</TabsTrigger>
+          <TabsList variant="line" className="mt-8">
+            <TabsTrigger value="grade">Grades</TabsTrigger>
+            <TabsTrigger value="final">Final exam</TabsTrigger>
           </TabsList>
+        </div>
+      </section>
 
-          <TabsContent value="grade" className="mt-6">
+      <main className="app-page-body">
+        <div className="app-page-body-narrow">
+          <TabsContent value="grade">
             <GradeCalculator
               isSignedIn={Boolean(isLoaded && isSignedIn)}
               courses={courses}
@@ -103,11 +112,11 @@ function GradeCalculatorWithCourse() {
             />
           </TabsContent>
 
-          <TabsContent value="final" className="mt-6">
+          <TabsContent value="final">
             <FinalGradeCalculator />
           </TabsContent>
-        </Tabs>
+        </div>
       </main>
-    </div>
+    </Tabs>
   )
 }

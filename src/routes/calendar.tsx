@@ -225,54 +225,61 @@ function CalendarPage() {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container max-w-6xl mx-auto px-4 py-8 space-y-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Calendar</h1>
-            <p className="text-muted-foreground">
-              Track assessment dates across all your courses.
-            </p>
-          </div>
+    <div className="app-page">
+      <section className="app-page-header">
+        <div className="app-page-header-inner">
+          <div className="app-page-title-row">
+            <div>
+              <h1 className="app-page-title">Calendar</h1>
+              <p className="app-page-subtitle">
+                Track assessment dates, upcoming work, and course-specific deadlines.
+              </p>
+            </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                setMonthCursor((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
-              }
-              aria-label="Previous month"
-              title="Previous month"
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-              Prev
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() =>
-                setMonthCursor((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
-              }
-              aria-label="Next month"
-              title="Next month"
-            >
-              Next
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
-            <Button
-              onClick={() => {
-                const now = new Date()
-                setMonthCursor(new Date(now.getFullYear(), now.getMonth(), 1))
-              }}
-              aria-label="Jump to current month"
-              title="Today"
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Today
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                className="rounded-md"
+                onClick={() =>
+                  setMonthCursor((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
+                }
+                aria-label="Previous month"
+                title="Previous month"
+              >
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Prev
+              </Button>
+              <Button
+                variant="outline"
+                className="rounded-md"
+                onClick={() =>
+                  setMonthCursor((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
+                }
+                aria-label="Next month"
+                title="Next month"
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+              <Button
+                className="rounded-md"
+                onClick={() => {
+                  const now = new Date()
+                  setMonthCursor(new Date(now.getFullYear(), now.getMonth(), 1))
+                }}
+                aria-label="Jump to current month"
+                title="Today"
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Today
+              </Button>
+            </div>
           </div>
         </div>
+      </section>
 
-        <Card className="border-border">
+      <main className="app-page-body space-y-6">
+        <Card className="border-border py-0 rounded-lg">
           <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <div className="h-10 w-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
@@ -294,10 +301,10 @@ function CalendarPage() {
                 value={activeCourseId}
                 onValueChange={(v) => setActiveCourseId(v)}
               >
-                <SelectTrigger className="w-64">
+                <SelectTrigger className="w-64 rounded-md">
                   <SelectValue placeholder="All courses" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-md">
                   <SelectItem value="all">All courses</SelectItem>
                   {courses.map((c) => (
                     <SelectItem key={String(c._id)} value={String(c._id)}>
@@ -311,7 +318,7 @@ function CalendarPage() {
         </Card>
 
         {!isLoaded ? null : !isSignedIn ? (
-          <Card className="border-border">
+          <Card className="border-border rounded-lg">
             <CardContent className="p-8 text-center">
               <div className="mx-auto h-12 w-12 rounded-xl bg-accent/30 border border-border flex items-center justify-center mb-4">
                 <Calendar className="h-6 w-6 text-foreground/70" />
@@ -327,7 +334,7 @@ function CalendarPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 items-start">
             <div className="min-w-0">
-              <Card className="border-border overflow-hidden py-0 gap-0">
+              <Card className="border-border overflow-hidden py-0 gap-0 rounded-lg">
                 <div className="grid grid-cols-7 bg-card border-b border-border/60">
                   {weekDays.map((d) => (
                     <div

@@ -24,13 +24,13 @@ export function GradeRow({
   const dateInputRef = useRef<HTMLInputElement | null>(null)
 
   return (
-    <div className="grid grid-cols-1 gap-2 items-center group sm:grid-cols-[1fr_150px_100px_100px_40px]">
+    <div className="group grid grid-cols-1 items-center gap-2.5 sm:grid-cols-[1fr_150px_100px_100px_40px] sm:gap-3.5">
       <Input
         type="text"
         placeholder="e.g. Homework"
         value={row.assignment}
         onChange={(e) => onUpdate(row.id, 'assignment', e.target.value)}
-        className="bg-input border-border"
+        className="h-9 rounded-lg border-transparent bg-transparent px-2.5 shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
       />
       <div className="relative">
         <button
@@ -47,7 +47,7 @@ export function GradeRow({
               el.click()
             }
           }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-md hover:bg-accent/40 transition-colors"
+          className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg hover:bg-accent/45 transition-colors"
           aria-label="Pick date"
           title="Pick date"
         >
@@ -58,13 +58,13 @@ export function GradeRow({
           type="date"
           value={row.date}
           onChange={(e) => onUpdate(row.id, 'date', e.target.value)}
-          className="bg-input border-border pl-9 pr-9 text-sm"
+          className="h-9 rounded-lg border-transparent bg-transparent pl-9 pr-9 text-sm shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
         />
         {row.date.trim().length > 0 && (
           <button
             type="button"
             onClick={() => onUpdate(row.id, 'date', '')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/40 transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/45 transition-colors"
             aria-label="Clear date"
             title="Clear date"
           >
@@ -78,7 +78,7 @@ export function GradeRow({
         onChange={(e) =>
           onUpdate(row.id, 'grade', sanitizeGradeInput(e.target.value))
         }
-        className="bg-input border-border text-center"
+        className="h-9 rounded-lg border-transparent bg-transparent text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
       />
       <Input
         type="text"
@@ -87,13 +87,13 @@ export function GradeRow({
         onChange={(e) =>
           onUpdate(row.id, 'weight', sanitizeNumberInput(e.target.value))
         }
-        className="bg-input border-border text-center"
+        className="h-9 rounded-lg border-transparent bg-transparent text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
       />
       <Button
         variant="ghost"
         size="icon"
         onClick={() => onDelete(row.id)}
-        className={`h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-opacity ${
+        className={`h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-opacity ${
           showDelete ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}
         disabled={!showDelete}

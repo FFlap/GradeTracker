@@ -1,6 +1,14 @@
 import { Link, useLocation } from '@tanstack/react-router'
 import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from '@clerk/clerk-react'
-import { Calendar, CalendarDays, Calculator, ChevronLeft, ChevronRight, GraduationCap, LogIn } from 'lucide-react'
+import {
+  Calendar,
+  CalendarDays,
+  Calculator,
+  ChevronLeft,
+  ChevronRight,
+  GraduationCap,
+  LogIn,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
@@ -27,20 +35,33 @@ export function Sidebar({
     user?.primaryEmailAddress?.emailAddress ??
     'Account'
 
+  const navLinkClass = (active: boolean) =>
+    cn(
+      'flex items-center gap-2 rounded-md text-sm font-medium transition-colors',
+      collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2',
+      active
+        ? 'bg-sidebar-accent text-primary shadow-[0_1px_2px_rgba(15,23,42,0.05)]'
+        : 'text-sidebar-foreground/85 hover:bg-sidebar-accent/65 hover:text-sidebar-foreground'
+    )
+
+  const sectionLabelClass = cn(
+    'px-3 pt-5 pb-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-sidebar-foreground/55',
+    collapsed && 'sr-only'
+  )
+
   return (
     <aside
       className={cn(
         'fixed left-0 top-0 bottom-0 bg-sidebar border-r border-sidebar-border z-40 transition-[width] duration-200',
-        collapsed ? 'w-16' : 'w-56'
+        collapsed ? 'w-16' : 'w-60'
       )}
     >
-      {/* Collapse/expand handle (attached to the right edge) */}
       <button
         type="button"
         onClick={onToggleCollapsed}
         className={cn(
-          'absolute top-1/2 -translate-y-1/2 right-0 translate-x-1/2 z-50',
-          'h-9 w-9 rounded-full border border-sidebar-border bg-sidebar shadow-sm',
+          'absolute top-1/2 right-0 z-50 -translate-y-1/2 translate-x-1/2',
+          'h-8 w-8 rounded-md border border-sidebar-border/70 bg-sidebar-accent shadow-[0_1px_2px_rgba(15,23,42,0.04)]',
           'hover:bg-sidebar-accent/60 text-sidebar-foreground/80 transition-colors'
         )}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -65,6 +86,14 @@ export function Sidebar({
                 )}
                 title="Grade Tracker"
               >
+                <span
+                  className={cn(
+                    'flex h-5 w-5 shrink-0 items-center justify-center rounded bg-foreground text-[0.68rem] font-bold text-background',
+                    collapsed && 'sr-only'
+                  )}
+                >
+                  G
+                </span>
                 <span className={cn('text-sm truncate', collapsed && 'sr-only')}>
                   Grade Tracker
                 </span>
@@ -73,75 +102,53 @@ export function Sidebar({
           </div>
         </div>
 
-        <div className="px-3 space-y-1">
+        <div className="px-3">
+          <div className={sectionLabelClass}>Calculators</div>
           <Link
             to="/grade-calculator"
-            className={cn(
-              'flex items-center gap-2 rounded-md text-sm font-medium transition-colors',
-              collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2',
-              isGradeCalculatorActive
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
-            )}
+            className={navLinkClass(isGradeCalculatorActive)}
             title="Grade Calculator"
           >
             <Calculator className="h-4 w-4" />
             <span className={cn(collapsed && 'sr-only')}>Grade Calculator</span>
           </Link>
 
-          <SignedIn>
           <Link
-            to="/calendar"
-            className={cn(
-              'flex items-center gap-2 rounded-md text-sm font-medium transition-colors',
-              collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2',
-              isCalendarActive
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
-            )}
-            title="Calendar"
+            to="/gpa-calculator"
+            className={navLinkClass(isGpaCalculatorActive)}
+            title="GPA Calculator"
           >
-            <Calendar className="h-4 w-4" />
-            <span className={cn(collapsed && 'sr-only')}>Calendar</span>
+            <GraduationCap className="h-4 w-4" />
+            <span className={cn(collapsed && 'sr-only')}>GPA Calculator</span>
           </Link>
 
-          <Link
-            to="/semesters"
-            className={cn(
-              'flex items-center gap-2 rounded-md text-sm font-medium transition-colors',
-              collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2',
-              isSemestersActive
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                  : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
-              )}
+          <SignedIn>
+            <div className={sectionLabelClass}>Planning</div>
+            <Link
+              to="/calendar"
+              className={navLinkClass(isCalendarActive)}
+              title="Calendar"
+            >
+              <Calendar className="h-4 w-4" />
+              <span className={cn(collapsed && 'sr-only')}>Calendar</span>
+            </Link>
+
+            <Link
+              to="/semesters"
+              className={navLinkClass(isSemestersActive)}
               title="Semesters"
             >
               <CalendarDays className="h-4 w-4" />
               <span className={cn(collapsed && 'sr-only')}>Semesters</span>
             </Link>
           </SignedIn>
-
-          <Link
-            to="/gpa-calculator"
-            className={cn(
-              'flex items-center gap-2 rounded-md text-sm font-medium transition-colors',
-              collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2',
-              isGpaCalculatorActive
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
-            )}
-            title="GPA Calculator"
-          >
-            <GraduationCap className="h-4 w-4" />
-            <span className={cn(collapsed && 'sr-only')}>GPA Calculator</span>
-          </Link>
         </div>
 
         <div className="mt-auto p-3 space-y-2">
           <SignedIn>
             <div
               className={cn(
-                'flex items-center gap-2 rounded-md border border-sidebar-border bg-sidebar-accent/30',
+                'flex items-center gap-2 rounded-md border border-sidebar-border/70 bg-sidebar-accent',
                 collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2'
               )}
             >
@@ -164,7 +171,7 @@ export function Sidebar({
           <SignedOut>
             <div
               className={cn(
-                'rounded-md border border-sidebar-border bg-sidebar-accent/30',
+                'rounded-md border border-sidebar-border/70 bg-sidebar-accent',
                 collapsed ? 'p-2' : 'p-3'
               )}
             >

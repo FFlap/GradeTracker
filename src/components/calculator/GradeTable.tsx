@@ -18,34 +18,32 @@ export function GradeTable({
 }: GradeTableProps) {
   return (
     <div className="space-y-3">
-      {/* Header */}
-      <div className="hidden sm:grid grid-cols-[1fr_150px_100px_100px_40px] gap-2 text-sm font-medium text-muted-foreground px-1">
-        <span>Assignment (optional)</span>
+      <div className="hidden sm:grid grid-cols-[1fr_150px_100px_100px_40px] gap-3 border-b border-border/70 px-5 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <span>Assignment</span>
         <span className="text-center">Date</span>
         <span className="text-center">Grade</span>
         <span className="text-center">Weight</span>
         <span></span>
       </div>
 
-      {/* Rows */}
-      <div className="space-y-2">
+      <div className="divide-y divide-border/60">
         {rows.map((row) => (
-          <GradeRow
-            key={row.id}
-            row={row}
-            onUpdate={onUpdateRow}
-            onDelete={onDeleteRow}
-            showDelete={rows.length > 1}
-          />
+          <div key={row.id} className="px-5 py-3.5 transition-colors hover:bg-muted/12">
+            <GradeRow
+              row={row}
+              onUpdate={onUpdateRow}
+              onDelete={onDeleteRow}
+              showDelete={rows.length > 1}
+            />
+          </div>
         ))}
       </div>
 
-      {/* Add Row Button */}
       <Button
         variant="outline"
         size="sm"
         onClick={onAddRow}
-        className="w-full border-dashed border-border hover:border-primary hover:text-primary hover:bg-primary/5"
+        className="w-full rounded-xl border-dashed border-border/75 bg-card/80 hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
       >
         <Plus className="h-4 w-4 mr-2" />
         Add row

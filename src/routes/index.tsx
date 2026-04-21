@@ -10,26 +10,25 @@ export const Route = createFileRoute('/')({
 
 function AnonymousCalculatorPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container max-w-3xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground mb-2">
-            Grade Tracker
-          </h1>
-          <p className="text-muted-foreground">
-            Calculate your weighted grade average, find out what you need on your
-            final, or compute your GPA.
+    <Tabs defaultValue="grade" className="app-page">
+      <section className="app-page-header">
+        <div className="app-page-header-inner">
+          <h1 className="app-page-title">Grade Tracker</h1>
+          <p className="app-page-subtitle">
+            Calculate weighted grades, final exam targets, and GPA from one quiet workspace.
           </p>
-        </div>
 
-        <Tabs defaultValue="grade" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="grade">Grade Calculator</TabsTrigger>
-            <TabsTrigger value="final">Final Grade</TabsTrigger>
-            <TabsTrigger value="gpa">GPA Calculator</TabsTrigger>
+          <TabsList variant="line" className="mt-8">
+            <TabsTrigger value="grade">Grades</TabsTrigger>
+            <TabsTrigger value="final">Final exam</TabsTrigger>
+            <TabsTrigger value="gpa">GPA</TabsTrigger>
           </TabsList>
+        </div>
+      </section>
 
-          <TabsContent value="grade" className="mt-6">
+      <main className="app-page-body">
+        <div className="app-page-body-narrow">
+          <TabsContent value="grade">
             <GradeCalculator
               isSignedIn={false}
               courses={[]}
@@ -39,15 +38,15 @@ function AnonymousCalculatorPage() {
             />
           </TabsContent>
 
-          <TabsContent value="final" className="mt-6">
+          <TabsContent value="final">
             <FinalGradeCalculator />
           </TabsContent>
 
-          <TabsContent value="gpa" className="mt-6">
+          <TabsContent value="gpa">
             <GPACalculator />
           </TabsContent>
-        </Tabs>
+        </div>
       </main>
-    </div>
+    </Tabs>
   )
 }

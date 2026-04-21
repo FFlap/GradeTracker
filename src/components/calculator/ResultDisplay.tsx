@@ -14,29 +14,22 @@ export function ResultDisplay({
 }: ResultDisplayProps) {
   if (!result) {
     return (
-      <Card
+      <div
         className={
           invalidMessage
-            ? 'bg-destructive/5 border-destructive/30'
-            : 'bg-muted/50 border-border'
+            ? 'rounded-lg border border-destructive/25 bg-destructive/5 px-5 py-4 text-destructive'
+            : 'rounded-lg border border-border bg-card px-5 py-4 text-muted-foreground'
         }
       >
-        <CardContent
-          className={
-            invalidMessage
-              ? 'p-6 text-center text-destructive'
-              : 'p-6 text-center text-muted-foreground'
-          }
-        >
+        <div className="text-center">
           {invalidMessage ??
             'Enter grades and weights above, then click Calculate to see your results.'}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     )
   }
 
   const formatNumber = (num: number) => num.toFixed(2)
-  const hasUngradedWeight = result.totalWeight < 100
 
   const getGradeColor = (grade: number) => {
     if (grade >= 90) return 'text-primary'
@@ -47,94 +40,99 @@ export function ResultDisplay({
   }
 
   return (
-    <Card className="bg-card border-border overflow-hidden py-0">
+    <Card className="bg-card border-border overflow-hidden py-0 gap-0 rounded-lg">
       <CardContent className="p-0">
-        {/* Main Result */}
-        <div className="p-6 bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border">
-          <div className="text-sm text-muted-foreground mb-1">
-            Average (completed work)
-          </div>
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span
-              className={`text-4xl font-bold ${getGradeColor(
-                result.averageOnCompletedWork
-              )}`}
-            >
-              {formatNumber(result.averageOnCompletedWork)}%
-            </span>
-            <span
-              className={`text-2xl font-semibold ${getGradeColor(
-                result.averageOnCompletedWork
-              )}`}
-            >
-              ({result.averageOnCompletedWorkLetter})
-            </span>
+        <div className="grid gap-0 md:grid-cols-[1.3fr_1fr_1fr]">
+          <div className="border-b border-border p-6 md:border-b-0 md:border-r">
+            <div className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              Average
+            </div>
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span
+                className={`text-4xl font-semibold ${getGradeColor(
+                  result.averageOnCompletedWork
+                )}`}
+              >
+                {formatNumber(result.averageOnCompletedWork)}%
+              </span>
+              <span
+                className={`text-xl font-medium ${getGradeColor(
+                  result.averageOnCompletedWork
+                )}`}
+              >
+                {result.averageOnCompletedWorkLetter}
+              </span>
+            </div>
+            <div className="mt-2 text-sm text-muted-foreground">
+              Completed work only
+            </div>
           </div>
 
-          {hasUngradedWeight && (
-            <>
-              <div className="mt-4 text-sm text-muted-foreground mb-1">
-                Overall (treat ungraded as 0)
-              </div>
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span
-                  className={`text-3xl font-bold ${getGradeColor(
-                    result.overallCoursePercentSoFar
-                  )}`}
-                >
-                  {formatNumber(result.overallCoursePercentSoFar)}%
-                </span>
-                <span
-                  className={`text-xl font-semibold ${getGradeColor(
-                    result.overallCoursePercentSoFar
-                  )}`}
-                >
-                  ({result.overallCoursePercentSoFarLetter})
-                </span>
-              </div>
-            </>
-          )}
+          <div className="border-b border-border p-6 md:border-b-0 md:border-r">
+            <div className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              Overall
+            </div>
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span
+                className={`text-3xl font-semibold ${getGradeColor(
+                  result.overallCoursePercentSoFar
+                )}`}
+              >
+                {formatNumber(result.overallCoursePercentSoFar)}%
+              </span>
+              <span
+                className={`text-lg font-medium ${getGradeColor(
+                  result.overallCoursePercentSoFar
+                )}`}
+              >
+                {result.overallCoursePercentSoFarLetter}
+              </span>
+            </div>
+            <div className="mt-2 text-sm text-muted-foreground">
+              Ungraded work treated as zero
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              Remaining
+            </div>
+            <div className="mt-2 text-3xl font-semibold text-foreground">
+              {formatNumber(result.remainingWeight)}%
+            </div>
+            <div className="mt-2 text-sm text-muted-foreground">
+              Weight still available
+            </div>
+          </div>
         </div>
 
-        {/* Additional Info */}
-        {hasUngradedWeight && (
-          <div className="p-6 space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Total weight calculated</span>
-              <span className="font-medium">{formatNumber(result.totalWeight)}%</span>
+        <div className="border-t border-border bg-muted/15 px-6 py-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="text-sm text-muted-foreground">
+              Total weight calculated:{' '}
+              <span className="font-medium text-foreground">{formatNumber(result.totalWeight)}%</span>
             </div>
 
-            {result.remainingWeight > 0 && (
-              <>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Remaining weight</span>
-                <span className="font-medium">{formatNumber(result.remainingWeight)}%</span>
-              </div>
-
-              {result.neededGrade !== null && (
-                <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">
-                    To reach {targetGrade}% overall:
+            {result.neededGrade !== null && (
+              <div className="text-right text-sm">
+                <div className="text-muted-foreground">To reach {targetGrade}% overall</div>
+                {result.neededGrade > 100 ? (
+                  <div className="font-medium text-destructive">
+                    Need {formatNumber(result.neededGrade)}% on the remaining weight
                   </div>
-                  {result.neededGrade > 100 ? (
-                    <div className="text-destructive font-medium">
-                      Not achievable - you would need {formatNumber(result.neededGrade)}% on the remaining {formatNumber(result.remainingWeight)}%
-                    </div>
-                  ) : result.neededGrade < 0 ? (
-                    <div className="text-primary font-medium">
-                      You've already exceeded your target!
-                    </div>
-                  ) : (
-                    <div className="font-medium">
-                      You need <span className="text-primary font-bold">{formatNumber(result.neededGrade)}%</span> on the remaining {formatNumber(result.remainingWeight)}%
-                    </div>
-                  )}
-                </div>
-              )}
-              </>
+                ) : result.neededGrade < 0 ? (
+                  <div className="font-medium text-primary">
+                    You have already exceeded the target
+                  </div>
+                ) : (
+                  <div className="font-medium text-foreground">
+                    Need <span className="text-primary">{formatNumber(result.neededGrade)}%</span> on the remaining {formatNumber(result.remainingWeight)}%
+                  </div>
+                )}
+              </div>
             )}
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   )

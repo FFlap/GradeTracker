@@ -13,6 +13,7 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
   const { isLoaded, isSignedIn } = useUser()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [isNarrowViewport, setIsNarrowViewport] = useState(false)
 
   // Redirect signed-in users from / to /grade-calculator
   useEffect(() => {
@@ -28,6 +29,15 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+    const media = window.matchMedia('(max-width: 767px)')
+    const sync = () => setIsNarrowViewport(media.matches)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
     window.localStorage.setItem('sidebarCollapsed', sidebarCollapsed ? '1' : '0')
   }, [sidebarCollapsed])
 
@@ -36,16 +46,18 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
     return null
   }
 
+  const effectiveSidebarCollapsed = sidebarCollapsed || isNarrowViewport
+
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-background">
       <Sidebar
-        collapsed={sidebarCollapsed}
+        collapsed={effectiveSidebarCollapsed}
         onToggleCollapsed={() => setSidebarCollapsed((v) => !v)}
       />
       <main
         className={cn(
           'flex-1 transition-[margin] duration-200',
-          sidebarCollapsed ? 'ml-16' : 'ml-56'
+          effectiveSidebarCollapsed ? 'ml-16' : 'ml-60'
         )}
       >
         {children}

@@ -677,7 +677,7 @@ function SemestersPage() {
   ) : null
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="app-page semesters-page">
       {isAddSemesterOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
@@ -1017,18 +1017,15 @@ function SemestersPage() {
         </div>
       )}
 
-      <main className="container max-w-5xl mx-auto px-4 py-8">
-        <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Academic Semesters
-            </h1>
-            <p className="text-muted-foreground">
-              Manage and review your academic journey history.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
+      <section className="app-page-header">
+        <div className="app-page-header-inner">
+          <div className="app-page-title-row">
+            <div>
+              <h1 className="app-page-title">Academic Semesters</h1>
+              <p className="app-page-subtitle">
+                Manage terms, credits, course placement, and academic progress.
+              </p>
+            </div>
             <Button
               onClick={() => {
                 setIsAddSemesterOpen(true)
@@ -1042,7 +1039,10 @@ function SemestersPage() {
             </Button>
           </div>
         </div>
+      </section>
 
+      <main className="app-page-body">
+        <div className="app-page-body-narrow">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
           <Card className="border-border">
             <CardContent className="p-4 flex items-center gap-3">
@@ -1104,6 +1104,7 @@ function SemestersPage() {
               </CardContent>
             </Card>
           )}
+        </div>
         </div>
       </main>
     </div>

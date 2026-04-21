@@ -6,6 +6,11 @@ import { AppLayout } from '../components/AppLayout'
 
 import ConvexProvider from '../integrations/convex/provider'
 
+const showDevtools =
+  import.meta.env.DEV &&
+  typeof window !== 'undefined' &&
+  window.localStorage.getItem('gradeTrackerDevtools') === '1'
+
 export const Route = createRootRoute({
   component: () => (
     <>
@@ -13,17 +18,19 @@ export const Route = createRootRoute({
         <AppLayout>
           <Outlet />
         </AppLayout>
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
+        {showDevtools && (
+          <TanStackDevtools
+            config={{
+              position: 'bottom-right',
+            }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+            ]}
+          />
+        )}
       </ConvexProvider>
     </>
   ),
