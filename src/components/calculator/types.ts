@@ -54,8 +54,7 @@ export interface Semester {
   createdAt: number
 }
 
-// Letter grade conversion mapping
-export const LETTER_GRADES: Record<string, number> = {
+const LETTER_GRADES: Record<string, number> = {
   'A+': 97,
   'A': 93,
   'A-': 90,
@@ -87,7 +86,7 @@ export const LETTER_GRADE_THRESHOLDS = [
   { min: 0, letter: 'F' },
 ]
 
-export function letterToPercentage(letter: string): number | null {
+function letterToPercentage(letter: string): number | null {
   const upperLetter = letter.toUpperCase().trim()
   return LETTER_GRADES[upperLetter] ?? null
 }
@@ -205,7 +204,7 @@ export function getGradeInputError(input: string): string | null {
   return null
 }
 
-export function parseWeightInput(input: string): number | null {
+function parseWeightInput(input: string): number | null {
   const trimmed = input.trim()
   if (!trimmed) return null
 
