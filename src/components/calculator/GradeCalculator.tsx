@@ -333,7 +333,8 @@ export function GradeCalculator({
   const currentAverage = result?.averageOnCompletedWork ?? null
   const projectedGrade = result?.overallCoursePercentSoFar ?? null
   const neededOnRemaining = result?.neededGrade ?? null
-  const showOverallSection = result ? result.totalWeight <= 100 : false
+  const showOverallSection = result ? result.totalWeight < 100 : false
+  const showRequiredOnRemaining = result ? result.totalWeight < 100 : false
 
   const formatPercent = (value: number | null) =>
     value === null ? '—' : `${value.toFixed(1)}%`
@@ -507,17 +508,19 @@ export function GradeCalculator({
                   )}
                 </div>
 
-                <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 px-4 py-4.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
-                  <div className="text-[0.72rem] leading-[1.35] font-semibold uppercase tracking-[0.12em] text-primary">
-                    Required on remaining
+                {showRequiredOnRemaining && (
+                  <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 px-4 py-4.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+                    <div className="text-[0.72rem] leading-[1.35] font-semibold uppercase tracking-[0.12em] text-primary">
+                      Required on remaining
+                    </div>
+                    <div className="mt-2.5 text-5xl font-semibold leading-none text-primary">
+                      {neededOnRemaining !== null &&
+                      neededOnRemaining < 0
+                        ? '0%'
+                        : `${neededOnRemaining?.toFixed(1)}%`}
+                    </div>
                   </div>
-                  <div className="mt-2.5 text-5xl font-semibold leading-none text-primary">
-                    {neededOnRemaining !== null &&
-                    neededOnRemaining < 0
-                      ? '0%'
-                      : `${neededOnRemaining?.toFixed(1)}%`}
-                  </div>
-                </div>
+                )}
               </div>
             )}
 
