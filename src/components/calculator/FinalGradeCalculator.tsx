@@ -1,15 +1,13 @@
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Calculator, RotateCcw } from 'lucide-react'
-import { percentageToLetter, sanitizeNumberInput } from './types'
+import { sanitizeNumberInput } from './types'
 
 interface FinalResult {
   neededGrade: number
   isPossible: boolean
-  letterGrade: string
 }
 
 export function FinalGradeCalculator() {
@@ -18,7 +16,6 @@ export function FinalGradeCalculator() {
   const [targetGrade, setTargetGrade] = useState('')
   const [result, setResult] = useState<FinalResult | null>(null)
   const [invalidMessage, setInvalidMessage] = useState<string | null>(null)
-  const targetGradePercent = Number.parseFloat(targetGrade)
 
   const handleCalculate = () => {
     const current = Number.parseFloat(currentGrade)
@@ -45,7 +42,6 @@ export function FinalGradeCalculator() {
     setResult({
       neededGrade: needed,
       isPossible: needed <= 100 && needed >= 0,
-      letterGrade: percentageToLetter(needed),
     })
     setInvalidMessage(null)
   }
@@ -59,83 +55,70 @@ export function FinalGradeCalculator() {
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="border-border py-0 gap-0 overflow-hidden rounded-lg">
-        <CardHeader className="border-b border-border px-5 py-4">
-          <CardTitle className="text-base font-semibold">
-            What do I need on my final?
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6 p-5">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="current-grade" className="text-sm">
-                Current grade
-              </Label>
-              <div className="relative">
-                <Input
-                  id="current-grade"
-                  type="text"
-                  value={currentGrade}
-                  onChange={(e) => {
-                    setCurrentGrade(sanitizeNumberInput(e.target.value))
-                    setResult(null)
-                    setInvalidMessage(null)
-                  }}
-                  className="border-border rounded-md"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="final-weight" className="text-sm">
-                Final exam weight
-              </Label>
-              <div className="relative">
-                <Input
-                  id="final-weight"
-                  type="text"
-                  inputMode="decimal"
-                  value={finalWeight}
-                  onChange={(e) => {
-                    setFinalWeight(sanitizeNumberInput(e.target.value))
-                    setResult(null)
-                    setInvalidMessage(null)
-                  }}
-                  className="pr-8 border-border rounded-md"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  %
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="target-grade" className="text-sm">
-                Target grade
-              </Label>
-              <div className="relative">
-                <Input
-                  id="target-grade"
-                  type="text"
-                  value={targetGrade}
-                  onChange={(e) => {
-                    setTargetGrade(sanitizeNumberInput(e.target.value))
-                    setResult(null)
-                    setInvalidMessage(null)
-                  }}
-                  className="border-border rounded-md"
-                />
-              </div>
-            </div>
+    <div className="grid items-start gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
+      <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
+        <CardContent className="space-y-6 p-6">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              Final Summary
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Calculate the score needed on the final exam to reach your target.
+            </p>
           </div>
 
-          <div className="flex gap-3">
-            <Button onClick={handleCalculate} className="flex-1 rounded-md sm:flex-none">
+          {result && (
+            <div className="border-t border-border/70 pt-6">
+              {result.isPossible ? (
+                <div className="space-y-4">
+                  <div className="rounded-xl border border-primary/15 bg-primary/5 px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+                    <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-primary">
+                      Required score
+                    </div>
+                    <div className="mt-3 flex items-baseline gap-3">
+                      <span className="text-6xl font-semibold leading-none text-primary">
+                        {result.neededGrade.toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : result.neededGrade > 100 ? (
+                <div className="rounded-xl border border-destructive/25 bg-destructive/5 px-5 py-5">
+                  <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-destructive">
+                    Not achievable
+                  </div>
+                  <div className="mt-3 text-4xl font-semibold leading-none text-destructive">
+                    {result.neededGrade.toFixed(1)}%
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                    This exceeds 100% on the final.
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-primary/15 bg-primary/5 px-5 py-5">
+                  <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-primary">
+                    Already reached
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                    Even with 0% on the final, you will exceed your target.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {invalidMessage && (
+            <div className="rounded-xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+              {invalidMessage}
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-1">
+            <Button onClick={handleCalculate} className="h-11 flex-1 rounded-xl">
               <Calculator className="h-4 w-4 mr-2" />
               Calculate
             </Button>
-            <Button variant="outline" onClick={handleReset} className="rounded-md">
+            <Button variant="outline" onClick={handleReset} className="h-11 flex-1 rounded-xl">
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset
             </Button>
@@ -143,73 +126,115 @@ export function FinalGradeCalculator() {
         </CardContent>
       </Card>
 
-      {/* Results */}
-      {result && (
-        <Card className="border-border overflow-hidden py-0 gap-0 rounded-lg">
-          <CardContent className="p-0">
-            <div className="p-6 bg-card">
-              {result.isPossible ? (
-                <>
-                  <div className="text-sm text-muted-foreground mb-1">
-                    You need to score
-                  </div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-4xl font-bold text-primary">
-                      {result.neededGrade.toFixed(1)}%
-                    </span>
-                    <span className="text-2xl font-semibold text-primary">
-                      ({result.letterGrade})
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-2">
-                    on your final exam to reach {(targetGradePercent ?? 0).toFixed(1)}% overall
-                  </div>
-                </>
-              ) : result.neededGrade > 100 ? (
-                <div className="text-center">
-                  <div className="text-xl font-semibold text-destructive mb-2">
-                    Not achievable
-                  </div>
-                  <div className="text-muted-foreground">
-                    You would need {result.neededGrade.toFixed(1)}% on the final,
-                    which exceeds 100%.
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <div className="text-xl font-semibold text-primary mb-2">
-                    You've already made it!
-                  </div>
-                  <div className="text-muted-foreground">
-                    Even with 0% on the final, you'll exceed your target.
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
+        <CardContent className="p-0">
+          <div className="border-b border-border/70 px-6 py-5">
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              Exam Inputs
+            </h2>
+          </div>
 
-      {!result && (
-        <Card
-          className={
-            invalidMessage
-              ? 'bg-destructive/5 border-destructive/30 py-0 rounded-lg'
-              : 'bg-card border-border py-0 rounded-lg'
-          }
-        >
-          <CardContent
-            className={
-              invalidMessage
-                ? 'p-6 text-center text-destructive'
-                : 'p-6 text-center text-muted-foreground'
-            }
-          >
-            {invalidMessage ??
-              'Enter your current grade, final exam weight, and target grade to see what you need on the final.'}
-          </CardContent>
-        </Card>
-      )}
+          <div className="px-6 py-4 text-sm text-muted-foreground">
+            Enter percentages for your current course grade, final exam weight, and target grade.
+          </div>
+
+          <div className="overflow-x-auto px-2 pb-5">
+            <div className="min-w-[34rem]">
+              <div className="grid grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] gap-3 border-b border-border/70 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                <span>Metric</span>
+                <span className="text-center">Value</span>
+                <span></span>
+              </div>
+
+              <div className="divide-y divide-border/70">
+                <div className="group grid grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/12">
+                  <div>
+                    <div className="font-medium text-foreground">Current grade</div>
+                    <div className="text-sm text-muted-foreground">
+                      Your grade before the final exam
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="current-grade"
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="88"
+                      value={currentGrade}
+                      onChange={(e) => {
+                        setCurrentGrade(sanitizeNumberInput(e.target.value))
+                        setResult(null)
+                        setInvalidMessage(null)
+                      }}
+                      className="h-9 rounded-lg border-transparent bg-transparent pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      %
+                    </span>
+                  </div>
+                  <span />
+                </div>
+
+                <div className="group grid grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/12">
+                  <div>
+                    <div className="font-medium text-foreground">Final exam weight</div>
+                    <div className="text-sm text-muted-foreground">
+                      How much the final counts
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="final-weight"
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="40"
+                      value={finalWeight}
+                      onChange={(e) => {
+                        setFinalWeight(sanitizeNumberInput(e.target.value))
+                        setResult(null)
+                        setInvalidMessage(null)
+                      }}
+                      className="h-9 rounded-lg border-transparent bg-transparent pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      %
+                    </span>
+                  </div>
+                  <span />
+                </div>
+
+                <div className="group grid grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/12">
+                  <div>
+                    <div className="font-medium text-foreground">Target grade</div>
+                    <div className="text-sm text-muted-foreground">
+                      The overall grade you want
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="target-grade"
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="90"
+                      value={targetGrade}
+                      onChange={(e) => {
+                        setTargetGrade(sanitizeNumberInput(e.target.value))
+                        setResult(null)
+                        setInvalidMessage(null)
+                      }}
+                      className="h-9 rounded-lg border-transparent bg-transparent pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      %
+                    </span>
+                  </div>
+                  <span />
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
