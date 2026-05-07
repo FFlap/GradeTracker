@@ -14,12 +14,10 @@ import {
   type CalculationResult,
   type Course,
   type LetterGradeThreshold,
-  calculateWeightedAverage,
-  calculateNeededGrade,
+  calculateGradeResult,
   getGradeInputError,
   LETTER_GRADE_THRESHOLDS,
   parseGradeInput,
-  percentageToLetter,
   sanitizeNumberInput,
 } from './types'
 
@@ -111,39 +109,7 @@ export function GradeCalculator({
       nextTargetGradeValue: number,
       thresholds?: LetterGradeThreshold[]
     ): CalculationResult | null => {
-      const calcResult = calculateWeightedAverage(nextRows)
-      if (!calcResult) {
-        return null
-      }
-
-      const remainingWeight = 100 - calcResult.totalWeight
-      const needed =
-        remainingWeight > 0
-          ? calculateNeededGrade(
-              calcResult.average,
-              calcResult.totalWeight,
-              nextTargetGradeValue
-            )
-          : null
-
-      const averageOnCompletedWork = calcResult.average
-      const overallCoursePercentSoFar = calcResult.weightedSum / 100
-
-      return {
-        averageOnCompletedWork,
-        averageOnCompletedWorkLetter: percentageToLetter(
-          averageOnCompletedWork,
-          thresholds
-        ),
-        overallCoursePercentSoFar,
-        overallCoursePercentSoFarLetter: percentageToLetter(
-          overallCoursePercentSoFar,
-          thresholds
-        ),
-        totalWeight: calcResult.totalWeight,
-        remainingWeight,
-        neededGrade: needed,
-      }
+      return calculateGradeResult(nextRows, nextTargetGradeValue, thresholds)
     },
     []
   )

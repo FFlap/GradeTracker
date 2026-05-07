@@ -263,6 +263,38 @@ export function calculateWeightedAverage(
   }
 }
 
+export function calculateGradeResult(
+  rows: GradeRow[],
+  targetGrade: number,
+  thresholds?: LetterGradeThreshold[]
+): CalculationResult | null {
+  const calcResult = calculateWeightedAverage(rows)
+  if (!calcResult) {
+    return null
+  }
+
+  const remainingWeight = 100 - calcResult.totalWeight
+  const neededGrade =
+    remainingWeight > 0
+      ? calculateNeededGrade(calcResult.average, calcResult.totalWeight, targetGrade)
+      : null
+  const averageOnCompletedWork = calcResult.average
+  const overallCoursePercentSoFar = calcResult.weightedSum / 100
+
+  return {
+    averageOnCompletedWork,
+    averageOnCompletedWorkLetter: percentageToLetter(averageOnCompletedWork, thresholds),
+    overallCoursePercentSoFar,
+    overallCoursePercentSoFarLetter: percentageToLetter(
+      overallCoursePercentSoFar,
+      thresholds
+    ),
+    totalWeight: calcResult.totalWeight,
+    remainingWeight,
+    neededGrade,
+  }
+}
+
 export function calculateNeededGrade(
   currentAverage: number,
   currentWeight: number,
