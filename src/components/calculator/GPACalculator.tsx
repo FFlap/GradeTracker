@@ -12,30 +12,30 @@ import {
 import { Calculator, RotateCcw, Plus, SlidersHorizontal, X } from 'lucide-react'
 import { sanitizeNumberInput } from './types'
 
-interface CourseEntry {
+export interface CourseEntry {
   id: string
   name: string
   grade: string
   credits: string
 }
 
-interface GPAResult {
+export interface GPAResult {
   gpa: number
   totalCredits: number
   totalPoints: number
 }
 
-interface GPAScaleEntry {
+export interface GPAScaleEntry {
   letter: string
   points: number
 }
 
-interface GPAScaleDraftEntry {
+export interface GPAScaleDraftEntry {
   letter: string
   points: string
 }
 
-const DEFAULT_GPA_SCALE: GPAScaleEntry[] = [
+export const DEFAULT_GPA_SCALE: GPAScaleEntry[] = [
   { letter: 'A+', points: 4.0 },
   { letter: 'A', points: 4.0 },
   { letter: 'A-', points: 3.7 },
@@ -71,6 +71,48 @@ function createScaleDraft(scale: GPAScaleEntry[]): GPAScaleDraftEntry[] {
     letter: entry.letter,
     points: entry.points.toFixed(1),
   }))
+}
+
+export function createValidatedGPAScale(
+  scaleDraft: GPAScaleDraftEntry[]
+): GPAScaleEntry[] {
+  return scaleDraft.map((entry) => {
+    const points = Number.parseFloat(entry.points)
+
+    return {
+      letter: entry.letter,
+      points: Number.isFinite(points) ? Math.max(0, Math.min(5, points)) : 0,
+    }
+  })
+}
+
+export function calculateGPAResult(
+  courses: CourseEntry[],
+  gpaScale: GPAScaleEntry[]
+): GPAResult | null {
+  let totalPoints = 0
+  let totalCredits = 0
+
+  for (const course of courses) {
+    const creditsInput = course.credits.trim()
+    const credits = creditsInput === '' ? 3 : parseFloat(creditsInput)
+    const gradePoints = gpaScale.find(
+      (entry) => entry.letter === course.grade
+    )?.points
+
+    if (isNaN(credits) || credits <= 0 || gradePoints === undefined) continue
+
+    totalPoints += gradePoints * credits
+    totalCredits += credits
+  }
+
+  if (totalCredits === 0) return null
+
+  return {
+    gpa: totalPoints / totalCredits,
+    totalCredits,
+    totalPoints,
+  }
 }
 
 export function GPACalculator() {
@@ -112,34 +154,16 @@ export function GPACalculator() {
   }, [])
 
   const handleCalculate = () => {
-    let totalPoints = 0
-    let totalCredits = 0
+    const nextResult = calculateGPAResult(courses, gpaScale)
 
-    for (const course of courses) {
-      const creditsInput = course.credits.trim()
-      const credits = creditsInput === '' ? 3 : parseFloat(creditsInput)
-      const gradePoints = gpaScale.find(
-        (entry) => entry.letter === course.grade
-      )?.points
-
-      if (isNaN(credits) || credits <= 0 || gradePoints === undefined) continue
-
-      totalPoints += gradePoints * credits
-      totalCredits += credits
-    }
-
-    if (totalCredits === 0) {
+    if (!nextResult) {
       setResult(null)
       setError('Select a letter grade for at least one course.')
       return
     }
 
     setError(null)
-    setResult({
-      gpa: totalPoints / totalCredits,
-      totalCredits,
-      totalPoints,
-    })
+    setResult(nextResult)
   }
 
   const handleReset = () => {
@@ -149,16 +173,7 @@ export function GPACalculator() {
   }
 
   const handleSaveScale = () => {
-    setGpaScale(
-      scaleDraft.map((entry) => {
-        const points = Number.parseFloat(entry.points)
-
-        return {
-          letter: entry.letter,
-          points: Number.isFinite(points) ? Math.max(0, Math.min(5, points)) : 0,
-        }
-      })
-    )
+    setGpaScale(createValidatedGPAScale(scaleDraft))
     setIsEditingScale(false)
     setResult(null)
     setError(null)
