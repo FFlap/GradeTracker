@@ -8,15 +8,22 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import {
-  calculateWeightedAverage,
-  LETTER_GRADE_THRESHOLDS,
-  percentageToLetter,
   sanitizeNumberInput,
   type Course,
   type Grade,
-  type GradeRow,
   type Semester,
 } from '@/components/calculator/types'
+import {
+  calculateCoursePercent,
+  calculateCumulativeSemesterStats,
+  calculateTermGpa,
+  getCourseCredits,
+  getCourseLetter,
+  getCurrentSemester,
+  groupCoursesBySemesterId,
+  groupGradesByCourseId,
+  sortSemestersForDisplay,
+} from '@/lib/semester-helpers'
 import {
   CalendarPlus,
   CalendarCheck2,
@@ -25,22 +32,6 @@ import {
   Settings,
   Trash2,
 } from 'lucide-react'
-
-const LETTER_TO_GPA: Record<string, number> = {
-  'A+': 4.0,
-  'A': 4.0,
-  'A-': 3.7,
-  'B+': 3.3,
-  'B': 3.0,
-  'B-': 2.7,
-  'C+': 2.3,
-  'C': 2.0,
-  'C-': 1.7,
-  'D+': 1.3,
-  'D': 1.0,
-  'D-': 0.7,
-  'F': 0.0,
-}
 
 export const Route = createFileRoute('/semesters')({
   component: SemestersPage,
@@ -66,28 +57,15 @@ function SemestersPage() {
   const grades = overview?.grades ?? []
 
   const gradesByCourseId = useMemo(() => {
-    const map = new Map<string, Grade[]>()
-    for (const g of grades) {
-      if (!g.courseId) continue
-      const key = String(g.courseId)
-      const list = map.get(key)
-      if (list) list.push(g)
-      else map.set(key, [g])
-    }
-    return map
+    return groupGradesByCourseId(grades)
   }, [grades])
 
   const sortedSemesters = useMemo(() => {
-    const copy = [...semesters]
-    copy.sort((a, b) => {
-      if (a.isCurrent !== b.isCurrent) return a.isCurrent ? -1 : 1
-      return (b.createdAt ?? 0) - (a.createdAt ?? 0)
-    })
-    return copy
+    return sortSemestersForDisplay(semesters)
   }, [semesters])
 
   const currentSemester = useMemo(() => {
-    return semesters.find((s) => s.isCurrent) ?? null
+    return getCurrentSemester(semesters)
   }, [semesters])
 
   const [openSemesterIds, setOpenSemesterIds] = useState<Set<string>>(new Set())
@@ -116,88 +94,15 @@ function SemestersPage() {
   }, [courses])
 
   const coursesBySemesterId = useMemo(() => {
-    const map = new Map<string, Course[]>()
-    for (const c of courses) {
-      const key = c.semesterId ? String(c.semesterId) : 'unassigned'
-      const list = map.get(key)
-      if (list) list.push(c)
-      else map.set(key, [c])
-    }
-    for (const [k, list] of map) {
-      list.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
-      map.set(k, list)
-    }
-    return map
+    return groupCoursesBySemesterId(courses)
   }, [courses])
 
-  const getCourseCredits = (course: Course) => {
-    const parsed = typeof course.credits === 'number' ? course.credits : 3
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : 3
-  }
-
-  const getCourseRowsForCalc = (courseGrades: Grade[]): GradeRow[] => {
-    const rows = courseGrades.map((g) => ({
-      id: String(g.clientRowId ?? g._id),
-      assignment: g.assignmentName ?? '',
-      date: g.dueDate ?? '',
-      grade: g.gradeInput ?? String(g.grade ?? ''),
-      weight: g.weightInput ?? String(g.weight ?? ''),
-    }))
-    return rows
-  }
-
-  const getCoursePercent = (course: Course) => {
-    const courseGrades = gradesByCourseId.get(String(course._id)) ?? []
-    const rows = getCourseRowsForCalc(courseGrades)
-    const calc = calculateWeightedAverage(rows)
-    return calc?.average ?? null
-  }
-
-  const getCourseLetter = (course: Course, percent: number) => {
-    const thresholds = course.letterGradeThresholds ?? LETTER_GRADE_THRESHOLDS
-    return percentageToLetter(percent, thresholds)
-  }
-
   const getTermGpa = (semesterId: string) => {
-    const termCourses = coursesBySemesterId.get(semesterId) ?? []
-    let totalPoints = 0
-    let totalCredits = 0
-
-    for (const course of termCourses) {
-      const percent = getCoursePercent(course)
-      if (percent === null) continue
-      const letter = getCourseLetter(course, percent)
-      const points = LETTER_TO_GPA[letter]
-      if (points === undefined) continue
-      const credits = getCourseCredits(course)
-      totalPoints += points * credits
-      totalCredits += credits
-    }
-    if (totalCredits === 0) return null
-    return totalPoints / totalCredits
+    return calculateTermGpa(semesterId, coursesBySemesterId, gradesByCourseId)
   }
 
   const cumulative = useMemo(() => {
-    let totalPoints = 0
-    let totalCredits = 0
-    let creditsSum = 0
-
-    for (const course of courses) {
-      const credits = getCourseCredits(course)
-      creditsSum += credits
-      const percent = getCoursePercent(course)
-      if (percent === null) continue
-      const letter = getCourseLetter(course, percent)
-      const points = LETTER_TO_GPA[letter]
-      if (points === undefined) continue
-      totalPoints += points * credits
-      totalCredits += credits
-    }
-    return {
-      gpa: totalCredits > 0 ? totalPoints / totalCredits : null,
-      credits: creditsSum,
-      semestersCompleted: semesters.filter((s) => s.status === 'completed').length,
-    }
+    return calculateCumulativeSemesterStats(courses, semesters, gradesByCourseId)
   }, [courses, semesters, gradesByCourseId])
 
   const [newSemesterName, setNewSemesterName] = useState('')
@@ -396,7 +301,7 @@ function SemestersPage() {
     course: Course,
     options: { showAssignToCurrent?: boolean } = {}
   ) => {
-    const percent = getCoursePercent(course)
+    const percent = calculateCoursePercent(course, gradesByCourseId)
     const letter = percent === null ? null : getCourseLetter(course, percent)
     const courseId = String(course._id)
 
