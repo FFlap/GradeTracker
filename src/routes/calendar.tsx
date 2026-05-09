@@ -12,6 +12,21 @@ import {
   type Grade,
 } from '@/components/calculator/types'
 import {
+  buildCalendarGrid,
+  buildUpcomingAssessments,
+  countAssessmentsInMonth,
+  countDueBetween,
+  formatDayLabel,
+  formatMonthLabel,
+  formatRangeLabel,
+  getDatePlusDaysISO,
+  groupAssessmentsByDate,
+  isCompletedAssessment,
+  isSameISODate,
+  parseISODate,
+  toISODate,
+} from '@/lib/calendar-helpers'
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -24,80 +39,6 @@ export const Route = createFileRoute('/calendar')({
 })
 
 type CalendarAssessment = Grade & { dueDate: string; courseName: string }
-
-function pad2(n: number) {
-  return String(n).padStart(2, '0')
-}
-
-function toISODate(d: Date) {
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
-}
-
-function isSameISODate(a: string, b: string) {
-  return a === b
-}
-
-function parseISODate(iso: string) {
-  const [y, m, d] = iso.split('-').map((v) => Number(v))
-  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d))
-    return null
-  const dt = new Date(y, m - 1, d)
-  if (Number.isNaN(dt.getTime())) return null
-  return dt
-}
-
-function normalizeToISODate(value: string) {
-  const trimmed = value.trim()
-  if (!trimmed) return null
-  const strict = parseISODate(trimmed)
-  if (strict) return toISODate(strict)
-
-  const parsed = new Date(trimmed)
-  if (Number.isNaN(parsed.getTime())) return null
-  return toISODate(
-    new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()),
-  )
-}
-
-function formatMonthLabel(d: Date) {
-  return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
-}
-
-function formatDayLabel(iso: string) {
-  const dt = parseISODate(iso)
-  if (!dt) return iso
-  return dt.toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
-function formatRangeLabel(startISO: string, endISO: string) {
-  const start = parseISODate(startISO)
-  const end = parseISODate(endISO)
-  if (!start || !end) return `${startISO}–${endISO}`
-
-  const sameYear = start.getFullYear() === end.getFullYear()
-  const startFmt = new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: sameYear ? undefined : 'numeric',
-  })
-  const endFmt = new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-  return `${startFmt.format(start)} – ${endFmt.format(end)}`
-}
-
-function isCompletedAssessment(a: CalendarAssessment) {
-  const weight = typeof a.weight === 'number' ? a.weight : 0
-  const hasGrade = (a.gradeInput ?? '').trim().length > 0
-  return weight > 0 && hasGrade
-}
 
 function CalendarPage() {
   const { isLoaded, isSignedIn } = useUser()
@@ -115,93 +56,33 @@ function CalendarPage() {
   const filtered = dated
 
   const byDate = useMemo(() => {
-    const map = new Map<string, CalendarAssessment[]>()
-    for (const g of filtered) {
-      const key = normalizeToISODate(g.dueDate)
-      if (!key) continue
-      const list = map.get(key)
-      if (list) list.push(g)
-      else map.set(key, [g])
-    }
-    for (const [k, list] of map) {
-      list.sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0))
-      map.set(k, list)
-    }
-    return map
+    return groupAssessmentsByDate(filtered)
   }, [filtered])
 
   const todayISO = useMemo(() => toISODate(new Date()), [])
 
   const upcomingEndISO = useMemo(() => {
-    const start = parseISODate(todayISO)
-    if (!start) {
-      const fallback = new Date()
-      fallback.setDate(fallback.getDate() + 30)
-      return toISODate(fallback)
-    }
-    const end = new Date(start.getFullYear(), start.getMonth(), start.getDate())
-    end.setDate(end.getDate() + 30)
-    return toISODate(end)
+    return getDatePlusDaysISO(todayISO, 30)
   }, [todayISO])
 
   const upcoming = useMemo(() => {
-    return filtered
-      .map((a) => {
-        const iso = normalizeToISODate(a.dueDate)
-        if (!iso) return null
-        return { ...a, dueDate: iso }
-      })
-      .filter((a): a is CalendarAssessment => a !== null)
-      .filter((a) => {
-        if (a.dueDate < todayISO) return false // overdue
-        if (a.dueDate > upcomingEndISO) return false
-        return !isCompletedAssessment(a)
-      })
-      .sort((a, b) => {
-        const byDue = String(a.dueDate).localeCompare(String(b.dueDate))
-        if (byDue !== 0) return byDue
-        return (a.createdAt ?? 0) - (b.createdAt ?? 0)
-      })
+    return buildUpcomingAssessments(filtered, todayISO, upcomingEndISO)
   }, [filtered, todayISO, upcomingEndISO])
 
   const thisWeekEndISO = useMemo(() => {
-    const start = parseISODate(todayISO)
-    if (!start) return upcomingEndISO
-    const end = new Date(start.getFullYear(), start.getMonth(), start.getDate())
-    end.setDate(end.getDate() + 7)
-    return toISODate(end)
-  }, [todayISO, upcomingEndISO])
+    return getDatePlusDaysISO(todayISO, 7)
+  }, [todayISO])
 
   const thisWeekCount = useMemo(() => {
-    return upcoming.filter(
-      (item) => item.dueDate >= todayISO && item.dueDate <= thisWeekEndISO,
-    ).length
+    return countDueBetween(upcoming, todayISO, thisWeekEndISO)
   }, [thisWeekEndISO, todayISO, upcoming])
 
   const currentMonthCount = useMemo(() => {
-    const monthPrefix = `${monthCursor.getFullYear()}-${pad2(monthCursor.getMonth() + 1)}`
-    return filtered.reduce((count, item) => {
-      const iso = normalizeToISODate(item.dueDate)
-      return iso?.startsWith(monthPrefix) ? count + 1 : count
-    }, 0)
+    return countAssessmentsInMonth(filtered, monthCursor)
   }, [filtered, monthCursor])
 
   const grid = useMemo(() => {
-    const year = monthCursor.getFullYear()
-    const month = monthCursor.getMonth()
-
-    const first = new Date(year, month, 1)
-    const startOffset = first.getDay() // 0=Sun
-    const daysInMonth = new Date(year, month + 1, 0).getDate()
-
-    const cells: Array<{ iso: string | null; day: number | null }> = []
-    for (let i = 0; i < startOffset; i++) cells.push({ iso: null, day: null })
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dt = new Date(year, month, day)
-      cells.push({ iso: toISODate(dt), day })
-    }
-    while (cells.length % 7 !== 0) cells.push({ iso: null, day: null })
-    return cells
+    return buildCalendarGrid(monthCursor)
   }, [monthCursor])
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
