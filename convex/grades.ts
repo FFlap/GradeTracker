@@ -159,20 +159,22 @@ export const listDated = query({
       .withIndex('by_user', (q) => q.eq('userId', identity.subject))
       .collect()
 
-    const dated = grades
-      .filter((g) => {
-        const due = (g as any).dueDate as string | undefined
-        return (
-          g.courseId !== undefined &&
-          typeof due === 'string' &&
-          due.trim().length > 0
-        )
-      })
-      .map((g) => ({
+    const dated = grades.flatMap((g) => {
+      const due = g.dueDate
+      if (
+        g.courseId === undefined ||
+        typeof due !== 'string' ||
+        due.trim().length === 0
+      ) {
+        return []
+      }
+
+      return [{
         ...g,
-        dueDate: (g as any).dueDate as string,
+        dueDate: due,
         courseName: courseNameById.get(String(g.courseId)) ?? 'Course',
-      }))
+      }]
+    })
       .sort((a, b) => {
         if (a.dueDate !== b.dueDate) return a.dueDate.localeCompare(b.dueDate)
         return (a.createdAt ?? 0) - (b.createdAt ?? 0)
@@ -229,8 +231,6 @@ export const removeByCourse = mutation({
       )
       .collect()
 
-    for (const grade of grades) {
-      await ctx.db.delete(grade._id)
-    }
+    await Promise.all(grades.map((grade) => ctx.db.delete(grade._id)))
   },
 })

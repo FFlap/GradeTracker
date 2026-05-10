@@ -39,19 +39,23 @@ export function GradeRow({
             const el = dateInputRef.current
             if (!el) return
             // Prefer native date picker when available (Chrome/Safari).
-            const anyEl = el as any
-            if (typeof anyEl.showPicker === 'function') {
-              anyEl.showPicker()
+            if (typeof el.showPicker === 'function') {
+              try {
+                el.showPicker()
+              } catch {
+                el.focus()
+                el.click()
+              }
             } else {
               el.focus()
               el.click()
             }
           }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg hover:bg-accent/45 transition-colors"
+          className="absolute left-2 top-1/2 -translate-y-1/2 size-7 rounded-lg hover:bg-accent/45 transition-colors"
           aria-label="Pick date"
           title="Pick date"
         >
-          <CalendarDays className="h-4 w-4 mx-auto text-primary" />
+          <CalendarDays className="size-4 mx-auto text-primary" />
         </button>
         <Input
           ref={dateInputRef}
@@ -64,11 +68,11 @@ export function GradeRow({
           <button
             type="button"
             onClick={() => onUpdate(row.id, 'date', '')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/45 transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/45 transition-colors"
             aria-label="Clear date"
             title="Clear date"
           >
-            <X className="h-4 w-4 mx-auto" />
+            <X className="size-4 mx-auto" />
           </button>
         )}
       </div>
@@ -93,12 +97,12 @@ export function GradeRow({
         variant="ghost"
         size="icon"
         onClick={() => onDelete(row.id)}
-        className={`h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-opacity ${
+        className={`size-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-opacity ${
           showDelete ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}
         disabled={!showDelete}
       >
-        <X className="h-4 w-4" />
+        <X className="size-4" />
       </Button>
     </div>
   )

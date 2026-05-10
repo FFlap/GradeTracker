@@ -45,6 +45,16 @@ export interface Grade {
   createdAt: number
 }
 
+export function gradeToRow(grade: Grade): GradeRow {
+  return {
+    id: String(grade.clientRowId ?? grade._id),
+    assignment: grade.assignmentName ?? '',
+    date: grade.dueDate ?? '',
+    grade: grade.gradeInput ?? String(grade.grade ?? ''),
+    weight: grade.weightInput ?? String(grade.weight ?? ''),
+  }
+}
+
 export interface Semester {
   _id: Id<'semesters'>
   userId: string
@@ -105,10 +115,11 @@ export function sanitizeGradeInput(input: string): string {
   const numeric = raw.replace(/[A-F+\-\s]/g, '')
   let sanitized = ''
   let hasSlash = false
+  let hasPercent = false
   let hasDecimalInSegment = false
 
   for (const char of numeric) {
-    if (sanitized.includes('%')) continue
+    if (hasPercent) continue
 
     if (/\d/.test(char)) {
       sanitized += char
@@ -130,6 +141,7 @@ export function sanitizeGradeInput(input: string): string {
 
     if (char === '%' && !hasSlash) {
       sanitized += char
+      hasPercent = true
     }
   }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useReducer } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,12 +10,68 @@ interface FinalResult {
   isPossible: boolean
 }
 
+interface FinalGradeState {
+  currentGrade: string
+  finalWeight: string
+  targetGrade: string
+  result: FinalResult | null
+  invalidMessage: string | null
+}
+
+type FinalGradeAction =
+  | { type: 'set-current-grade'; value: string }
+  | { type: 'set-final-weight'; value: string }
+  | { type: 'set-target-grade'; value: string }
+  | { type: 'calculation-success'; result: FinalResult }
+  | { type: 'calculation-error'; message: string }
+  | { type: 'reset' }
+
+const initialFinalGradeState: FinalGradeState = {
+  currentGrade: '',
+  finalWeight: '',
+  targetGrade: '',
+  result: null,
+  invalidMessage: null,
+}
+
+function finalGradeReducer(
+  state: FinalGradeState,
+  action: FinalGradeAction
+): FinalGradeState {
+  switch (action.type) {
+    case 'set-current-grade':
+      return {
+        ...state,
+        currentGrade: action.value,
+        result: null,
+        invalidMessage: null,
+      }
+    case 'set-final-weight':
+      return {
+        ...state,
+        finalWeight: action.value,
+        result: null,
+        invalidMessage: null,
+      }
+    case 'set-target-grade':
+      return {
+        ...state,
+        targetGrade: action.value,
+        result: null,
+        invalidMessage: null,
+      }
+    case 'calculation-success':
+      return { ...state, result: action.result, invalidMessage: null }
+    case 'calculation-error':
+      return { ...state, result: null, invalidMessage: action.message }
+    case 'reset':
+      return initialFinalGradeState
+  }
+}
+
 export function FinalGradeCalculator() {
-  const [currentGrade, setCurrentGrade] = useState('')
-  const [finalWeight, setFinalWeight] = useState('')
-  const [targetGrade, setTargetGrade] = useState('')
-  const [result, setResult] = useState<FinalResult | null>(null)
-  const [invalidMessage, setInvalidMessage] = useState<string | null>(null)
+  const [state, dispatch] = useReducer(finalGradeReducer, initialFinalGradeState)
+  const { currentGrade, finalWeight, targetGrade, result, invalidMessage } = state
 
   const handleCalculate = () => {
     const current = Number.parseFloat(currentGrade)
@@ -23,14 +79,18 @@ export function FinalGradeCalculator() {
     const target = Number.parseFloat(targetGrade)
 
     if (!Number.isFinite(current) || isNaN(weight) || !Number.isFinite(target)) {
-      setResult(null)
-      setInvalidMessage('Enter a current grade, final exam weight, and target grade.')
+      dispatch({
+        type: 'calculation-error',
+        message: 'Enter a current grade, final exam weight, and target grade.',
+      })
       return
     }
 
     if (weight <= 0 || weight > 100) {
-      setResult(null)
-      setInvalidMessage('Final exam weight must be greater than 0 and no more than 100.')
+      dispatch({
+        type: 'calculation-error',
+        message: 'Final exam weight must be greater than 0 and no more than 100.',
+      })
       return
     }
 
@@ -39,19 +99,17 @@ export function FinalGradeCalculator() {
     const currentWeight = 1 - weight / 100
     const needed = (target - current * currentWeight) / (weight / 100)
 
-    setResult({
-      neededGrade: needed,
-      isPossible: needed <= 100 && needed >= 0,
+    dispatch({
+      type: 'calculation-success',
+      result: {
+        neededGrade: needed,
+        isPossible: needed <= 100 && needed >= 0,
+      },
     })
-    setInvalidMessage(null)
   }
 
   const handleReset = () => {
-    setCurrentGrade('')
-    setFinalWeight('')
-    setTargetGrade('')
-    setResult(null)
-    setInvalidMessage(null)
+    dispatch({ type: 'reset' })
   }
 
   return (
@@ -71,7 +129,7 @@ export function FinalGradeCalculator() {
             <div className="border-t border-border/70 pt-6">
               {result.isPossible ? (
                 <div className="space-y-4">
-                  <div className="rounded-xl border border-primary/15 bg-primary/5 px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+                  <div className="rounded-xl border border-primary/15 bg-primary/5 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
                     <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-primary">
                       Required score
                     </div>
@@ -83,7 +141,7 @@ export function FinalGradeCalculator() {
                   </div>
                 </div>
               ) : result.neededGrade > 100 ? (
-                <div className="rounded-xl border border-destructive/25 bg-destructive/5 px-5 py-5">
+                <div className="rounded-xl border border-destructive/25 bg-destructive/5 p-5">
                   <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-destructive">
                     Not achievable
                   </div>
@@ -95,7 +153,7 @@ export function FinalGradeCalculator() {
                   </p>
                 </div>
               ) : (
-                <div className="rounded-xl border border-primary/15 bg-primary/5 px-5 py-5">
+                <div className="rounded-xl border border-primary/15 bg-primary/5 p-5">
                   <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-primary">
                     Already reached
                   </div>
@@ -115,11 +173,11 @@ export function FinalGradeCalculator() {
 
           <div className="flex gap-3 pt-1">
             <Button onClick={handleCalculate} className="h-11 flex-1 rounded-xl">
-              <Calculator className="h-4 w-4 mr-2" />
+              <Calculator className="size-4 mr-2" />
               Calculate
             </Button>
             <Button variant="outline" onClick={handleReset} className="h-11 flex-1 rounded-xl">
-              <RotateCcw className="h-4 w-4 mr-2" />
+              <RotateCcw className="size-4 mr-2" />
               Reset
             </Button>
           </div>
@@ -162,9 +220,10 @@ export function FinalGradeCalculator() {
                       placeholder="88"
                       value={currentGrade}
                       onChange={(e) => {
-                        setCurrentGrade(sanitizeNumberInput(e.target.value))
-                        setResult(null)
-                        setInvalidMessage(null)
+                        dispatch({
+                          type: 'set-current-grade',
+                          value: sanitizeNumberInput(e.target.value),
+                        })
                       }}
                       className="h-9 rounded-lg border-transparent bg-transparent pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
                     />
@@ -190,9 +249,10 @@ export function FinalGradeCalculator() {
                       placeholder="40"
                       value={finalWeight}
                       onChange={(e) => {
-                        setFinalWeight(sanitizeNumberInput(e.target.value))
-                        setResult(null)
-                        setInvalidMessage(null)
+                        dispatch({
+                          type: 'set-final-weight',
+                          value: sanitizeNumberInput(e.target.value),
+                        })
                       }}
                       className="h-9 rounded-lg border-transparent bg-transparent pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
                     />
@@ -218,9 +278,10 @@ export function FinalGradeCalculator() {
                       placeholder="90"
                       value={targetGrade}
                       onChange={(e) => {
-                        setTargetGrade(sanitizeNumberInput(e.target.value))
-                        setResult(null)
-                        setInvalidMessage(null)
+                        dispatch({
+                          type: 'set-target-grade',
+                          value: sanitizeNumberInput(e.target.value),
+                        })
                       }}
                       className="h-9 rounded-lg border-transparent bg-transparent pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
                     />

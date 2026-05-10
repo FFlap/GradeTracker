@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useUser } from '@clerk/clerk-react'
 import { useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
@@ -13,6 +13,7 @@ import {
 } from '@/components/calculator/types'
 import {
   buildCalendarGrid,
+  type CalendarMonthCursor,
   buildUpcomingAssessments,
   countAssessmentsInMonth,
   countDueBetween,
@@ -39,7 +40,12 @@ export const Route = createFileRoute('/calendar')({
 })
 
 type CalendarAssessment = Grade & { dueDate: string; courseName: string }
+type CalendarClock = { todayISO: string; currentMonth: CalendarMonthCursor }
 
+const fallbackMonthCursor = { year: 2000, month: 0 }
+const fallbackTodayISO = '2000-01-01'
+
+// oxlint-disable-next-line react-doctor/no-giant-component -- The route keeps the calendar grid, summary, and day drawer state in one cohesive page.
 function CalendarPage() {
   const { isLoaded, isSignedIn } = useUser()
 
@@ -48,18 +54,25 @@ function CalendarPage() {
     | undefined
   const dated = datedGradesData ?? []
 
-  const [monthCursor, setMonthCursor] = useState(() => {
-    const now = new Date()
-    return new Date(now.getFullYear(), now.getMonth(), 1)
-  })
+  const [calendarClock, setCalendarClock] = useState<CalendarClock | null>(null)
+  const [monthCursor, setMonthCursor] = useState<CalendarMonthCursor | null>(null)
   const [openDayISO, setOpenDayISO] = useState<string | null>(null)
   const filtered = dated
+
+  useEffect(() => {
+    const now = new Date()
+    const currentMonth = { year: now.getFullYear(), month: now.getMonth() }
+    setCalendarClock({ todayISO: toISODate(now), currentMonth })
+    setMonthCursor(currentMonth)
+  }, [])
+
+  const activeMonthCursor =
+    monthCursor ?? calendarClock?.currentMonth ?? fallbackMonthCursor
+  const todayISO = calendarClock?.todayISO ?? fallbackTodayISO
 
   const byDate = useMemo(() => {
     return groupAssessmentsByDate(filtered)
   }, [filtered])
-
-  const todayISO = useMemo(() => toISODate(new Date()), [])
 
   const upcomingEndISO = useMemo(() => {
     return getDatePlusDaysISO(todayISO, 30)
@@ -78,23 +91,19 @@ function CalendarPage() {
   }, [thisWeekEndISO, todayISO, upcoming])
 
   const currentMonthCount = useMemo(() => {
-    return countAssessmentsInMonth(filtered, monthCursor)
-  }, [filtered, monthCursor])
+    return countAssessmentsInMonth(filtered, activeMonthCursor)
+  }, [filtered, activeMonthCursor])
 
   const grid = useMemo(() => {
-    return buildCalendarGrid(monthCursor)
-  }, [monthCursor])
+    return buildCalendarGrid(activeMonthCursor)
+  }, [activeMonthCursor])
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const monthOptions = Array.from({ length: 12 }, (_, monthIndex) => ({
     value: String(monthIndex),
-    label: new Date(
-      monthCursor.getFullYear(),
-      monthIndex,
-      1,
-    ).toLocaleDateString(undefined, {
-      month: 'long',
-      year: 'numeric',
+    label: formatMonthLabel({
+      year: activeMonthCursor.year,
+      month: monthIndex,
     }),
   }))
 
@@ -113,12 +122,12 @@ function CalendarPage() {
         </div>
       </section>
 
-      <main className="px-6 py-6">
+      <main className="p-6">
         {!isLoaded ? null : !isSignedIn ? (
           <Card className="mx-auto max-w-2xl rounded-2xl border-border/70 py-0">
             <CardContent className="p-10 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                <Calendar className="h-6 w-6 text-foreground/70" />
+              <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+                <Calendar className="size-6 text-foreground/70" />
               </div>
               <div className="mb-1 text-lg font-semibold text-foreground">
                 Sign in to use the calendar
@@ -243,7 +252,7 @@ function CalendarPage() {
                             onClick={() => setOpenDayISO(item.dueDate)}
                             className="flex w-full items-start gap-3 text-left"
                           >
-                            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                            <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" />
                             <span className="min-w-0 flex-1">
                               <span className="block truncate text-sm font-medium text-foreground">
                                 {item.assignmentName?.trim() || 'Assessment'}
@@ -272,7 +281,7 @@ function CalendarPage() {
 
             <Card className="overflow-hidden rounded-2xl border-[#dfe4ea] bg-white py-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
               <CardContent className="p-0">
-                <div className="px-6 py-6">
+                <div className="p-6">
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <h2 className="text-xl font-semibold tracking-tight text-foreground">
@@ -286,19 +295,22 @@ function CalendarPage() {
 
                     <div className="flex flex-wrap items-center gap-3">
                       <Select
-                        value={String(monthCursor.getMonth())}
+                        value={String(activeMonthCursor.month)}
                         onValueChange={(value) => {
                           const nextMonth = Number(value)
                           if (Number.isFinite(nextMonth)) {
                             setMonthCursor(
-                              (d) => new Date(d.getFullYear(), nextMonth, 1),
+                              (d) => ({
+                                year: (d ?? activeMonthCursor).year,
+                                month: nextMonth,
+                              }),
                             )
                           }
                         }}
                       >
                         <SelectTrigger className="h-11 w-48 rounded-xl border-[#dfe4ea] bg-white text-base">
                           <SelectValue
-                            placeholder={formatMonthLabel(monthCursor)}
+                            placeholder={formatMonthLabel(activeMonthCursor)}
                           />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
@@ -312,41 +324,48 @@ function CalendarPage() {
                       <Button
                         variant="outline"
                         size="icon"
-                        className="h-11 w-11 rounded-xl border-[#dfe4ea]"
+                        className="size-11 rounded-xl border-[#dfe4ea]"
                         onClick={() =>
                           setMonthCursor(
-                            (d) =>
-                              new Date(d.getFullYear(), d.getMonth() - 1, 1),
+                            (d) => {
+                              const current = d ?? activeMonthCursor
+                              return current.month === 0
+                                ? { year: current.year - 1, month: 11 }
+                                : { year: current.year, month: current.month - 1 }
+                            },
                           )
                         }
                         aria-label="Previous month"
                         title="Previous month"
                       >
-                        <ChevronLeft className="h-4 w-4" />
+                        <ChevronLeft className="size-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="icon"
-                        className="h-11 w-11 rounded-xl border-[#dfe4ea]"
+                        className="size-11 rounded-xl border-[#dfe4ea]"
                         onClick={() =>
                           setMonthCursor(
-                            (d) =>
-                              new Date(d.getFullYear(), d.getMonth() + 1, 1),
+                            (d) => {
+                              const current = d ?? activeMonthCursor
+                              return current.month === 11
+                                ? { year: current.year + 1, month: 0 }
+                                : { year: current.year, month: current.month + 1 }
+                            },
                           )
                         }
                         aria-label="Next month"
                         title="Next month"
                       >
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="size-4" />
                       </Button>
                       <Button
                         variant="outline"
                         className="h-11 rounded-xl border-[#dfe4ea] px-6 text-base"
                         onClick={() => {
-                          const now = new Date()
-                          setMonthCursor(
-                            new Date(now.getFullYear(), now.getMonth(), 1),
-                          )
+                          if (calendarClock) {
+                            setMonthCursor(calendarClock.currentMonth)
+                          }
                         }}
                         aria-label="Jump to current month"
                         title="Today"
@@ -378,12 +397,12 @@ function CalendarPage() {
                             : false
                           const isMuted =
                             iso !== null &&
-                            parseISODate(iso)?.getMonth() !==
-                              monthCursor.getMonth()
+                                parseISODate(iso)?.getMonth() !==
+                              activeMonthCursor.month
 
                           return (
                             <button
-                              key={`${idx}-${iso ?? 'blank'}`}
+                              key={cell.key}
                               type="button"
                               disabled={!iso}
                               onClick={() => iso && setOpenDayISO(iso)}
@@ -397,7 +416,7 @@ function CalendarPage() {
                               <div className="flex items-center gap-2">
                                 <div
                                   className={cn(
-                                    'flex h-6 w-6 items-center justify-center rounded-full text-sm font-medium',
+                                    'flex size-6 items-center justify-center rounded-full text-sm font-medium',
                                     isToday
                                       ? 'bg-primary text-primary-foreground'
                                       : isMuted
@@ -451,10 +470,12 @@ function CalendarPage() {
 
       {openDayISO && (
         <div
+          role="presentation"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
           onMouseDown={() => setOpenDayISO(null)}
         >
           <div
+            role="presentation"
             className="w-full max-w-lg"
             onMouseDown={(e) => e.stopPropagation()}
           >

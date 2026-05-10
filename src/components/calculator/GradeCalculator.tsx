@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useCallback } from 'react'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { Card, CardContent } from '@/components/ui/card'
@@ -19,6 +19,7 @@ import {
   LETTER_GRADE_THRESHOLDS,
   parseGradeInput,
   sanitizeNumberInput,
+  gradeToRow,
 } from './types'
 
 interface GradeCalculatorProps {
@@ -39,6 +40,8 @@ function generateId() {
   return Math.random().toString(36).substring(2, 9)
 }
 
+const EMPTY_ROW_COUNT = 3
+
 function createEmptyRow(): GradeRow {
   return {
     id: generateId(),
@@ -49,14 +52,168 @@ function createEmptyRow(): GradeRow {
   }
 }
 
+function createEmptyRows(count = EMPTY_ROW_COUNT): GradeRow[] {
+  return Array.from({ length: count }, createEmptyRow)
+}
+
 function matchesDefaultThresholds(thresholds: LetterGradeThreshold[]) {
-  return LETTER_GRADE_THRESHOLDS.every(
-    (threshold, index) =>
-      threshold.letter === thresholds[index]?.letter &&
-      threshold.min === thresholds[index]?.min
+  return (
+    thresholds.length === LETTER_GRADE_THRESHOLDS.length &&
+    LETTER_GRADE_THRESHOLDS.every(
+      (threshold, index) =>
+        threshold.letter === thresholds[index]?.letter &&
+        threshold.min === thresholds[index]?.min
+    )
   )
 }
 
+interface GradeCalculatorState {
+  rows: GradeRow[]
+  targetGrade: string
+  result: CalculationResult | null
+  invalidMessage: string | null
+  localLetterGradeThresholds: LetterGradeThreshold[] | null
+  isEditingScale: boolean
+  scaleDraft: LetterGradeThreshold[]
+  isSavingScale: boolean
+}
+
+type GradeCalculatorAction =
+  | { type: 'clear-course' }
+  | {
+      type: 'load-course'
+      rows: GradeRow[]
+      targetGrade: string
+      result: CalculationResult | null
+    }
+  | { type: 'update-row'; id: string; field: keyof GradeRow; value: string }
+  | { type: 'delete-row'; id: string }
+  | { type: 'add-row' }
+  | { type: 'target-grade-change'; value: string }
+  | { type: 'calculation-error'; message: string }
+  | { type: 'calculation-success'; result: CalculationResult | null }
+  | { type: 'reset' }
+  | { type: 'toggle-scale-editor'; thresholds?: LetterGradeThreshold[] }
+  | { type: 'reset-scale-draft' }
+  | { type: 'update-scale-draft'; index: number; min: number }
+  | { type: 'save-scale-start' }
+  | { type: 'save-scale-success'; localThresholds?: LetterGradeThreshold[] | null }
+  | { type: 'save-scale-end' }
+
+function createInitialGradeCalculatorState(): GradeCalculatorState {
+  return {
+    rows: createEmptyRows(),
+    targetGrade: '80',
+    result: null,
+    invalidMessage: null,
+    localLetterGradeThresholds: null,
+    isEditingScale: false,
+    scaleDraft: [],
+    isSavingScale: false,
+  }
+}
+
+function gradeCalculatorReducer(
+  state: GradeCalculatorState,
+  action: GradeCalculatorAction
+): GradeCalculatorState {
+  switch (action.type) {
+    case 'clear-course':
+      return {
+        ...state,
+        rows: createEmptyRows(),
+        targetGrade: '80',
+        result: null,
+        invalidMessage: null,
+      }
+    case 'load-course':
+      return {
+        ...state,
+        rows: action.rows,
+        targetGrade: action.targetGrade,
+        result: action.result,
+        invalidMessage: null,
+      }
+    case 'update-row':
+      return {
+        ...state,
+        rows: state.rows.map((row) =>
+          row.id === action.id ? { ...row, [action.field]: action.value } : row
+        ),
+        result: null,
+        invalidMessage: null,
+      }
+    case 'delete-row':
+      return {
+        ...state,
+        rows: state.rows.filter((row) => row.id !== action.id),
+        result: null,
+        invalidMessage: null,
+      }
+    case 'add-row':
+      return {
+        ...state,
+        rows: [...state.rows, createEmptyRow()],
+        result: null,
+        invalidMessage: null,
+      }
+    case 'target-grade-change':
+      return {
+        ...state,
+        targetGrade: action.value,
+        result: null,
+        invalidMessage: null,
+      }
+    case 'calculation-error':
+      return { ...state, result: null, invalidMessage: action.message }
+    case 'calculation-success':
+      return { ...state, result: action.result, invalidMessage: null }
+    case 'reset':
+      return {
+        ...state,
+        rows: createEmptyRows(),
+        targetGrade: '80',
+        result: null,
+        invalidMessage: null,
+      }
+    case 'toggle-scale-editor': {
+      if (state.isEditingScale) {
+        return { ...state, isEditingScale: false }
+      }
+      return {
+        ...state,
+        isEditingScale: true,
+        scaleDraft: action.thresholds ?? LETTER_GRADE_THRESHOLDS,
+      }
+    }
+    case 'reset-scale-draft':
+      return { ...state, scaleDraft: LETTER_GRADE_THRESHOLDS }
+    case 'update-scale-draft':
+      return {
+        ...state,
+        scaleDraft: state.scaleDraft.map((threshold, index) =>
+          index === action.index ? { ...threshold, min: action.min } : threshold
+        ),
+      }
+    case 'save-scale-start':
+      return { ...state, isSavingScale: true }
+    case 'save-scale-success':
+      return {
+        ...state,
+        localLetterGradeThresholds:
+          action.localThresholds === undefined
+            ? state.localLetterGradeThresholds
+            : action.localThresholds,
+        result: null,
+        isEditingScale: false,
+        isSavingScale: false,
+      }
+    case 'save-scale-end':
+      return { ...state, isSavingScale: false }
+  }
+}
+
+// oxlint-disable-next-line react-doctor/no-giant-component -- The calculator keeps tightly-coupled form, persistence, and result state together.
 export function GradeCalculator({
   isSignedIn,
   courses,
@@ -67,16 +224,21 @@ export function GradeCalculator({
   onDeleteCourse,
   onUpdateLetterGradeThresholds,
 }: GradeCalculatorProps) {
-  const [rows, setRows] = useState<GradeRow[]>([
-    createEmptyRow(),
-    createEmptyRow(),
-    createEmptyRow(),
-  ])
-  const [targetGrade, setTargetGrade] = useState('80')
-  const [result, setResult] = useState<CalculationResult | null>(null)
-  const [invalidMessage, setInvalidMessage] = useState<string | null>(null)
-  const [localLetterGradeThresholds, setLocalLetterGradeThresholds] =
-    useState<LetterGradeThreshold[] | null>(null)
+  const [state, dispatch] = useReducer(
+    gradeCalculatorReducer,
+    undefined,
+    createInitialGradeCalculatorState
+  )
+  const {
+    rows,
+    targetGrade,
+    result,
+    invalidMessage,
+    localLetterGradeThresholds,
+    isEditingScale,
+    scaleDraft,
+    isSavingScale,
+  } = state
 
   const selectedCourse = useMemo(
     () => (selectedCourseId ? courses.find((c) => c._id === selectedCourseId) ?? null : null),
@@ -118,10 +280,7 @@ export function GradeCalculator({
   useEffect(() => {
     if (!selectedCourseId) {
       lastLoadedCourseIdRef.current = null
-      setRows([createEmptyRow(), createEmptyRow(), createEmptyRow()])
-      setTargetGrade('80')
-      setResult(null)
-      setInvalidMessage(null)
+      dispatch({ type: 'clear-course' })
       return
     }
     if (!selectedCourse) return
@@ -130,27 +289,20 @@ export function GradeCalculator({
 
     lastLoadedCourseIdRef.current = selectedCourseId
 
-    const mapped = [...savedGrades]
+    const mapped = Array.from(savedGrades)
       .sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0))
-      .map((g) => ({
-        id: String(g.clientRowId ?? g._id),
-        assignment: g.assignmentName ?? '',
-        date: g.dueDate ?? '',
-        grade: g.gradeInput ?? String(g.grade ?? ''),
-        weight: g.weightInput ?? String(g.weight ?? ''),
-      }))
+      .map(gradeToRow)
 
-    const nextRows =
-      mapped.length > 0
-        ? mapped
-        : [createEmptyRow(), createEmptyRow(), createEmptyRow()]
+    const nextRows = mapped.length > 0 ? mapped : createEmptyRows()
     const nextTargetGradeValue = selectedCourse.targetGrade ?? 80
     const thresholds = selectedCourse.letterGradeThresholds
 
-    setTargetGrade(String(nextTargetGradeValue))
-    setRows(nextRows)
-    setResult(buildResult(nextRows, nextTargetGradeValue, thresholds))
-    setInvalidMessage(null)
+    dispatch({
+      type: 'load-course',
+      rows: nextRows,
+      targetGrade: String(nextTargetGradeValue),
+      result: buildResult(nextRows, nextTargetGradeValue, thresholds),
+    })
   }, [
     buildResult,
     savedGrades,
@@ -158,14 +310,16 @@ export function GradeCalculator({
     selectedCourseId,
   ])
 
-  const [isEditingScale, setIsEditingScale] = useState(false)
-  const [scaleDraft, setScaleDraft] = useState<LetterGradeThreshold[]>([])
-  const [isSavingScale, setIsSavingScale] = useState(false)
+  const toggleScaleEditor = () => {
+    dispatch({
+      type: 'toggle-scale-editor',
+      thresholds: activeLetterGradeThresholds,
+    })
+  }
 
-  useEffect(() => {
-    if (!isEditingScale) return
-    setScaleDraft(activeLetterGradeThresholds ?? LETTER_GRADE_THRESHOLDS)
-  }, [activeLetterGradeThresholds, isEditingScale])
+  const resetScaleDraft = () => {
+    dispatch({ type: 'reset-scale-draft' })
+  }
 
   const saveTimeoutsRef = useRef<Map<string, number>>(new Map())
   const targetGradeSaveTimeoutsRef = useRef<Map<string, number>>(new Map())
@@ -233,11 +387,7 @@ export function GradeCalculator({
 
   const handleUpdateRow = useCallback(
     (id: string, field: keyof GradeRow, value: string) => {
-      setRows((prev) =>
-        prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
-      )
-      setResult(null)
-      setInvalidMessage(null)
+      dispatch({ type: 'update-row', id, field, value })
 
       scheduleSaveRow(id)
     },
@@ -246,9 +396,7 @@ export function GradeCalculator({
 
   const handleDeleteRow = useCallback(
     (id: string) => {
-      setRows((prev) => prev.filter((row) => row.id !== id))
-      setResult(null)
-      setInvalidMessage(null)
+      dispatch({ type: 'delete-row', id })
 
       if (isSignedIn && selectedCourseId) {
         removeGradeRow({ courseId: selectedCourseId, clientRowId: id }).catch(
@@ -260,9 +408,7 @@ export function GradeCalculator({
   )
 
   const handleAddRow = useCallback(() => {
-    setRows((prev) => [...prev, createEmptyRow()])
-    setResult(null)
-    setInvalidMessage(null)
+    dispatch({ type: 'add-row' })
   }, [])
 
   const handleCalculate = useCallback(() => {
@@ -271,27 +417,23 @@ export function GradeCalculator({
       if (!gradeError) continue
 
       const rowName = row.assignment.trim() || `row ${index + 1}`
-      setResult(null)
-      setInvalidMessage(`Grade for ${rowName} is invalid. ${gradeError}`)
+      dispatch({
+        type: 'calculation-error',
+        message: `Grade for ${rowName} is invalid. ${gradeError}`,
+      })
       return
     }
 
     const targetGradeValue = Number.parseFloat(targetGrade) || 80
-    setInvalidMessage(null)
-    setResult(
-      buildResult(
-        rows,
-        targetGradeValue,
-        activeLetterGradeThresholds
-      )
-    )
+    dispatch({
+      type: 'calculation-success',
+      result: buildResult(rows, targetGradeValue, activeLetterGradeThresholds),
+    })
   }, [activeLetterGradeThresholds, buildResult, rows, targetGrade])
 
   const handleTargetGradeChange = useCallback(
     (value: string) => {
-      setTargetGrade(value)
-      setResult(null)
-      setInvalidMessage(null)
+      dispatch({ type: 'target-grade-change', value })
 
       if (selectedCourseId) {
         scheduleSaveTargetGrade(selectedCourseId, value)
@@ -301,10 +443,7 @@ export function GradeCalculator({
   )
 
   const handleReset = () => {
-    setRows([createEmptyRow(), createEmptyRow(), createEmptyRow()])
-    setTargetGrade('80')
-    setResult(null)
-    setInvalidMessage(null)
+    dispatch({ type: 'reset' })
 
     if (isSignedIn && selectedCourseId) {
       removeGradesByCourse({ courseId: selectedCourseId })
@@ -377,9 +516,9 @@ export function GradeCalculator({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setIsEditingScale((v) => !v)}
+                  onClick={toggleScaleEditor}
                 >
-                  <SlidersHorizontal className="h-4 w-4" />
+                  <SlidersHorizontal className="size-4" />
                   {isEditingScale ? 'Close' : 'Customize'}
                 </Button>
               </div>
@@ -399,13 +538,11 @@ export function GradeCalculator({
                           disabled={t.letter.toUpperCase() === 'F'}
                           onChange={(e) => {
                             const value = Number(sanitizeNumberInput(e.target.value))
-                            setScaleDraft((prev) =>
-                              prev.map((p, i) =>
-                                i === idx
-                                  ? { ...p, min: Number.isFinite(value) ? value : p.min }
-                                  : p
-                              )
-                            )
+                            dispatch({
+                              type: 'update-scale-draft',
+                              index: idx,
+                              min: Number.isFinite(value) ? value : t.min,
+                            })
                           }}
                           className="h-8"
                         />
@@ -417,7 +554,7 @@ export function GradeCalculator({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setScaleDraft(LETTER_GRADE_THRESHOLDS)}
+                      onClick={resetScaleDraft}
                       disabled={isSavingScale}
                     >
                       Reset to default
@@ -425,14 +562,14 @@ export function GradeCalculator({
                     <Button
                       size="sm"
                       onClick={async () => {
-                        const normalized = [...scaleDraft]
-                          .map((t) => ({
-                            letter: t.letter.trim(),
-                            min: Math.max(0, Math.min(100, Number(t.min) || 0)),
-                          }))
-                          .map((t) =>
-                            t.letter.toUpperCase() === 'F' ? { ...t, min: 0 } : t
-                          )
+                        const normalized = scaleDraft.map((t) => {
+                          const letter = t.letter.trim()
+                          const min =
+                            letter.toUpperCase() === 'F'
+                              ? 0
+                              : Math.max(0, Math.min(100, Number(t.min) || 0))
+                          return { letter, min }
+                        })
 
                         const byLetter = new Map(normalized.map((t) => [t.letter, t]))
                         const ordered = LETTER_GRADE_THRESHOLDS.map(
@@ -450,18 +587,20 @@ export function GradeCalculator({
 
                         try {
                           if (isSignedIn && selectedCourseId && onUpdateLetterGradeThresholds) {
-                            setIsSavingScale(true)
+                            dispatch({ type: 'save-scale-start' })
                             await onUpdateLetterGradeThresholds(selectedCourseId, ordered)
+                            dispatch({ type: 'save-scale-success' })
                           } else {
-                            setLocalLetterGradeThresholds(
-                              matchesDefaultThresholds(ordered) ? null : ordered
-                            )
+                            dispatch({
+                              type: 'save-scale-success',
+                              localThresholds: matchesDefaultThresholds(ordered)
+                                ? null
+                                : ordered,
+                            })
                           }
-                          setResult(null)
-                          setIsEditingScale(false)
                         } finally {
                           if (isSignedIn && selectedCourseId && onUpdateLetterGradeThresholds) {
-                            setIsSavingScale(false)
+                            dispatch({ type: 'save-scale-end' })
                           }
                         }
                       }}
@@ -498,7 +637,7 @@ export function GradeCalculator({
                 </div>
 
                 {showRequiredOnRemaining && (
-                  <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 px-4 py-4.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+                  <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 p-4.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
                     <div className="text-[0.72rem] leading-[1.35] font-semibold uppercase tracking-[0.12em] text-primary">
                       Required on remaining
                     </div>
@@ -521,11 +660,11 @@ export function GradeCalculator({
 
             <div className="flex gap-3 pt-1">
               <Button onClick={handleCalculate} className="h-11 flex-1 rounded-xl">
-                <Calculator className="h-4 w-4 mr-2" />
+                <Calculator className="size-4 mr-2" />
                 Calculate
               </Button>
               <Button variant="outline" onClick={handleReset} className="h-11 flex-1 rounded-xl">
-                <RotateCcw className="h-4 w-4 mr-2" />
+                <RotateCcw className="size-4 mr-2" />
                 Reset
               </Button>
             </div>

@@ -8,9 +8,31 @@ export type ScheduleAssessment = {
   createdAt?: number
 }
 
+export type CalendarMonthCursor = {
+  year: number
+  month: number
+}
+
+function getMonthParts(monthCursor: Date | CalendarMonthCursor) {
+  return monthCursor instanceof Date
+    ? { year: monthCursor.getFullYear(), month: monthCursor.getMonth() }
+    : monthCursor
+}
+
 function pad2(n: number) {
   return String(n).padStart(2, '0')
 }
+
+const shortMonthDayFormatter = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+})
+
+const shortDateFormatter = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+})
 
 export function toISODate(d: Date) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
@@ -44,8 +66,12 @@ export function normalizeToISODate(value: string) {
   )
 }
 
-export function formatMonthLabel(d: Date) {
-  return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+export function formatMonthLabel(monthCursor: Date | CalendarMonthCursor) {
+  const { year, month } = getMonthParts(monthCursor)
+  return new Date(year, month, 1).toLocaleDateString(undefined, {
+    month: 'long',
+    year: 'numeric',
+  })
 }
 
 export function formatDayLabel(iso: string) {
@@ -65,17 +91,10 @@ export function formatRangeLabel(startISO: string, endISO: string) {
   if (!start || !end) return `${startISO}–${endISO}`
 
   const sameYear = start.getFullYear() === end.getFullYear()
-  const startFmt = new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: sameYear ? undefined : 'numeric',
-  })
-  const endFmt = new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-  return `${startFmt.format(start)} – ${endFmt.format(end)}`
+  const startLabel = sameYear
+    ? shortMonthDayFormatter.format(start)
+    : shortDateFormatter.format(start)
+  return `${startLabel} – ${shortDateFormatter.format(end)}`
 }
 
 export function getDatePlusDaysISO(
@@ -117,23 +136,24 @@ export function buildUpcomingAssessments<T extends ScheduleAssessment>(
   todayISO: string,
   upcomingEndISO = getDatePlusDaysISO(todayISO, 30)
 ) {
-  return items
-    .map((item) => {
-      const iso = normalizeToISODate(item.dueDate)
-      if (!iso) return null
-      return { ...item, dueDate: iso }
-    })
-    .filter((item): item is T => item !== null)
-    .filter((item) => {
-      if (item.dueDate < todayISO) return false
-      if (item.dueDate > upcomingEndISO) return false
-      return !isCompletedAssessment(item)
-    })
-    .sort((a, b) => {
-      const byDue = String(a.dueDate).localeCompare(String(b.dueDate))
-      if (byDue !== 0) return byDue
-      return (a.createdAt ?? 0) - (b.createdAt ?? 0)
-    })
+  const upcoming: T[] = []
+  for (const item of items) {
+    const iso = normalizeToISODate(item.dueDate)
+    if (!iso) continue
+
+    const normalized = { ...item, dueDate: iso }
+    if (normalized.dueDate < todayISO) continue
+    if (normalized.dueDate > upcomingEndISO) continue
+    if (isCompletedAssessment(normalized)) continue
+
+    upcoming.push(normalized)
+  }
+
+  return upcoming.sort((a, b) => {
+    const byDue = String(a.dueDate).localeCompare(String(b.dueDate))
+    if (byDue !== 0) return byDue
+    return (a.createdAt ?? 0) - (b.createdAt ?? 0)
+  })
 }
 
 export function countDueBetween<T extends ScheduleAssessment>(
@@ -147,29 +167,38 @@ export function countDueBetween<T extends ScheduleAssessment>(
 
 export function countAssessmentsInMonth<T extends ScheduleAssessment>(
   items: T[],
-  monthCursor: Date
+  monthCursor: Date | CalendarMonthCursor
 ) {
-  const monthPrefix = `${monthCursor.getFullYear()}-${pad2(monthCursor.getMonth() + 1)}`
+  const { year, month } = getMonthParts(monthCursor)
+  const monthPrefix = `${year}-${pad2(month + 1)}`
   return items.reduce((count, item) => {
     const iso = normalizeToISODate(item.dueDate)
     return iso?.startsWith(monthPrefix) ? count + 1 : count
   }, 0)
 }
 
-export function buildCalendarGrid(monthCursor: Date) {
-  const year = monthCursor.getFullYear()
-  const month = monthCursor.getMonth()
+export function buildCalendarGrid(monthCursor: Date | CalendarMonthCursor) {
+  const { year, month } = getMonthParts(monthCursor)
 
   const first = new Date(year, month, 1)
   const startOffset = first.getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
 
-  const cells: Array<{ iso: string | null; day: number | null }> = []
-  for (let i = 0; i < startOffset; i++) cells.push({ iso: null, day: null })
+  const cells: Array<{ key: string; iso: string | null; day: number | null }> = []
+  for (let i = 0; i < startOffset; i++) {
+    cells.push({ key: `leading-${year}-${month}-${i}`, iso: null, day: null })
+  }
   for (let day = 1; day <= daysInMonth; day++) {
     const dt = new Date(year, month, day)
-    cells.push({ iso: toISODate(dt), day })
+    const iso = toISODate(dt)
+    cells.push({ key: iso, iso, day })
   }
-  while (cells.length % 7 !== 0) cells.push({ iso: null, day: null })
+  while (cells.length % 7 !== 0) {
+    cells.push({
+      key: `trailing-${year}-${month}-${cells.length}`,
+      iso: null,
+      day: null,
+    })
+  }
   return cells
 }

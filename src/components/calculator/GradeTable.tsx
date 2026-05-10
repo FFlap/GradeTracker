@@ -45,7 +45,7 @@ export function GradeTable({
         onClick={onAddRow}
         className="w-full rounded-xl border-dashed border-border/75 bg-card/80 hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
       >
-        <Plus className="h-4 w-4 mr-2" />
+        <Plus className="size-4 mr-2" />
         Add row
       </Button>
     </div>

@@ -42,11 +42,15 @@ export const add = mutation({
         .query('semesters')
         .withIndex('by_user', (q) => q.eq('userId', identity.subject))
         .collect()
+      const patches = []
       for (const sem of existing) {
         if (sem.isCurrent || sem.status === 'in_progress') {
-          await ctx.db.patch(sem._id, { isCurrent: false, status: 'completed' })
+          patches.push(
+            ctx.db.patch(sem._id, { isCurrent: false, status: 'completed' })
+          )
         }
       }
+      await Promise.all(patches)
     }
 
     return await ctx.db.insert('semesters', {
@@ -81,22 +85,28 @@ export const setCurrent = mutation({
     if (!identity) {
       throw new Error('Not authenticated')
     }
-    const semester = await ctx.db.get(args.id)
+    const [semester, existing] = await Promise.all([
+      ctx.db.get(args.id),
+      ctx.db
+        .query('semesters')
+        .withIndex('by_user', (q) => q.eq('userId', identity.subject))
+        .collect(),
+    ])
     if (!semester || semester.userId !== identity.subject) {
       throw new Error('Semester not found')
     }
 
-    const existing = await ctx.db
-      .query('semesters')
-      .withIndex('by_user', (q) => q.eq('userId', identity.subject))
-      .collect()
+    const patches = []
     for (const sem of existing) {
       if (sem._id === args.id) continue
       if (sem.isCurrent || sem.status === 'in_progress') {
-        await ctx.db.patch(sem._id, { isCurrent: false, status: 'completed' })
+        patches.push(
+          ctx.db.patch(sem._id, { isCurrent: false, status: 'completed' })
+        )
       }
     }
-    await ctx.db.patch(args.id, { isCurrent: true, status: 'in_progress' })
+    patches.push(ctx.db.patch(args.id, { isCurrent: true, status: 'in_progress' }))
+    await Promise.all(patches)
   },
 })
 
@@ -107,7 +117,13 @@ export const updateStatus = mutation({
     if (!identity) {
       throw new Error('Not authenticated')
     }
-    const semester = await ctx.db.get(args.id)
+    const [semester, existing] = await Promise.all([
+      ctx.db.get(args.id),
+      ctx.db
+        .query('semesters')
+        .withIndex('by_user', (q) => q.eq('userId', identity.subject))
+        .collect(),
+    ])
     if (!semester || semester.userId !== identity.subject) {
       throw new Error('Semester not found')
     }
@@ -118,17 +134,17 @@ export const updateStatus = mutation({
     }
 
     if (args.status === 'in_progress') {
-      const existing = await ctx.db
-        .query('semesters')
-        .withIndex('by_user', (q) => q.eq('userId', identity.subject))
-        .collect()
+      const patches = []
       for (const sem of existing) {
         if (sem._id === args.id) continue
         if (sem.isCurrent || sem.status === 'in_progress') {
-          await ctx.db.patch(sem._id, { isCurrent: false, status: 'completed' })
+          patches.push(
+            ctx.db.patch(sem._id, { isCurrent: false, status: 'completed' })
+          )
         }
       }
-      await ctx.db.patch(args.id, { status: 'in_progress', isCurrent: true })
+      patches.push(ctx.db.patch(args.id, { status: 'in_progress', isCurrent: true }))
+      await Promise.all(patches)
       return
     }
 
@@ -143,31 +159,37 @@ export const remove = mutation({
     if (!identity) {
       throw new Error('Not authenticated')
     }
-    const semester = await ctx.db.get(args.id)
+    const [semester, courses] = await Promise.all([
+      ctx.db.get(args.id),
+      ctx.db
+        .query('courses')
+        .withIndex('by_semester', (q) => q.eq('semesterId', args.id))
+        .collect(),
+    ])
     if (!semester || semester.userId !== identity.subject) {
       throw new Error('Semester not found')
     }
 
-    const courses = await ctx.db
-      .query('courses')
-      .withIndex('by_semester', (q) => q.eq('semesterId', args.id))
-      .collect()
-
+    const courseDeletes = []
     for (const course of courses) {
       if (course.userId !== identity.subject) continue
-
-      const grades = await ctx.db
-        .query('grades')
-        .withIndex('by_course', (q) => q.eq('courseId', course._id))
-        .collect()
-      for (const grade of grades) {
-        if (grade.userId === identity.subject) {
-          await ctx.db.delete(grade._id)
-        }
-      }
-
-      await ctx.db.delete(course._id)
+      courseDeletes.push(
+        (async () => {
+          const grades = await ctx.db
+            .query('grades')
+            .withIndex('by_course', (q) => q.eq('courseId', course._id))
+            .collect()
+          const deletes = [ctx.db.delete(course._id)]
+          for (const grade of grades) {
+            if (grade.userId === identity.subject) {
+              deletes.push(ctx.db.delete(grade._id))
+            }
+          }
+          await Promise.all(deletes)
+        })()
+      )
     }
+    await Promise.all(courseDeletes)
 
     if (semester.isCurrent) {
       const remaining = await ctx.db
@@ -193,22 +215,22 @@ export const overview = query({
       return { semesters: [], courses: [], grades: [] }
     }
 
-    const semesters = await ctx.db
-      .query('semesters')
-      .withIndex('by_user', (q) => q.eq('userId', identity.subject))
-      .order('desc')
-      .collect()
-
-    const courses = await ctx.db
-      .query('courses')
-      .withIndex('by_user', (q) => q.eq('userId', identity.subject))
-      .order('desc')
-      .collect()
-
-    const grades = await ctx.db
-      .query('grades')
-      .withIndex('by_user', (q) => q.eq('userId', identity.subject))
-      .collect()
+    const [semesters, courses, grades] = await Promise.all([
+      ctx.db
+        .query('semesters')
+        .withIndex('by_user', (q) => q.eq('userId', identity.subject))
+        .order('desc')
+        .collect(),
+      ctx.db
+        .query('courses')
+        .withIndex('by_user', (q) => q.eq('userId', identity.subject))
+        .order('desc')
+        .collect(),
+      ctx.db
+        .query('grades')
+        .withIndex('by_user', (q) => q.eq('userId', identity.subject))
+        .collect(),
+    ])
 
     return { semesters, courses, grades }
   },

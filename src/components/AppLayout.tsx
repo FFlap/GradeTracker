@@ -9,23 +9,22 @@ interface AppLayoutProps {
 }
 
 function ShellLayout({ children }: { children: React.ReactNode }) {
-  const location = useLocation()
+  const routerLocation = useLocation()
   const navigate = useNavigate()
   const { isLoaded, isSignedIn } = useUser()
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.localStorage.getItem('sidebarCollapsed') === '1'
+  )
   const [isNarrowViewport, setIsNarrowViewport] = useState(false)
 
   // Redirect signed-in users from / to /grade-calculator
   useEffect(() => {
-    if (isLoaded && isSignedIn && location.pathname === '/') {
+    if (isLoaded && isSignedIn && routerLocation.pathname === '/') {
       navigate({ to: '/grade-calculator' })
     }
-  }, [isLoaded, isSignedIn, location.pathname, navigate])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    setSidebarCollapsed(window.localStorage.getItem('sidebarCollapsed') === '1')
-  }, [])
+  }, [isLoaded, isSignedIn, routerLocation.pathname, navigate])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -42,7 +41,7 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
   }, [sidebarCollapsed])
 
   // Don't render content during redirect
-  if (isLoaded && isSignedIn && location.pathname === '/') {
+  if (isLoaded && isSignedIn && routerLocation.pathname === '/') {
     return null
   }
 

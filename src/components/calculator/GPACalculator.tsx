@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useReducer, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -92,13 +92,14 @@ export function calculateGPAResult(
 ): GPAResult | null {
   let totalPoints = 0
   let totalCredits = 0
+  const pointsByLetter = new Map(
+    gpaScale.map((entry) => [entry.letter, entry.points])
+  )
 
   for (const course of courses) {
     const creditsInput = course.credits.trim()
     const credits = creditsInput === '' ? 3 : parseFloat(creditsInput)
-    const gradePoints = gpaScale.find(
-      (entry) => entry.letter === course.grade
-    )?.points
+    const gradePoints = pointsByLetter.get(course.grade)
 
     if (isNaN(credits) || credits <= 0 || gradePoints === undefined) continue
 
@@ -115,80 +116,164 @@ export function calculateGPAResult(
   }
 }
 
+interface GPACalculatorState {
+  courses: CourseEntry[]
+  gpaScale: GPAScaleEntry[]
+  scaleDraft: GPAScaleDraftEntry[]
+  isEditingScale: boolean
+  result: GPAResult | null
+  error: string | null
+}
+
+type GPACalculatorAction =
+  | { type: 'update-course'; id: string; field: keyof CourseEntry; value: string }
+  | { type: 'delete-course'; id: string }
+  | { type: 'add-course' }
+  | { type: 'calculation-success'; result: GPAResult }
+  | { type: 'calculation-error'; message: string }
+  | { type: 'reset-courses' }
+  | { type: 'toggle-scale-editor' }
+  | { type: 'update-scale-draft'; index: number; points: string }
+  | { type: 'save-scale' }
+  | { type: 'reset-scale' }
+
+function createInitialGPACalculatorState(): GPACalculatorState {
+  return {
+    courses: [createEmptyCourse(), createEmptyCourse(), createEmptyCourse()],
+    gpaScale: DEFAULT_GPA_SCALE,
+    scaleDraft: createScaleDraft(DEFAULT_GPA_SCALE),
+    isEditingScale: false,
+    result: null,
+    error: null,
+  }
+}
+
+function gpaCalculatorReducer(
+  state: GPACalculatorState,
+  action: GPACalculatorAction
+): GPACalculatorState {
+  switch (action.type) {
+    case 'update-course':
+      return {
+        ...state,
+        courses: state.courses.map((course) =>
+          course.id === action.id
+            ? { ...course, [action.field]: action.value }
+            : course
+        ),
+        result: null,
+        error: null,
+      }
+    case 'delete-course':
+      return {
+        ...state,
+        courses: state.courses.filter((course) => course.id !== action.id),
+        result: null,
+        error: null,
+      }
+    case 'add-course':
+      return {
+        ...state,
+        courses: [...state.courses, createEmptyCourse()],
+        error: null,
+      }
+    case 'calculation-success':
+      return { ...state, result: action.result, error: null }
+    case 'calculation-error':
+      return { ...state, result: null, error: action.message }
+    case 'reset-courses':
+      return {
+        ...state,
+        courses: [createEmptyCourse(), createEmptyCourse(), createEmptyCourse()],
+        result: null,
+        error: null,
+      }
+    case 'toggle-scale-editor':
+      return {
+        ...state,
+        scaleDraft: createScaleDraft(state.gpaScale),
+        isEditingScale: !state.isEditingScale,
+      }
+    case 'update-scale-draft':
+      return {
+        ...state,
+        scaleDraft: state.scaleDraft.map((draft, index) =>
+          index === action.index ? { ...draft, points: action.points } : draft
+        ),
+      }
+    case 'save-scale':
+      return {
+        ...state,
+        gpaScale: createValidatedGPAScale(state.scaleDraft),
+        isEditingScale: false,
+        result: null,
+        error: null,
+      }
+    case 'reset-scale':
+      return {
+        ...state,
+        gpaScale: DEFAULT_GPA_SCALE,
+        scaleDraft: createScaleDraft(DEFAULT_GPA_SCALE),
+        result: null,
+        error: null,
+      }
+  }
+}
+
 export function GPACalculator() {
-  const [courses, setCourses] = useState<CourseEntry[]>([
-    createEmptyCourse(),
-    createEmptyCourse(),
-    createEmptyCourse(),
-  ])
-  const [gpaScale, setGpaScale] = useState<GPAScaleEntry[]>(DEFAULT_GPA_SCALE)
-  const [scaleDraft, setScaleDraft] = useState<GPAScaleDraftEntry[]>(
-    createScaleDraft(DEFAULT_GPA_SCALE)
+  const [state, dispatch] = useReducer(
+    gpaCalculatorReducer,
+    undefined,
+    createInitialGPACalculatorState
   )
-  const [isEditingScale, setIsEditingScale] = useState(false)
-  const [result, setResult] = useState<GPAResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const { courses, gpaScale, scaleDraft, isEditingScale, result, error } = state
 
   const handleUpdateCourse = useCallback(
     (id: string, field: keyof CourseEntry, value: string) => {
-      setCourses((prev) =>
-        prev.map((course) =>
-          course.id === id ? { ...course, [field]: value } : course
-        )
-      )
-      setResult(null)
-      setError(null)
+      dispatch({ type: 'update-course', id, field, value })
     },
     []
   )
 
   const handleDeleteCourse = useCallback((id: string) => {
-    setCourses((prev) => prev.filter((course) => course.id !== id))
-    setResult(null)
-    setError(null)
+    dispatch({ type: 'delete-course', id })
   }, [])
 
   const handleAddCourse = useCallback(() => {
-    setCourses((prev) => [...prev, createEmptyCourse()])
-    setError(null)
+    dispatch({ type: 'add-course' })
   }, [])
 
   const handleCalculate = () => {
     const nextResult = calculateGPAResult(courses, gpaScale)
 
     if (!nextResult) {
-      setResult(null)
-      setError('Select a letter grade for at least one course.')
+      dispatch({
+        type: 'calculation-error',
+        message: 'Select a letter grade for at least one course.',
+      })
       return
     }
 
-    setError(null)
-    setResult(nextResult)
+    dispatch({ type: 'calculation-success', result: nextResult })
   }
 
   const handleReset = () => {
-    setCourses([createEmptyCourse(), createEmptyCourse(), createEmptyCourse()])
-    setResult(null)
-    setError(null)
+    dispatch({ type: 'reset-courses' })
   }
 
   const handleSaveScale = () => {
-    setGpaScale(createValidatedGPAScale(scaleDraft))
-    setIsEditingScale(false)
-    setResult(null)
-    setError(null)
+    dispatch({ type: 'save-scale' })
   }
 
   const handleResetScale = () => {
-    setGpaScale(DEFAULT_GPA_SCALE)
-    setScaleDraft(createScaleDraft(DEFAULT_GPA_SCALE))
-    setResult(null)
-    setError(null)
+    dispatch({ type: 'reset-scale' })
   }
 
-  const isDefaultScale = gpaScale.every(
-    (entry, index) => entry.points === DEFAULT_GPA_SCALE[index]?.points
-  )
+  const isDefaultScale =
+    gpaScale.length === DEFAULT_GPA_SCALE.length &&
+    gpaScale.every(
+      (entry, index) => entry.points === DEFAULT_GPA_SCALE[index]?.points
+    )
 
   const getGPAColor = (gpa: number) => {
     if (gpa >= 3.7) return 'text-primary'
@@ -222,12 +307,9 @@ export function GPACalculator() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  setScaleDraft(createScaleDraft(gpaScale))
-                  setIsEditingScale((value) => !value)
-                }}
+                onClick={() => dispatch({ type: 'toggle-scale-editor' })}
               >
-                <SlidersHorizontal className="h-4 w-4" />
+                <SlidersHorizontal className="size-4" />
                 {isEditingScale ? 'Close' : 'Customize'}
               </Button>
             </div>
@@ -246,11 +328,7 @@ export function GPACalculator() {
                         value={entry.points}
                         onChange={(event) => {
                           const points = sanitizeNumberInput(event.target.value)
-                          setScaleDraft((prev) =>
-                            prev.map((draft, draftIndex) =>
-                              draftIndex === index ? { ...draft, points } : draft
-                            )
-                          )
+                          dispatch({ type: 'update-scale-draft', index, points })
                         }}
                         className="h-8 rounded-lg"
                       />
@@ -273,7 +351,7 @@ export function GPACalculator() {
           {result && (
             <div className="border-t border-border/70 pt-6">
               <div className="space-y-4">
-                <div className="rounded-xl border border-primary/15 bg-primary/5 px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+                <div className="rounded-xl border border-primary/15 bg-primary/5 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
                   <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-primary">
                     GPA
                   </div>
@@ -312,11 +390,11 @@ export function GPACalculator() {
 
           <div className="flex gap-3 pt-1">
             <Button onClick={handleCalculate} className="h-11 flex-1 rounded-xl">
-              <Calculator className="h-4 w-4 mr-2" />
+              <Calculator className="size-4 mr-2" />
               Calculate
             </Button>
             <Button variant="outline" onClick={handleReset} className="h-11 flex-1 rounded-xl">
-              <RotateCcw className="h-4 w-4 mr-2" />
+              <RotateCcw className="size-4 mr-2" />
               Reset
             </Button>
           </div>
@@ -401,7 +479,7 @@ export function GPACalculator() {
                       }`}
                       disabled={courses.length <= 1}
                     >
-                      <X className="h-4 w-4" />
+                      <X className="size-4" />
                     </Button>
                   </div>
                 ))}
@@ -414,7 +492,7 @@ export function GPACalculator() {
                 onClick={handleAddCourse}
                 className="h-11 w-full rounded-xl border-dashed border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="size-4 mr-2" />
                 Add course
               </Button>
             </div>

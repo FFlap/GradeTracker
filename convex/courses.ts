@@ -148,9 +148,7 @@ export const remove = mutation({
         q.eq('userId', identity.subject).eq('courseId', args.id)
       )
       .collect()
-    for (const grade of grades) {
-      await ctx.db.delete(grade._id)
-    }
+    await Promise.all(grades.map((grade) => ctx.db.delete(grade._id)))
 
     return await ctx.db.delete(args.id)
   },

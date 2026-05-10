@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery, useMutation } from 'convex/react'
+import { useQuery } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { useState } from 'react'
 import { useUser } from '@clerk/clerk-react'
 import { GradeCalculator } from '@/components/calculator/GradeCalculator'
 import type { Course, LetterGradeThreshold } from '@/components/calculator/types'
+import { useCourseMutations } from '@/hooks/useCourseMutations'
 
 export const Route = createFileRoute('/grade-calculator/')({
   component: GradeCalculatorPage,
@@ -16,10 +17,12 @@ function GradeCalculatorPage() {
 
   const coursesData = useQuery(api.courses.list)
   const courses = (coursesData ?? []) as Course[]
-  const addCourse = useMutation(api.courses.add)
-  const updateCourseName = useMutation(api.courses.updateName)
-  const updateLetterGradeThresholds = useMutation(api.courses.updateLetterGradeThresholds)
-  const removeCourse = useMutation(api.courses.remove)
+  const {
+    addCourse,
+    updateCourseName,
+    updateLetterGradeThresholds,
+    removeCourse,
+  } = useCourseMutations()
 
   const handleCreateCourse = async (name: string) => {
     const courseId = await addCourse({ name })
@@ -27,18 +30,18 @@ function GradeCalculatorPage() {
   }
 
   const handleRenameCourse = async (courseId: Course['_id'], name: string) => {
-    await updateCourseName({ id: courseId, name })
+    await updateCourseName(courseId, name)
   }
 
   const handleUpdateThresholds = async (
     courseId: Course['_id'],
     thresholds: LetterGradeThreshold[]
   ) => {
-    await updateLetterGradeThresholds({ id: courseId, thresholds })
+    await updateLetterGradeThresholds(courseId, thresholds)
   }
 
   const handleDeleteCourse = async (courseId: Course['_id']) => {
-    await removeCourse({ id: courseId })
+    await removeCourse(courseId)
     setSelectedCourseId((prev) => (prev === courseId ? null : prev))
   }
 

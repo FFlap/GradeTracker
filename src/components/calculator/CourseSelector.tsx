@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useReducer, useRef } from 'react'
 import { SignInButton } from '@clerk/clerk-react'
 import {
   Select,
@@ -23,7 +23,77 @@ interface CourseSelectorProps {
   onDeleteCourse?: (courseId: Course['_id']) => void | Promise<void>
 }
 
+type CourseSelectorMode = 'select' | 'creating' | 'editing'
+
+interface CourseSelectorState {
+  mode: CourseSelectorMode
+  newCourseName: string
+  editedCourseName: string
+  isWorking: boolean
+  isManageOpen: boolean
+}
+
+type CourseSelectorAction =
+  | { type: 'set-mode'; mode: CourseSelectorMode }
+  | { type: 'set-new-course-name'; value: string }
+  | { type: 'set-edited-course-name'; value: string }
+  | { type: 'set-working'; value: boolean }
+  | { type: 'set-manage-open'; value: boolean }
+  | { type: 'create-success' }
+  | { type: 'rename-success' }
+  | { type: 'delete-success' }
+
+const initialCourseSelectorState: CourseSelectorState = {
+  mode: 'select',
+  newCourseName: '',
+  editedCourseName: '',
+  isWorking: false,
+  isManageOpen: false,
+}
+
+function courseSelectorReducer(
+  state: CourseSelectorState,
+  action: CourseSelectorAction
+): CourseSelectorState {
+  switch (action.type) {
+    case 'set-mode':
+      return { ...state, mode: action.mode }
+    case 'set-new-course-name':
+      return { ...state, newCourseName: action.value }
+    case 'set-edited-course-name':
+      return { ...state, editedCourseName: action.value }
+    case 'set-working':
+      return { ...state, isWorking: action.value }
+    case 'set-manage-open':
+      return { ...state, isManageOpen: action.value }
+    case 'create-success':
+      return {
+        ...state,
+        mode: 'select',
+        newCourseName: '',
+        isManageOpen: false,
+      }
+    case 'rename-success':
+      return { ...state, mode: 'select', isManageOpen: false }
+    case 'delete-success':
+      return { ...state, isManageOpen: false }
+  }
+}
+
 export function CourseSelector({
+  isSignedIn,
+  ...props
+}: CourseSelectorProps) {
+  return (
+    <CourseSelectorInner
+      key={isSignedIn ? 'signed-in' : 'signed-out'}
+      isSignedIn={isSignedIn}
+      {...props}
+    />
+  )
+}
+
+function CourseSelectorInner({
   isSignedIn,
   courses,
   selectedCourseId,
@@ -32,35 +102,25 @@ export function CourseSelector({
   onRenameCourse,
   onDeleteCourse,
 }: CourseSelectorProps) {
-  const [isCreating, setIsCreating] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const [newCourseName, setNewCourseName] = useState('')
-  const [editedCourseName, setEditedCourseName] = useState('')
-  const [isWorking, setIsWorking] = useState(false)
-  const [isManageOpen, setIsManageOpen] = useState(false)
+  const [state, dispatch] = useReducer(
+    courseSelectorReducer,
+    initialCourseSelectorState
+  )
   const manageMenuRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
-    if (isSignedIn) return
-    setIsCreating(false)
-    setIsEditing(false)
-    setIsManageOpen(false)
-    setNewCourseName('')
-    setEditedCourseName('')
-    setIsWorking(false)
-  }, [isSignedIn])
-
-  useEffect(() => {
-    if (!isManageOpen) return
+    if (!state.isManageOpen) return
 
     const handlePointerDown = (event: MouseEvent) => {
       if (!manageMenuRef.current?.contains(event.target as Node)) {
-        setIsManageOpen(false)
+        dispatch({ type: 'set-manage-open', value: false })
       }
     }
 
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsManageOpen(false)
+      if (event.key === 'Escape') {
+        dispatch({ type: 'set-manage-open', value: false })
+      }
     }
 
     window.addEventListener('mousedown', handlePointerDown)
@@ -69,39 +129,36 @@ export function CourseSelector({
       window.removeEventListener('mousedown', handlePointerDown)
       window.removeEventListener('keydown', handleEscape)
     }
-  }, [isManageOpen])
+  }, [state.isManageOpen])
 
   const selectedCourse =
     selectedCourseId ? courses.find((c) => c._id === selectedCourseId) : null
 
   const handleCreateCourse = async () => {
     if (!isSignedIn) return
-    const name = newCourseName.trim()
+    const name = state.newCourseName.trim()
     if (!name) return
 
     try {
-      setIsWorking(true)
+      dispatch({ type: 'set-working', value: true })
       await onCreateCourse(name)
-      setNewCourseName('')
-      setIsCreating(false)
-      setIsManageOpen(false)
+      dispatch({ type: 'create-success' })
     } finally {
-      setIsWorking(false)
+      dispatch({ type: 'set-working', value: false })
     }
   }
 
   const handleRenameCourse = async () => {
     if (!isSignedIn) return
-    const name = editedCourseName.trim()
+    const name = state.editedCourseName.trim()
     if (!selectedCourseId || !name || !onRenameCourse) return
 
     try {
-      setIsWorking(true)
+      dispatch({ type: 'set-working', value: true })
       await onRenameCourse(selectedCourseId, name)
-      setIsEditing(false)
-      setIsManageOpen(false)
+      dispatch({ type: 'rename-success' })
     } finally {
-      setIsWorking(false)
+      dispatch({ type: 'set-working', value: false })
     }
   }
 
@@ -117,80 +174,82 @@ export function CourseSelector({
     }
 
     try {
-      setIsWorking(true)
+      dispatch({ type: 'set-working', value: true })
       await onDeleteCourse(selectedCourseId)
       onSelectCourse(null)
-      setIsManageOpen(false)
+      dispatch({ type: 'delete-success' })
     } finally {
-      setIsWorking(false)
+      dispatch({ type: 'set-working', value: false })
     }
   }
 
-  if (isCreating) {
+  if (state.mode === 'creating') {
     return (
       <div className="flex gap-2">
         <Input
           type="text"
           placeholder="Course name (e.g. Math 101)"
-          value={newCourseName}
-          onChange={(e) => setNewCourseName(e.target.value)}
+          value={state.newCourseName}
+          onChange={(e) =>
+            dispatch({ type: 'set-new-course-name', value: e.target.value })
+          }
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleCreateCourse()
-            if (e.key === 'Escape') setIsCreating(false)
+            if (e.key === 'Escape') dispatch({ type: 'set-mode', mode: 'select' })
           }}
           className="flex-1"
-          autoFocus
         />
         <Button
           size="icon"
           onClick={handleCreateCourse}
-          disabled={!newCourseName.trim() || isWorking}
+          disabled={!state.newCourseName.trim() || state.isWorking}
         >
-          <Check className="h-4 w-4" />
+          <Check className="size-4" />
         </Button>
         <Button
           variant="outline"
           size="icon"
-          onClick={() => setIsCreating(false)}
-          disabled={isWorking}
+          onClick={() => dispatch({ type: 'set-mode', mode: 'select' })}
+          disabled={state.isWorking}
         >
           <span className="sr-only">Cancel</span>
-          <X className="h-4 w-4" />
+          <X className="size-4" />
         </Button>
       </div>
     )
   }
 
-  if (isEditing) {
+  if (state.mode === 'editing') {
     return (
       <div className="flex gap-2">
         <Input
           type="text"
           placeholder="Course name (e.g. Math 101)"
-          value={editedCourseName}
-          onChange={(e) => setEditedCourseName(e.target.value)}
+          value={state.editedCourseName}
+          onChange={(e) =>
+            dispatch({ type: 'set-edited-course-name', value: e.target.value })
+          }
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleRenameCourse()
-            if (e.key === 'Escape') setIsEditing(false)
+            if (e.key === 'Escape') dispatch({ type: 'set-mode', mode: 'select' })
           }}
           className="flex-1"
-          autoFocus
         />
         <Button
           size="icon"
           onClick={handleRenameCourse}
-          disabled={!editedCourseName.trim() || isWorking}
+          disabled={!state.editedCourseName.trim() || state.isWorking}
         >
-          <Check className="h-4 w-4" />
+          <Check className="size-4" />
         </Button>
         <Button
           variant="outline"
           size="icon"
-          onClick={() => setIsEditing(false)}
-          disabled={isWorking}
+          onClick={() => dispatch({ type: 'set-mode', mode: 'select' })}
+          disabled={state.isWorking}
         >
           <span className="sr-only">Cancel</span>
-          <X className="h-4 w-4" />
+          <X className="size-4" />
         </Button>
       </div>
     )
@@ -203,7 +262,7 @@ export function CourseSelector({
         onValueChange={(value) =>
           onSelectCourse(value === 'none' ? null : (value as Course['_id']))
         }
-        disabled={!isSignedIn || isWorking}
+        disabled={!isSignedIn || state.isWorking}
       >
         <SelectTrigger
           className={cn(
@@ -234,28 +293,33 @@ export function CourseSelector({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setIsManageOpen((open) => !open)}
-            disabled={isWorking}
-            aria-expanded={isManageOpen}
+            onClick={() =>
+              dispatch({
+                type: 'set-manage-open',
+                value: !state.isManageOpen,
+              })
+            }
+            disabled={state.isWorking}
+            aria-expanded={state.isManageOpen}
             aria-haspopup="menu"
             className="min-w-[7rem] justify-center gap-1.5 text-primary"
           >
-            <MoreHorizontal className="h-4 w-4" />
+            <MoreHorizontal className="size-4" />
             Manage
           </Button>
 
-          {isManageOpen && (
+          {state.isManageOpen && (
             <div className="absolute right-0 top-[calc(100%+0.5rem)] z-30 w-[12.75rem] rounded-xl border border-border/80 bg-card p-1.5 shadow-[0_14px_30px_rgba(15,23,42,0.1)]">
               <button
                 type="button"
                 onClick={() => {
-                  setIsManageOpen(false)
-                  setIsCreating(true)
+                  dispatch({ type: 'set-manage-open', value: false })
+                  dispatch({ type: 'set-mode', mode: 'creating' })
                 }}
-                className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent/35"
+                className="flex w-full items-center gap-2.5 rounded-lg p-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent/35"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Plus className="h-4 w-4" />
+                <span className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Plus className="size-4" />
                 </span>
                 <span className="font-medium">Add course</span>
               </button>
@@ -264,15 +328,18 @@ export function CourseSelector({
                 type="button"
                 onClick={() => {
                   if (!selectedCourseId || !onRenameCourse) return
-                  setEditedCourseName(selectedCourse?.name ?? '')
-                  setIsEditing(true)
-                  setIsManageOpen(false)
+                  dispatch({
+                    type: 'set-edited-course-name',
+                    value: selectedCourse?.name ?? '',
+                  })
+                  dispatch({ type: 'set-mode', mode: 'editing' })
+                  dispatch({ type: 'set-manage-open', value: false })
                 }}
-                disabled={!selectedCourseId || !onRenameCourse || isWorking}
-                className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent/35 disabled:pointer-events-none disabled:opacity-45"
+                disabled={!selectedCourseId || !onRenameCourse || state.isWorking}
+                className="flex w-full items-center gap-2.5 rounded-lg p-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent/35 disabled:pointer-events-none disabled:opacity-45"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Pencil className="h-4 w-4" />
+                <span className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Pencil className="size-4" />
                 </span>
                 <span className="font-medium">Rename course</span>
               </button>
@@ -280,11 +347,11 @@ export function CourseSelector({
               <button
                 type="button"
                 onClick={handleDeleteCourse}
-                disabled={!selectedCourseId || !onDeleteCourse || isWorking}
-                className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left text-sm text-destructive transition-colors hover:bg-destructive/6 disabled:pointer-events-none disabled:opacity-45"
+                disabled={!selectedCourseId || !onDeleteCourse || state.isWorking}
+                className="flex w-full items-center gap-2.5 rounded-lg p-2.5 text-left text-sm text-destructive transition-colors hover:bg-destructive/6 disabled:pointer-events-none disabled:opacity-45"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-                  <Trash2 className="h-4 w-4" />
+                <span className="flex size-8 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                  <Trash2 className="size-4" />
                 </span>
                 <span className="font-medium">Delete course</span>
               </button>
@@ -296,10 +363,10 @@ export function CourseSelector({
           <Button
             variant="outline"
             size="sm"
-            disabled={isWorking}
+            disabled={state.isWorking}
             className="min-w-[7rem] justify-center gap-1.5 text-primary"
           >
-            <MoreHorizontal className="h-4 w-4" />
+            <MoreHorizontal className="size-4" />
             Manage
           </Button>
         </SignInButton>

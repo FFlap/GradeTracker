@@ -7,6 +7,7 @@ import {
   type GradeRow,
   type LetterGradeThreshold,
   type Semester,
+  gradeToRow,
 } from '@/components/calculator/types'
 
 export const DEFAULT_LETTER_TO_GPA: Record<string, number> = {
@@ -71,13 +72,7 @@ export function getCourseCredits(course: Course) {
 }
 
 export function buildCourseRowsForCalc(courseGrades: Grade[]): GradeRow[] {
-  return courseGrades.map((grade) => ({
-    id: String(grade.clientRowId ?? grade._id),
-    assignment: grade.assignmentName ?? '',
-    date: grade.dueDate ?? '',
-    grade: grade.gradeInput ?? String(grade.grade ?? ''),
-    weight: grade.weightInput ?? String(grade.weight ?? ''),
-  }))
+  return courseGrades.map(gradeToRow)
 }
 
 export function calculateCoursePercent(

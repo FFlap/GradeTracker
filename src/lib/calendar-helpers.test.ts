@@ -156,22 +156,22 @@ describe('schedule calendar grid', () => {
 
     expect(grid).toHaveLength(42)
     expect(grid.slice(0, 5)).toEqual([
-      { iso: null, day: null },
-      { iso: null, day: null },
-      { iso: null, day: null },
-      { iso: null, day: null },
-      { iso: null, day: null },
+      { key: 'leading-2026-4-0', iso: null, day: null },
+      { key: 'leading-2026-4-1', iso: null, day: null },
+      { key: 'leading-2026-4-2', iso: null, day: null },
+      { key: 'leading-2026-4-3', iso: null, day: null },
+      { key: 'leading-2026-4-4', iso: null, day: null },
     ])
-    expect(grid[5]).toEqual({ iso: '2026-05-01', day: 1 })
-    expect(grid[35]).toEqual({ iso: '2026-05-31', day: 31 })
-    expect(grid[41]).toEqual({ iso: null, day: null })
+    expect(grid[5]).toEqual({ key: '2026-05-01', iso: '2026-05-01', day: 1 })
+    expect(grid[35]).toEqual({ key: '2026-05-31', iso: '2026-05-31', day: 31 })
+    expect(grid[41]).toEqual({ key: 'trailing-2026-4-41', iso: null, day: null })
   })
 
   it('builds a 28-cell grid for February 2026 when the month fits exactly four weeks', () => {
     const grid = buildCalendarGrid(new Date(2026, 1, 1))
 
     expect(grid).toHaveLength(28)
-    expect(grid[0]).toEqual({ iso: '2026-02-01', day: 1 })
-    expect(grid[27]).toEqual({ iso: '2026-02-28', day: 28 })
+    expect(grid[0]).toEqual({ key: '2026-02-01', iso: '2026-02-01', day: 1 })
+    expect(grid[27]).toEqual({ key: '2026-02-28', iso: '2026-02-28', day: 28 })
   })
 })

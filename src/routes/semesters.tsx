@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useRef } from 'react'
 import type { DragEvent } from 'react'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
@@ -37,6 +37,7 @@ export const Route = createFileRoute('/semesters')({
   component: SemestersPage,
 })
 
+// oxlint-disable-next-line react-doctor/no-giant-component, react-doctor/prefer-useReducer -- The semester board coordinates drag/drop, modals, and Convex mutations as one page workflow.
 function SemestersPage() {
   const overview = useQuery(api.semesters.overview) as
     | { semesters: Semester[]; courses: Course[]; grades: Grade[] }
@@ -52,9 +53,9 @@ function SemestersPage() {
   const updateCourseName = useMutation(api.courses.updateName)
   const removeCourse = useMutation(api.courses.remove)
 
-  const semesters = overview?.semesters ?? []
-  const courses = overview?.courses ?? []
-  const grades = overview?.grades ?? []
+  const semesters = useMemo(() => overview?.semesters ?? [], [overview?.semesters])
+  const courses = useMemo(() => overview?.courses ?? [], [overview?.courses])
+  const grades = useMemo(() => overview?.grades ?? [], [overview?.grades])
 
   const gradesByCourseId = useMemo(() => {
     return groupGradesByCourseId(grades)
@@ -68,20 +69,12 @@ function SemestersPage() {
     return getCurrentSemester(semesters)
   }, [semesters])
 
-  const [openSemesterIds, setOpenSemesterIds] = useState<Set<string>>(new Set())
-  const didInitOpenRef = useRef(false)
-  useEffect(() => {
-    if (didInitOpenRef.current) return
-    if (currentSemester) {
-      setOpenSemesterIds(new Set([String(currentSemester._id)]))
-      didInitOpenRef.current = true
-      return
-    }
-    if (sortedSemesters[0]) {
-      setOpenSemesterIds(new Set([String(sortedSemesters[0]._id)]))
-      didInitOpenRef.current = true
-    }
+  const defaultOpenSemesterIds = useMemo(() => {
+    const defaultSemester = currentSemester ?? sortedSemesters[0]
+    return defaultSemester ? new Set([String(defaultSemester._id)]) : new Set<string>()
   }, [currentSemester, sortedSemesters])
+  const [openSemesterIds, setOpenSemesterIds] = useState<Set<string> | null>(null)
+  const effectiveOpenSemesterIds = openSemesterIds ?? defaultOpenSemesterIds
 
   const [settingsSemesterId, setSettingsSemesterId] = useState<string | null>(null)
   const [semesterSettingsName, setSemesterSettingsName] = useState('')
@@ -123,22 +116,6 @@ function SemestersPage() {
   const [draggingCourseId, setDraggingCourseId] = useState<string | null>(null)
   const [dragOverSemesterId, setDragOverSemesterId] = useState<string | null>(null)
   const draggingCourseIdRef = useRef<string | null>(null)
-
-  useEffect(() => {
-    if (!settingsCourseId) return
-    if (courseById.get(settingsCourseId)) return
-    setSettingsCourseId(null)
-  }, [courseById, settingsCourseId])
-
-  useEffect(() => {
-    if (!settingsSemesterId) return
-    const sem = semesters.find((s) => String(s._id) === settingsSemesterId) ?? null
-    if (!sem) {
-      setSettingsSemesterId(null)
-      return
-    }
-    setSemesterSettingsName(sem.name ?? '')
-  }, [semesters, settingsSemesterId])
 
   const openCourseSettings = (course: Course) => {
     setSettingsCourseId(String(course._id))
@@ -355,11 +332,11 @@ function SemestersPage() {
             type="button"
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="size-8"
             onClick={() => openCourseSettings(course)}
             title="Course settings"
           >
-            <Settings className="h-4 w-4" />
+            <Settings className="size-4" />
           </Button>
 
           {options.showAssignToCurrent && currentSemester && (
@@ -373,7 +350,7 @@ function SemestersPage() {
               }
               title={`Assign to ${currentSemester.name}`}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="size-4" />
             </Button>
           )}
         </div>
@@ -383,7 +360,7 @@ function SemestersPage() {
 
   const semesterCards = sortedSemesters.map((semester) => {
     const semId = String(semester._id)
-    const isOpen = openSemesterIds.has(semId)
+    const isOpen = effectiveOpenSemesterIds.has(semId)
     const termGpa = getTermGpa(semId)
 
     const termCourses = coursesBySemesterId.get(semId) ?? []
@@ -414,14 +391,14 @@ function SemestersPage() {
             if (draggingCourseIdRef.current) return
             setSettingsCourseId(null)
             setOpenSemesterIds((prev) => {
-              const next = new Set(prev)
+              const next = new Set(prev ?? defaultOpenSemesterIds)
               if (next.has(semId)) next.delete(semId)
               else next.add(semId)
               if (!next.has(semId)) setSettingsSemesterId(null)
               return next
             })
           }}
-          className="flex w-full items-center gap-4 bg-[#f7f9fb] px-4 py-4 text-left transition-colors hover:bg-[#f0f4f7]"
+          className="flex w-full items-center gap-4 bg-[#f7f9fb] p-4 text-left transition-colors hover:bg-[#f0f4f7]"
         >
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-3">
@@ -458,24 +435,25 @@ function SemestersPage() {
             type="button"
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="size-8"
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              setOpenSemesterIds((prev) => new Set([...prev, semId]))
+              setOpenSemesterIds((prev) => new Set([...(prev ?? defaultOpenSemesterIds), semId]))
               setSettingsSemesterId(semId)
+              setSemesterSettingsName(semester.name ?? '')
               setIsAddSemesterOpen(false)
               setIsAddCourseOpen(false)
               setSettingsCourseId(null)
             }}
             title="Semester settings"
           >
-            <Settings className="h-4 w-4" />
+            <Settings className="size-4" />
           </Button>
 
           <ChevronDown
             className={cn(
-              'h-4 w-4 text-muted-foreground transition-transform',
+              'size-4 text-muted-foreground transition-transform',
               isOpen && 'rotate-180'
             )}
           />
@@ -516,7 +494,7 @@ function SemestersPage() {
                     }}
                     className="h-11 w-full rounded-xl border-dashed border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="size-4 mr-2" />
                     Add course
                   </Button>
               </div>
@@ -542,7 +520,7 @@ function SemestersPage() {
         dragOverSemesterId === 'unassigned' && 'border-primary/30 bg-[#f7f9fb]'
       )}
     >
-      <div className="bg-[#f7f9fb] px-4 py-4">
+      <div className="bg-[#f7f9fb] p-4">
         <div className="flex items-center gap-3">
           <div className="text-base font-semibold tracking-tight text-foreground">Unassigned</div>
           <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-semibold tracking-wide text-muted-foreground">
@@ -576,10 +554,15 @@ function SemestersPage() {
     <div className="app-page semesters-page">
       {isAddSemesterOpen && (
         <div
+          role="presentation"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
           onMouseDown={() => setIsAddSemesterOpen(false)}
         >
-          <div className="w-full max-w-md" onMouseDown={(e) => e.stopPropagation()}>
+          <div
+            role="presentation"
+            className="w-full max-w-md"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             <Card className="border-border">
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-start justify-between gap-3">
@@ -602,7 +585,6 @@ function SemestersPage() {
                     value={newSemesterName}
                     onChange={(e) => setNewSemesterName(e.target.value)}
                     placeholder="e.g. Spring 2024"
-                    autoFocus
                   />
                 </div>
 
@@ -627,7 +609,7 @@ function SemestersPage() {
                     Cancel
                   </Button>
                   <Button onClick={handleCreateSemester}>
-                    <CalendarPlus className="h-4 w-4 mr-2" />
+                    <CalendarPlus className="size-4 mr-2" />
                     Create
                   </Button>
                 </div>
@@ -639,10 +621,15 @@ function SemestersPage() {
 
       {isAddCourseOpen && addCourseSemesterId && (
         <div
+          role="presentation"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
           onMouseDown={() => setIsAddCourseOpen(false)}
         >
-          <div className="w-full max-w-md" onMouseDown={(e) => e.stopPropagation()}>
+          <div
+            role="presentation"
+            className="w-full max-w-md"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             <Card className="border-border">
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-start justify-between gap-3">
@@ -665,7 +652,6 @@ function SemestersPage() {
                     value={newCourseName}
                     onChange={(e) => setNewCourseName(e.target.value)}
                     placeholder="e.g. Econ 101"
-                    autoFocus
                   />
                 </div>
 
@@ -687,7 +673,7 @@ function SemestersPage() {
                     Cancel
                   </Button>
                   <Button onClick={handleCreateCourse}>
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="size-4 mr-2" />
                     Add
                   </Button>
                 </div>
@@ -699,10 +685,15 @@ function SemestersPage() {
 
       {settingsCourseId && (
         <div
+          role="presentation"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
           onMouseDown={() => setSettingsCourseId(null)}
         >
-          <div className="w-full max-w-md" onMouseDown={(e) => e.stopPropagation()}>
+          <div
+            role="presentation"
+            className="w-full max-w-md"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             <Card className="border-border">
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-start justify-between gap-3">
@@ -741,7 +732,6 @@ function SemestersPage() {
                           value={courseSettingsName}
                           onChange={(e) => setCourseSettingsName(e.target.value)}
                           placeholder="e.g. Algebra II"
-                          autoFocus
                         />
                       </div>
 
@@ -764,7 +754,7 @@ function SemestersPage() {
                           onClick={handleDeleteCourseFromSettings}
                           disabled={isCourseSettingsWorking}
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
+                          <Trash2 className="size-4 mr-2" />
                           Delete
                         </Button>
 
@@ -795,10 +785,12 @@ function SemestersPage() {
 
       {settingsSemesterId && (
         <div
+          role="presentation"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
           onMouseDown={() => setSettingsSemesterId(null)}
         >
           <div
+            role="presentation"
             className="w-full max-w-md"
             onMouseDown={(e) => e.stopPropagation()}
           >
@@ -837,7 +829,6 @@ function SemestersPage() {
                         <Input
                           value={semesterSettingsName}
                           onChange={(e) => setSemesterSettingsName(e.target.value)}
-                          autoFocus
                         />
                       </div>
 
@@ -875,14 +866,14 @@ function SemestersPage() {
                             await removeSemester({ id: sem._id })
                             setSettingsSemesterId(null)
                             setOpenSemesterIds((prev) => {
-                              const next = new Set(prev)
+                              const next = new Set(prev ?? defaultOpenSemesterIds)
                               next.delete(String(sem._id))
                               return next
                             })
                           }}
                           disabled={isSemesterSettingsWorking}
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
+                          <Trash2 className="size-4 mr-2" />
                           Delete semester
                         </Button>
 
@@ -990,7 +981,7 @@ function SemestersPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CalendarCheck2 className="h-4 w-4" />
+                      <CalendarCheck2 className="size-4" />
                       {cumulative.semestersCompleted} completed
                     </div>
                   </div>
@@ -1015,7 +1006,7 @@ function SemestersPage() {
                     }}
                     className="h-11 w-full rounded-xl border-dashed border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="size-4 mr-2" />
                     Add semester
                   </Button>
                 </div>

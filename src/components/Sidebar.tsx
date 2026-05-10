@@ -13,6 +13,27 @@ import {
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
+function SectionLabel({
+  label,
+  collapsedLabel,
+  collapsed,
+}: {
+  label: string
+  collapsedLabel: string
+  collapsed: boolean
+}) {
+  return (
+    <div
+      className={cn(
+        'px-3 pt-5 pb-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-sidebar-foreground/55',
+        collapsed && 'px-0 text-center'
+      )}
+    >
+      {collapsed ? collapsedLabel : label}
+    </div>
+  )
+}
+
 export function Sidebar({
   collapsed,
   onToggleCollapsed,
@@ -51,16 +72,8 @@ export function Sidebar({
     collapsed ? 'max-w-0 -translate-x-1 opacity-0' : 'max-w-40 translate-x-0 opacity-100'
   )
 
-  const sectionLabelClass =
-    'px-3 pt-5 pb-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-sidebar-foreground/55'
   const collapsedAccountTileClass =
     'mx-auto flex h-11 w-10 items-center justify-center p-0'
-
-  const renderSectionLabel = (label: string, collapsedLabel: string) => (
-    <div className={cn(sectionLabelClass, collapsed && 'px-0 text-center')}>
-      {collapsed ? collapsedLabel : label}
-    </div>
-  )
 
   return (
     <aside
@@ -74,16 +87,16 @@ export function Sidebar({
         onClick={onToggleCollapsed}
         className={cn(
           'absolute top-7 right-0 z-50 -translate-y-1/2 translate-x-1/2',
-          'h-7 w-7 rounded-md border border-border/80 bg-card shadow-[0_10px_22px_rgba(15,23,42,0.08)]',
+          'size-7 rounded-md border border-border/80 bg-card shadow-[0_10px_22px_rgba(15,23,42,0.08)]',
           'hover:bg-muted/70 text-sidebar-foreground/80 transition-colors'
         )}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         title={collapsed ? 'Expand' : 'Collapse'}
       >
         {collapsed ? (
-          <ChevronRight className="h-3.5 w-3.5 mx-auto" />
+          <ChevronRight className="size-3.5 mx-auto" />
         ) : (
-          <ChevronLeft className="h-3.5 w-3.5 mx-auto" />
+          <ChevronLeft className="size-3.5 mx-auto" />
         )}
       </button>
 
@@ -99,7 +112,7 @@ export function Sidebar({
             )}
             title="Grade Tracker"
           >
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-foreground text-[0.68rem] font-bold text-background">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded bg-foreground text-[0.68rem] font-bold text-background">
               G
             </span>
             <span className={cn('text-sm truncate', collapsedTextClass)}>
@@ -109,13 +122,13 @@ export function Sidebar({
         </div>
 
         <div className="px-3">
-          {renderSectionLabel('Calculators', 'C')}
+          <SectionLabel label="Calculators" collapsedLabel="C" collapsed={collapsed} />
           <Link
             to="/grade-calculator"
             className={navLinkClass(isGradeCalculatorActive)}
             title="Grade Calculator"
           >
-            <Calculator className="h-4 w-4" />
+            <Calculator className="size-4" />
             <span className={collapsedTextClass}>Grade Calculator</span>
           </Link>
 
@@ -124,7 +137,7 @@ export function Sidebar({
             className={navLinkClass(isGpaCalculatorActive)}
             title="GPA Calculator"
           >
-            <GraduationCap className="h-4 w-4" />
+            <GraduationCap className="size-4" />
             <span className={collapsedTextClass}>GPA Calculator</span>
           </Link>
 
@@ -133,18 +146,18 @@ export function Sidebar({
             className={navLinkClass(isFinalExamActive)}
             title="Final Exam"
           >
-            <ClipboardPenLine className="h-4 w-4" />
+            <ClipboardPenLine className="size-4" />
             <span className={collapsedTextClass}>Final Exam</span>
           </Link>
 
           <SignedIn>
-            {renderSectionLabel('Planning', 'P')}
+            <SectionLabel label="Planning" collapsedLabel="P" collapsed={collapsed} />
             <Link
               to="/calendar"
               className={navLinkClass(isCalendarActive)}
               title="Calendar"
             >
-              <Calendar className="h-4 w-4" />
+              <Calendar className="size-4" />
               <span className={collapsedTextClass}>Calendar</span>
             </Link>
 
@@ -153,7 +166,7 @@ export function Sidebar({
               className={navLinkClass(isSemestersActive)}
               title="Semesters"
             >
-              <CalendarDays className="h-4 w-4" />
+              <CalendarDays className="size-4" />
               <span className={collapsedTextClass}>Semesters</span>
             </Link>
           </SignedIn>
@@ -180,9 +193,9 @@ export function Sidebar({
                 appearance={{
                   elements: {
                     userButtonTrigger: collapsed
-                      ? 'h-8 w-8 p-0 flex items-center justify-center'
-                      : 'h-8 w-8 p-0',
-                    avatarBox: 'h-8 w-8',
+                      ? 'size-8 p-0 flex items-center justify-center'
+                      : 'size-8 p-0',
+                    avatarBox: 'size-8',
                   },
                 }}
               />
@@ -203,9 +216,9 @@ export function Sidebar({
                 <Button
                   size="sm"
                   variant="default"
-                  className={cn('mt-2 w-full', collapsed && 'm-0 h-8 w-8 rounded-full p-0')}
+                  className={cn('mt-2 w-full', collapsed && 'm-0 size-8 rounded-full p-0')}
                 >
-                  <LogIn className={cn('h-4 w-4', !collapsed && 'mr-2')} />
+                  <LogIn className={cn('size-4', !collapsed && 'mr-2')} />
                   <span className={collapsedTextClass}>Sign In</span>
                 </Button>
               </SignInButton>
