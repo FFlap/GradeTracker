@@ -1,6 +1,13 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useMemo, useState, useRef } from 'react'
-import type { DragEvent } from 'react'
+import {
+  useMemo,
+  useReducer,
+  useRef,
+  type Dispatch,
+  type DragEvent,
+  type ReactNode,
+  type SetStateAction,
+} from 'react'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { Card, CardContent } from '@/components/ui/card'
@@ -37,8 +44,85 @@ export const Route = createFileRoute('/semesters')({
   component: SemestersPage,
 })
 
-// oxlint-disable-next-line react-doctor/no-giant-component, react-doctor/prefer-useReducer -- The semester board coordinates drag/drop, modals, and Convex mutations as one page workflow.
-function SemestersPage() {
+type SemesterStatus = 'in_progress' | 'completed'
+type GradesByCourseId = ReturnType<typeof groupGradesByCourseId>
+type CoursesBySemesterId = ReturnType<typeof groupCoursesBySemesterId>
+type CumulativeSemesterStats = ReturnType<
+  typeof calculateCumulativeSemesterStats
+>
+
+type SemesterBoardState = {
+  openSemesterIds: Set<string> | null
+  settingsSemesterId: string | null
+  semesterSettingsName: string
+  isSemesterSettingsWorking: boolean
+  newSemesterName: string
+  newSemesterStatus: SemesterStatus
+  isAddSemesterOpen: boolean
+  isAddCourseOpen: boolean
+  addCourseSemesterId: string | null
+  newCourseName: string
+  newCourseCredits: string
+  settingsCourseId: string | null
+  courseSettingsName: string
+  courseSettingsCredits: string
+  isCourseSettingsWorking: boolean
+  draggingCourseId: string | null
+  dragOverSemesterId: string | null
+}
+
+type SemesterBoardAction<K extends keyof SemesterBoardState = keyof SemesterBoardState> = {
+  type: 'set'
+  key: K
+  value: SetStateAction<SemesterBoardState[K]>
+}
+
+const initialSemesterBoardState: SemesterBoardState = {
+  openSemesterIds: null,
+  settingsSemesterId: null,
+  semesterSettingsName: '',
+  isSemesterSettingsWorking: false,
+  newSemesterName: '',
+  newSemesterStatus: 'in_progress',
+  isAddSemesterOpen: false,
+  isAddCourseOpen: false,
+  addCourseSemesterId: null,
+  newCourseName: '',
+  newCourseCredits: '3',
+  settingsCourseId: null,
+  courseSettingsName: '',
+  courseSettingsCredits: '3',
+  isCourseSettingsWorking: false,
+  draggingCourseId: null,
+  dragOverSemesterId: null,
+}
+
+function semesterBoardReducer(
+  state: SemesterBoardState,
+  action: SemesterBoardAction
+): SemesterBoardState {
+  const currentValue = state[action.key]
+  const nextValue =
+    typeof action.value === 'function'
+      ? (action.value as (previous: typeof currentValue) => typeof currentValue)(
+          currentValue
+        )
+      : action.value
+
+  return {
+    ...state,
+    [action.key]: nextValue,
+  }
+}
+
+function makeSemesterBoardSetter<K extends keyof SemesterBoardState>(
+  dispatch: Dispatch<SemesterBoardAction>,
+  key: K
+): Dispatch<SetStateAction<SemesterBoardState[K]>> {
+  return (value) => dispatch({ type: 'set', key, value } as SemesterBoardAction)
+}
+
+function useSemestersPageModel() {
   const overview = useQuery(api.semesters.overview) as
     | { semesters: Semester[]; courses: Course[]; grades: Grade[] }
     | undefined
@@ -73,12 +157,98 @@ function SemestersPage() {
     const defaultSemester = currentSemester ?? sortedSemesters[0]
     return defaultSemester ? new Set([String(defaultSemester._id)]) : new Set<string>()
   }, [currentSemester, sortedSemesters])
-  const [openSemesterIds, setOpenSemesterIds] = useState<Set<string> | null>(null)
+  const [boardState, dispatchBoardState] = useReducer(
+    semesterBoardReducer,
+    initialSemesterBoardState
+  )
+  const {
+    openSemesterIds,
+    settingsSemesterId,
+    semesterSettingsName,
+    isSemesterSettingsWorking,
+    newSemesterName,
+    newSemesterStatus,
+    isAddSemesterOpen,
+    isAddCourseOpen,
+    addCourseSemesterId,
+    newCourseName,
+    newCourseCredits,
+    settingsCourseId,
+    courseSettingsName,
+    courseSettingsCredits,
+    isCourseSettingsWorking,
+    draggingCourseId,
+    dragOverSemesterId,
+  } = boardState
+  const setOpenSemesterIds = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'openSemesterIds'
+  )
+  const setSettingsSemesterId = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'settingsSemesterId'
+  )
+  const setSemesterSettingsName = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'semesterSettingsName'
+  )
+  const setIsSemesterSettingsWorking = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'isSemesterSettingsWorking'
+  )
+  const setNewSemesterName = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'newSemesterName'
+  )
+  const setNewSemesterStatus = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'newSemesterStatus'
+  )
+  const setIsAddSemesterOpen = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'isAddSemesterOpen'
+  )
+  const setIsAddCourseOpen = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'isAddCourseOpen'
+  )
+  const setAddCourseSemesterId = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'addCourseSemesterId'
+  )
+  const setNewCourseName = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'newCourseName'
+  )
+  const setNewCourseCredits = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'newCourseCredits'
+  )
+  const setSettingsCourseId = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'settingsCourseId'
+  )
+  const setCourseSettingsName = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'courseSettingsName'
+  )
+  const setCourseSettingsCredits = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'courseSettingsCredits'
+  )
+  const setIsCourseSettingsWorking = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'isCourseSettingsWorking'
+  )
+  const setDraggingCourseId = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'draggingCourseId'
+  )
+  const setDragOverSemesterId = makeSemesterBoardSetter(
+    dispatchBoardState,
+    'dragOverSemesterId'
+  )
   const effectiveOpenSemesterIds = openSemesterIds ?? defaultOpenSemesterIds
-
-  const [settingsSemesterId, setSettingsSemesterId] = useState<string | null>(null)
-  const [semesterSettingsName, setSemesterSettingsName] = useState('')
-  const [isSemesterSettingsWorking, setIsSemesterSettingsWorking] = useState(false)
 
   const courseById = useMemo(() => {
     const map = new Map<string, Course>()
@@ -97,24 +267,6 @@ function SemestersPage() {
   const cumulative = useMemo(() => {
     return calculateCumulativeSemesterStats(courses, semesters, gradesByCourseId)
   }, [courses, semesters, gradesByCourseId])
-
-  const [newSemesterName, setNewSemesterName] = useState('')
-  const [newSemesterStatus, setNewSemesterStatus] = useState<'in_progress' | 'completed'>(
-    'in_progress'
-  )
-
-  const [isAddSemesterOpen, setIsAddSemesterOpen] = useState(false)
-  const [isAddCourseOpen, setIsAddCourseOpen] = useState(false)
-  const [addCourseSemesterId, setAddCourseSemesterId] = useState<string | null>(null)
-  const [newCourseName, setNewCourseName] = useState('')
-  const [newCourseCredits, setNewCourseCredits] = useState('3')
-
-  const [settingsCourseId, setSettingsCourseId] = useState<string | null>(null)
-  const [courseSettingsName, setCourseSettingsName] = useState('')
-  const [courseSettingsCredits, setCourseSettingsCredits] = useState('3')
-  const [isCourseSettingsWorking, setIsCourseSettingsWorking] = useState(false)
-  const [draggingCourseId, setDraggingCourseId] = useState<string | null>(null)
-  const [dragOverSemesterId, setDragOverSemesterId] = useState<string | null>(null)
   const draggingCourseIdRef = useRef<string | null>(null)
 
   const openCourseSettings = (course: Course) => {
@@ -274,255 +426,994 @@ function SemestersPage() {
     })
   }
 
-  const renderCourseRow = (
-    course: Course,
-    options: { showAssignToCurrent?: boolean } = {}
-  ) => {
-    const percent = calculateCoursePercent(course, gradesByCourseId)
-    const letter = percent === null ? null : getCourseLetter(course, percent)
-    const courseId = String(course._id)
+  const unassignedCourses = coursesBySemesterId.get('unassigned') ?? []
+  const selectedSettingsCourse = settingsCourseId
+    ? (courseById.get(settingsCourseId) ?? null)
+    : null
+  const selectedSettingsSemester = settingsSemesterId
+    ? (semesters.find((s) => String(s._id) === settingsSemesterId) ?? null)
+    : null
 
-    return (
-      <div
-        key={courseId}
-        draggable
-        onDragStart={(event) => handleCourseDragStart(event, courseId)}
-        onDragEnd={handleCourseDragEnd}
-        className={cn(
-          'grid cursor-grab grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/12 active:cursor-grabbing',
-          draggingCourseId === courseId && 'opacity-50'
-        )}
-      >
-        <div className="min-w-0 flex-1">
-          <Link
-            to="/grade-calculator/$courseId"
-            params={{ courseId: course._id }}
-            className="truncate font-medium text-foreground underline-offset-4 hover:underline"
-          >
-            {course.name}
-          </Link>
-        </div>
-
-        <div className="text-center text-sm text-foreground">
-          {getCourseCredits(course)}
-        </div>
-
-        <div className="text-center">
-          <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-            {percent === null || letter === null ? '—' : `${letter} (${Math.round(percent)}%)`}
-          </span>
-        </div>
-
-        <div className="flex justify-center">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-8 rounded-xl px-3"
-            asChild
-          >
-            <Link to="/grade-calculator/$courseId" params={{ courseId: course._id }}>
-              Open course
-            </Link>
-          </Button>
-        </div>
-
-        <div className="flex items-center justify-end gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={() => openCourseSettings(course)}
-            title="Course settings"
-          >
-            <Settings className="size-4" />
-          </Button>
-
-          {options.showAssignToCurrent && currentSemester && (
-            <Button
-              size="icon-sm"
-              onClick={() =>
-                updateCourseSemester({
-                  id: course._id,
-                  semesterId: currentSemester._id,
-                })
-              }
-              title={`Assign to ${currentSemester.name}`}
-            >
-              <Plus className="size-4" />
-            </Button>
-          )}
-        </div>
-      </div>
-    )
+  const handleToggleSemester = (semesterId: string) => {
+    if (draggingCourseIdRef.current) return
+    setSettingsCourseId(null)
+    setOpenSemesterIds((prev) => {
+      const next = new Set(prev ?? defaultOpenSemesterIds)
+      if (next.has(semesterId)) next.delete(semesterId)
+      else next.add(semesterId)
+      if (!next.has(semesterId)) setSettingsSemesterId(null)
+      return next
+    })
   }
 
-  const semesterCards = sortedSemesters.map((semester) => {
-    const semId = String(semester._id)
-    const isOpen = effectiveOpenSemesterIds.has(semId)
-    const termGpa = getTermGpa(semId)
+  const handleOpenSemesterSettings = (semester: Semester) => {
+    const semesterId = String(semester._id)
+    setOpenSemesterIds(
+      (prev) => new Set([...(prev ?? defaultOpenSemesterIds), semesterId])
+    )
+    setSettingsSemesterId(semesterId)
+    setSemesterSettingsName(semester.name ?? '')
+    setIsAddSemesterOpen(false)
+    setIsAddCourseOpen(false)
+    setSettingsCourseId(null)
+  }
 
-    const termCourses = coursesBySemesterId.get(semId) ?? []
+  const handleOpenAddCourse = (semesterId: string) => {
+    setIsAddCourseOpen(true)
+    setAddCourseSemesterId(semesterId)
+    setNewCourseName('')
+    setNewCourseCredits('3')
+    setIsAddSemesterOpen(false)
+    setSettingsSemesterId(null)
+    setSettingsCourseId(null)
+  }
 
-    const statusLabel =
-      semester.isCurrent || semester.status === 'in_progress' ? 'IN PROGRESS' : 'COMPLETED'
+  const handleOpenAddSemester = () => {
+    setIsAddSemesterOpen(true)
+    setSettingsSemesterId(null)
+    setIsAddCourseOpen(false)
+    setSettingsCourseId(null)
+  }
 
-    return (
-      <section
-        key={semId}
-        onDragOver={(event) => handleCourseDragOver(event, semId)}
-        onDragLeave={(event) => {
-          const nextTarget = event.relatedTarget
-          if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return
-          setDragOverSemesterId((prev) => (prev === semId ? null : prev))
-        }}
-        onDrop={(event) => handleCourseDrop(event, semId)}
-        className={cn(
-          'overflow-hidden rounded-xl border border-[#e1e5ea] bg-white transition-colors',
-          dragOverSemesterId === semId && 'border-primary/30 bg-[#f7f9fb]'
-        )}
+  const handleCourseDragLeave = (event: DragEvent, semesterId: string) => {
+    const nextTarget = event.relatedTarget
+    if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) {
+      return
+    }
+    setDragOverSemesterId((prev) => (prev === semesterId ? null : prev))
+  }
+
+  const handleAssignCourseToCurrent = async (course: Course) => {
+    if (!currentSemester) return
+    await updateCourseSemester({
+      id: course._id,
+      semesterId: currentSemester._id,
+    })
+  }
+
+  const handleUpdateSemesterStatus = async (
+    semester: Semester,
+    status: SemesterStatus
+  ) => {
+    await updateSemesterStatus({
+      id: semester._id,
+      status,
+    })
+  }
+
+  const handleDeleteSemester = async (semester: Semester) => {
+    if (
+      !window.confirm(
+        `Delete “${semester.name}” and all courses/grades inside it? This cannot be undone.`
+      )
+    ) {
+      return
+    }
+    await removeSemester({ id: semester._id })
+    setSettingsSemesterId(null)
+    setOpenSemesterIds((prev) => {
+      const next = new Set(prev ?? defaultOpenSemesterIds)
+      next.delete(String(semester._id))
+      return next
+    })
+  }
+
+  return {
+    isAddSemesterOpen,
+    newSemesterName,
+    newSemesterStatus,
+    setIsAddSemesterOpen,
+    setNewSemesterName,
+    setNewSemesterStatus,
+    handleCreateSemester,
+    isAddCourseOpen,
+    addCourseSemesterId,
+    newCourseName,
+    newCourseCredits,
+    setIsAddCourseOpen,
+    setNewCourseName,
+    setNewCourseCredits,
+    handleCreateCourse,
+    settingsCourseId,
+    selectedSettingsCourse,
+    courseSettingsName,
+    courseSettingsCredits,
+    isCourseSettingsWorking,
+    setSettingsCourseId,
+    setCourseSettingsName,
+    setCourseSettingsCredits,
+    handleDeleteCourseFromSettings,
+    handleSaveCourseSettings,
+    settingsSemesterId,
+    selectedSettingsSemester,
+    semesterSettingsName,
+    isSemesterSettingsWorking,
+    setSettingsSemesterId,
+    setSemesterSettingsName,
+    handleUpdateSemesterStatus,
+    handleDeleteSemester,
+    handleSaveSemesterSettings,
+    cumulative,
+    courses,
+    sortedSemesters,
+    coursesBySemesterId,
+    gradesByCourseId,
+    currentSemester,
+    effectiveOpenSemesterIds,
+    unassignedCourses,
+    dragOverSemesterId,
+    draggingCourseId,
+    getTermGpa,
+    handleCourseDragStart,
+    handleCourseDragEnd,
+    handleCourseDragOver,
+    handleCourseDragLeave,
+    handleCourseDrop,
+    openCourseSettings,
+    handleAssignCourseToCurrent,
+    handleToggleSemester,
+    handleOpenSemesterSettings,
+    handleOpenAddCourse,
+    handleOpenAddSemester,
+  }
+}
+
+type SemestersPageModel = ReturnType<typeof useSemestersPageModel>
+
+function SemestersPage() {
+  const model = useSemestersPageModel()
+
+  return <SemestersPageView model={model} />
+}
+
+function SemestersPageView({ model }: { model: SemestersPageModel }) {
+  return (
+    <div className="app-page semesters-page">
+      <AddSemesterDialog
+        open={model.isAddSemesterOpen}
+        name={model.newSemesterName}
+        status={model.newSemesterStatus}
+        onClose={() => model.setIsAddSemesterOpen(false)}
+        onNameChange={model.setNewSemesterName}
+        onStatusChange={model.setNewSemesterStatus}
+        onCreate={model.handleCreateSemester}
+      />
+      <AddCourseDialog
+        open={model.isAddCourseOpen && model.addCourseSemesterId !== null}
+        name={model.newCourseName}
+        credits={model.newCourseCredits}
+        onClose={() => model.setIsAddCourseOpen(false)}
+        onNameChange={model.setNewCourseName}
+        onCreditsChange={model.setNewCourseCredits}
+        onCreate={model.handleCreateCourse}
+      />
+      <CourseSettingsDialog
+        open={model.settingsCourseId !== null}
+        course={model.selectedSettingsCourse}
+        name={model.courseSettingsName}
+        credits={model.courseSettingsCredits}
+        isWorking={model.isCourseSettingsWorking}
+        onClose={() => model.setSettingsCourseId(null)}
+        onNameChange={model.setCourseSettingsName}
+        onCreditsChange={model.setCourseSettingsCredits}
+        onDelete={model.handleDeleteCourseFromSettings}
+        onSave={model.handleSaveCourseSettings}
+      />
+      <SemesterSettingsDialog
+        open={model.settingsSemesterId !== null}
+        semester={model.selectedSettingsSemester}
+        name={model.semesterSettingsName}
+        isWorking={model.isSemesterSettingsWorking}
+        onClose={() => model.setSettingsSemesterId(null)}
+        onNameChange={model.setSemesterSettingsName}
+        onStatusChange={model.handleUpdateSemesterStatus}
+        onDelete={model.handleDeleteSemester}
+        onSave={model.handleSaveSemesterSettings}
+      />
+
+      <SemestersPageHeader />
+
+      <main className="app-page-body">
+        <div className="app-page-body-narrow">
+          <div className="grid items-start gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
+            <OverallSummaryCard
+              cumulative={model.cumulative}
+              courseCount={model.courses.length}
+            />
+            <SemesterListCard
+              semesters={model.sortedSemesters}
+              coursesBySemesterId={model.coursesBySemesterId}
+              gradesByCourseId={model.gradesByCourseId}
+              currentSemester={model.currentSemester}
+              openSemesterIds={model.effectiveOpenSemesterIds}
+              unassignedCourses={model.unassignedCourses}
+              dragOverSemesterId={model.dragOverSemesterId}
+              draggingCourseId={model.draggingCourseId}
+              completedCount={model.cumulative.semestersCompleted}
+              getTermGpa={model.getTermGpa}
+              onCourseDragStart={model.handleCourseDragStart}
+              onCourseDragEnd={model.handleCourseDragEnd}
+              onCourseDragOver={model.handleCourseDragOver}
+              onCourseDragLeave={model.handleCourseDragLeave}
+              onCourseDrop={model.handleCourseDrop}
+              onOpenCourseSettings={model.openCourseSettings}
+              onAssignCourseToCurrent={model.handleAssignCourseToCurrent}
+              onToggleSemester={model.handleToggleSemester}
+              onOpenSemesterSettings={model.handleOpenSemesterSettings}
+              onOpenAddCourse={model.handleOpenAddCourse}
+              onOpenAddSemester={model.handleOpenAddSemester}
+            />
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+function DialogShell({
+  children,
+  onClose,
+}: {
+  children: ReactNode
+  onClose: () => void
+}) {
+  return (
+    <div
+      role="presentation"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
+      onMouseDown={onClose}
+    >
+      <div
+        role="presentation"
+        className="w-full max-w-md"
+        onMouseDown={(event) => event.stopPropagation()}
       >
-        <button
-          type="button"
-          onDragOver={(event) => handleCourseDragOver(event, semId)}
-          onDrop={(event) => handleCourseDrop(event, semId)}
-          onClick={() => {
-            if (draggingCourseIdRef.current) return
-            setSettingsCourseId(null)
-            setOpenSemesterIds((prev) => {
-              const next = new Set(prev ?? defaultOpenSemesterIds)
-              if (next.has(semId)) next.delete(semId)
-              else next.add(semId)
-              if (!next.has(semId)) setSettingsSemesterId(null)
-              return next
-            })
-          }}
-          className="flex w-full items-center gap-4 bg-[#f7f9fb] p-4 text-left transition-colors hover:bg-[#f0f4f7]"
+        <Card className="border-border">
+          <CardContent className="space-y-4 p-5">{children}</CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+function DialogHeader({
+  title,
+  description,
+  isCloseDisabled = false,
+  onClose,
+}: {
+  title: string
+  description: string
+  isCloseDisabled?: boolean
+  onClose: () => void
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <div className="text-lg font-semibold text-foreground">{title}</div>
+        <div className="text-sm text-muted-foreground">{description}</div>
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onClose}
+        disabled={isCloseDisabled}
+      >
+        Close
+      </Button>
+    </div>
+  )
+}
+
+function AddSemesterDialog({
+  open,
+  name,
+  status,
+  onClose,
+  onNameChange,
+  onStatusChange,
+  onCreate,
+}: {
+  open: boolean
+  name: string
+  status: SemesterStatus
+  onClose: () => void
+  onNameChange: (value: string) => void
+  onStatusChange: (value: SemesterStatus) => void
+  onCreate: () => void
+}) {
+  if (!open) return null
+
+  return (
+    <DialogShell onClose={onClose}>
+      <DialogHeader
+        title="Add semester"
+        description="Create a new term to organize courses."
+        onClose={onClose}
+      />
+
+      <div className="space-y-1">
+        <div className="text-xs text-muted-foreground">Semester name</div>
+        <Input
+          value={name}
+          onChange={(event) => onNameChange(event.target.value)}
+          placeholder="e.g. Spring 2024"
+        />
+      </div>
+
+      <div className="space-y-1">
+        <div className="text-xs text-muted-foreground">Status</div>
+        <select
+          value={status}
+          onChange={(event) =>
+            onStatusChange(
+              event.target.value === 'completed' ? 'completed' : 'in_progress'
+            )
+          }
+          className="h-9 w-full rounded-md border border-border bg-input px-3 text-sm text-foreground"
         >
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-3">
-              <div className="text-base font-semibold tracking-tight text-foreground truncate">
-                {semester.name}
-              </div>
-              <span
-                className={cn(
-                  'rounded-full border px-2 py-0.5 text-xs font-semibold tracking-wide',
-                  semester.status === 'completed'
-                    ? 'bg-muted text-muted-foreground border-border'
-                    : 'bg-primary/10 text-primary border-primary/20'
-                )}
+          <option value="in_progress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+
+      <div className="flex justify-end gap-2 border-t border-border/60 pt-2">
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={onCreate}>
+          <CalendarPlus className="mr-2 size-4" />
+          Create
+        </Button>
+      </div>
+    </DialogShell>
+  )
+}
+
+function AddCourseDialog({
+  open,
+  name,
+  credits,
+  onClose,
+  onNameChange,
+  onCreditsChange,
+  onCreate,
+}: {
+  open: boolean
+  name: string
+  credits: string
+  onClose: () => void
+  onNameChange: (value: string) => void
+  onCreditsChange: (value: string) => void
+  onCreate: () => void
+}) {
+  if (!open) return null
+
+  return (
+    <DialogShell onClose={onClose}>
+      <DialogHeader
+        title="Add course"
+        description="Add a class to this semester."
+        onClose={onClose}
+      />
+
+      <div className="space-y-1">
+        <div className="text-xs text-muted-foreground">Course name</div>
+        <Input
+          value={name}
+          onChange={(event) => onNameChange(event.target.value)}
+          placeholder="e.g. Econ 101"
+        />
+      </div>
+
+      <div className="space-y-1">
+        <div className="text-xs text-muted-foreground">Credits</div>
+        <Input
+          type="text"
+          inputMode="decimal"
+          value={credits}
+          onChange={(event) =>
+            onCreditsChange(sanitizeNumberInput(event.target.value))
+          }
+          placeholder="3"
+        />
+      </div>
+
+      <div className="flex justify-end gap-2 border-t border-border/60 pt-2">
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={onCreate}>
+          <Plus className="mr-2 size-4" />
+          Add
+        </Button>
+      </div>
+    </DialogShell>
+  )
+}
+
+function CourseSettingsDialog({
+  open,
+  course,
+  name,
+  credits,
+  isWorking,
+  onClose,
+  onNameChange,
+  onCreditsChange,
+  onDelete,
+  onSave,
+}: {
+  open: boolean
+  course: Course | null
+  name: string
+  credits: string
+  isWorking: boolean
+  onClose: () => void
+  onNameChange: (value: string) => void
+  onCreditsChange: (value: string) => void
+  onDelete: () => void
+  onSave: () => void
+}) {
+  if (!open) return null
+
+  return (
+    <DialogShell onClose={onClose}>
+      <DialogHeader
+        title="Course settings"
+        description="Rename, edit credits, or delete this course."
+        isCloseDisabled={isWorking}
+        onClose={onClose}
+      />
+
+      {!course ? (
+        <div className="text-sm text-muted-foreground">Course not found.</div>
+      ) : (
+        <>
+          <div className="space-y-1">
+            <div className="text-xs text-muted-foreground">Course name</div>
+            <Input
+              value={name}
+              onChange={(event) => onNameChange(event.target.value)}
+              placeholder="e.g. Algebra II"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <div className="text-xs text-muted-foreground">Credits</div>
+            <Input
+              type="text"
+              inputMode="decimal"
+              value={credits}
+              onChange={(event) =>
+                onCreditsChange(sanitizeNumberInput(event.target.value))
+              }
+              placeholder="3"
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-2 border-t border-border/60 pt-2">
+            <Button
+              variant="destructive"
+              onClick={onDelete}
+              disabled={isWorking}
+            >
+              <Trash2 className="mr-2 size-4" />
+              Delete
+            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={onClose} disabled={isWorking}>
+                Cancel
+              </Button>
+              <Button
+                onClick={onSave}
+                disabled={!name.trim() || isWorking}
               >
-                {statusLabel}
-              </span>
+                Save
+              </Button>
             </div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              {termCourses.length} courses
+          </div>
+        </>
+      )}
+    </DialogShell>
+  )
+}
+
+function SemesterSettingsDialog({
+  open,
+  semester,
+  name,
+  isWorking,
+  onClose,
+  onNameChange,
+  onStatusChange,
+  onDelete,
+  onSave,
+}: {
+  open: boolean
+  semester: Semester | null
+  name: string
+  isWorking: boolean
+  onClose: () => void
+  onNameChange: (value: string) => void
+  onStatusChange: (semester: Semester, status: SemesterStatus) => void
+  onDelete: (semester: Semester) => void
+  onSave: () => void
+}) {
+  if (!open) return null
+
+  return (
+    <DialogShell onClose={onClose}>
+      <DialogHeader
+        title="Semester settings"
+        description="Rename, update status, or delete this semester."
+        isCloseDisabled={isWorking}
+        onClose={onClose}
+      />
+
+      {!semester ? (
+        <div className="text-sm text-muted-foreground">Semester not found.</div>
+      ) : (
+        <>
+          <div className="space-y-1">
+            <div className="text-xs text-muted-foreground">Semester name</div>
+            <Input
+              value={name}
+              onChange={(event) => onNameChange(event.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="w-44">
+              <div className="mb-1 text-xs text-muted-foreground">Status</div>
+              <select
+                value={semester.status}
+                onChange={(event) =>
+                  onStatusChange(
+                    semester,
+                    event.target.value === 'completed'
+                      ? 'completed'
+                      : 'in_progress'
+                  )
+                }
+                disabled={isWorking}
+                className="h-9 w-full rounded-md border border-border bg-input px-3 text-sm text-foreground"
+              >
+                <option value="in_progress">In progress</option>
+                <option value="completed">Completed</option>
+              </select>
             </div>
           </div>
 
-          {termGpa !== null && (
-            <div className="hidden sm:flex items-center gap-6">
-              <div className="text-right">
-                <div className="text-sm font-semibold text-foreground">
-                  {termGpa.toFixed(2)} GPA
-                </div>
-              </div>
+          <div className="flex items-center justify-between gap-2 border-t border-border/60 pt-2">
+            <Button
+              variant="destructive"
+              onClick={() => onDelete(semester)}
+              disabled={isWorking}
+            >
+              <Trash2 className="mr-2 size-4" />
+              Delete semester
+            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={onClose} disabled={isWorking}>
+                Cancel
+              </Button>
+              <Button onClick={onSave} disabled={!name.trim() || isWorking}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+    </DialogShell>
+  )
+}
+
+function SemestersPageHeader() {
+  return (
+    <section className="app-page-header">
+      <div className="app-page-header-inner">
+        <div className="app-page-title-row">
+          <div>
+            <h1 className="app-page-title">Semesters</h1>
+            <p className="app-page-subtitle">
+              Manage terms, credits, course placement, and academic progress.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function OverallSummaryCard({
+  cumulative,
+  courseCount,
+}: {
+  cumulative: CumulativeSemesterStats
+  courseCount: number
+}) {
+  return (
+    <div className="space-y-5">
+      <Card className="gap-0 overflow-hidden rounded-2xl border-border/70 py-0">
+        <CardContent className="space-y-6 p-6">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              Overall Summary
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Track cumulative progress across every semester.
+            </p>
+          </div>
+
+          <div className="border-t border-border/70 pt-6">
+            <SummaryMetric
+              value={cumulative.gpa === null ? '—' : cumulative.gpa.toFixed(2)}
+              label="Overall GPA"
+              primary
+            />
+            <SummaryMetric value={cumulative.credits} label="Credits taken" />
+            <SummaryMetric value={courseCount} label="Total courses" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function SummaryMetric({
+  value,
+  label,
+  primary = false,
+}: {
+  value: number | string
+  label: string
+  primary?: boolean
+}) {
+  return (
+    <div className={cn(!primary && 'mt-5 border-t border-border/70 pt-5')}>
+      <div className={primary ? 'flex items-baseline gap-2' : undefined}>
+        <span
+          className={cn(
+            'font-semibold leading-none',
+            primary ? 'text-5xl text-primary' : 'text-3xl text-foreground'
+          )}
+        >
+          {value}
+        </span>
+      </div>
+      <div className="mt-2 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        {label}
+      </div>
+    </div>
+  )
+}
+
+function SemesterListCard({
+  semesters,
+  coursesBySemesterId,
+  gradesByCourseId,
+  currentSemester,
+  openSemesterIds,
+  unassignedCourses,
+  dragOverSemesterId,
+  draggingCourseId,
+  completedCount,
+  getTermGpa,
+  onCourseDragStart,
+  onCourseDragEnd,
+  onCourseDragOver,
+  onCourseDragLeave,
+  onCourseDrop,
+  onOpenCourseSettings,
+  onAssignCourseToCurrent,
+  onToggleSemester,
+  onOpenSemesterSettings,
+  onOpenAddCourse,
+  onOpenAddSemester,
+}: {
+  semesters: Semester[]
+  coursesBySemesterId: CoursesBySemesterId
+  gradesByCourseId: GradesByCourseId
+  currentSemester: Semester | null
+  openSemesterIds: Set<string>
+  unassignedCourses: Course[]
+  dragOverSemesterId: string | null
+  draggingCourseId: string | null
+  completedCount: number
+  getTermGpa: (semesterId: string) => number | null
+  onCourseDragStart: (event: DragEvent<HTMLDivElement>, courseId: string) => void
+  onCourseDragEnd: () => void
+  onCourseDragOver: (event: DragEvent, semesterId: string) => void
+  onCourseDragLeave: (event: DragEvent, semesterId: string) => void
+  onCourseDrop: (event: DragEvent, semesterId: string) => void
+  onOpenCourseSettings: (course: Course) => void
+  onAssignCourseToCurrent: (course: Course) => void
+  onToggleSemester: (semesterId: string) => void
+  onOpenSemesterSettings: (semester: Semester) => void
+  onOpenAddCourse: (semesterId: string) => void
+  onOpenAddSemester: () => void
+}) {
+  return (
+    <Card className="gap-0 overflow-hidden rounded-2xl border-border/70 py-0">
+      <CardContent className="p-0">
+        <div className="border-b border-border/70 px-6 py-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                All Semesters
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                View your courses grouped by semester.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <CalendarCheck2 className="size-4" />
+              {completedCount} completed
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3 overflow-x-auto p-4">
+          <UnassignedCoursesCard
+            courses={unassignedCourses}
+            gradesByCourseId={gradesByCourseId}
+            currentSemester={currentSemester}
+            dragOverSemesterId={dragOverSemesterId}
+            draggingCourseId={draggingCourseId}
+            onCourseDragStart={onCourseDragStart}
+            onCourseDragEnd={onCourseDragEnd}
+            onCourseDragOver={onCourseDragOver}
+            onCourseDragLeave={onCourseDragLeave}
+            onCourseDrop={onCourseDrop}
+            onOpenCourseSettings={onOpenCourseSettings}
+            onAssignCourseToCurrent={onAssignCourseToCurrent}
+          />
+          {semesters.length > 0 ? (
+            semesters.map((semester) => {
+              const semesterId = String(semester._id)
+              return (
+                <SemesterCard
+                  key={semesterId}
+                  semester={semester}
+                  courses={coursesBySemesterId.get(semesterId) ?? []}
+                  termGpa={getTermGpa(semesterId)}
+                  gradesByCourseId={gradesByCourseId}
+                  currentSemester={currentSemester}
+                  isOpen={openSemesterIds.has(semesterId)}
+                  dragOverSemesterId={dragOverSemesterId}
+                  draggingCourseId={draggingCourseId}
+                  onCourseDragStart={onCourseDragStart}
+                  onCourseDragEnd={onCourseDragEnd}
+                  onCourseDragOver={onCourseDragOver}
+                  onCourseDragLeave={onCourseDragLeave}
+                  onCourseDrop={onCourseDrop}
+                  onOpenCourseSettings={onOpenCourseSettings}
+                  onAssignCourseToCurrent={onAssignCourseToCurrent}
+                  onToggleSemester={onToggleSemester}
+                  onOpenSemesterSettings={onOpenSemesterSettings}
+                  onOpenAddCourse={onOpenAddCourse}
+                />
+              )
+            })
+          ) : (
+            <div className="rounded-xl border border-border/70 px-6 py-8 text-center text-sm text-muted-foreground">
+              Create your first semester to start organizing courses.
             </div>
           )}
-
           <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              setOpenSemesterIds((prev) => new Set([...(prev ?? defaultOpenSemesterIds), semId]))
-              setSettingsSemesterId(semId)
-              setSemesterSettingsName(semester.name ?? '')
-              setIsAddSemesterOpen(false)
-              setIsAddCourseOpen(false)
-              setSettingsCourseId(null)
-            }}
-            title="Semester settings"
+            variant="outline"
+            onClick={onOpenAddSemester}
+            className="h-11 w-full rounded-xl border-dashed border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
           >
-            <Settings className="size-4" />
+            <Plus className="mr-2 size-4" />
+            Add semester
           </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
-          <ChevronDown
-            className={cn(
-              'size-4 text-muted-foreground transition-transform',
-              isOpen && 'rotate-180'
-            )}
-          />
-        </button>
+function SemesterCard({
+  semester,
+  courses,
+  termGpa,
+  gradesByCourseId,
+  currentSemester,
+  isOpen,
+  dragOverSemesterId,
+  draggingCourseId,
+  onCourseDragStart,
+  onCourseDragEnd,
+  onCourseDragOver,
+  onCourseDragLeave,
+  onCourseDrop,
+  onOpenCourseSettings,
+  onAssignCourseToCurrent,
+  onToggleSemester,
+  onOpenSemesterSettings,
+  onOpenAddCourse,
+}: {
+  semester: Semester
+  courses: Course[]
+  termGpa: number | null
+  gradesByCourseId: GradesByCourseId
+  currentSemester: Semester | null
+  isOpen: boolean
+  dragOverSemesterId: string | null
+  draggingCourseId: string | null
+  onCourseDragStart: (event: DragEvent<HTMLDivElement>, courseId: string) => void
+  onCourseDragEnd: () => void
+  onCourseDragOver: (event: DragEvent, semesterId: string) => void
+  onCourseDragLeave: (event: DragEvent, semesterId: string) => void
+  onCourseDrop: (event: DragEvent, semesterId: string) => void
+  onOpenCourseSettings: (course: Course) => void
+  onAssignCourseToCurrent: (course: Course) => void
+  onToggleSemester: (semesterId: string) => void
+  onOpenSemesterSettings: (semester: Semester) => void
+  onOpenAddCourse: (semesterId: string) => void
+}) {
+  const semesterId = String(semester._id)
+  const statusLabel =
+    semester.isCurrent || semester.status === 'in_progress'
+      ? 'IN PROGRESS'
+      : 'COMPLETED'
 
-        {isOpen && (
-          <div className="pb-5">
-            <div className="min-w-[42rem]">
-              <div className="grid grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] gap-3 border-y border-[#e8ebef] bg-[#fbfcfd] px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                <span>Course</span>
-                <span className="text-center">Credits</span>
-                <span className="text-center">Grade</span>
-                <span className="text-center">Action</span>
-                <span></span>
-              </div>
+  return (
+    <section
+      onDragOver={(event) => onCourseDragOver(event, semesterId)}
+      onDragLeave={(event) => onCourseDragLeave(event, semesterId)}
+      onDrop={(event) => onCourseDrop(event, semesterId)}
+      className={cn(
+        'overflow-hidden rounded-xl border border-[#e1e5ea] bg-white transition-colors',
+        dragOverSemesterId === semesterId && 'border-primary/30 bg-[#f7f9fb]'
+      )}
+    >
+      <button
+        type="button"
+        onDragOver={(event) => onCourseDragOver(event, semesterId)}
+        onDrop={(event) => onCourseDrop(event, semesterId)}
+        onClick={() => onToggleSemester(semesterId)}
+        className="flex w-full items-center gap-4 bg-[#f7f9fb] p-4 text-left transition-colors hover:bg-[#f0f4f7]"
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-3">
+            <div className="truncate text-base font-semibold tracking-tight text-foreground">
+              {semester.name}
+            </div>
+            <span
+              className={cn(
+                'rounded-full border px-2 py-0.5 text-xs font-semibold tracking-wide',
+                semester.status === 'completed'
+                  ? 'border-border bg-muted text-muted-foreground'
+                  : 'border-primary/20 bg-primary/10 text-primary'
+              )}
+            >
+              {statusLabel}
+            </span>
+          </div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            {courses.length} courses
+          </div>
+        </div>
 
-              <div className="divide-y divide-[#edf0f3]">
-                {termCourses.length === 0 ? (
-                  <div className="px-4 py-5 text-sm text-muted-foreground">
-                    No courses in this semester yet.
-                  </div>
-                ) : (
-                  termCourses.map((course) => renderCourseRow(course))
-                )}
-              </div>
-
-              <div className="px-4 pt-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsAddCourseOpen(true)
-                      setAddCourseSemesterId(semId)
-                      setNewCourseName('')
-                      setNewCourseCredits('3')
-                      setIsAddSemesterOpen(false)
-                      setSettingsSemesterId(null)
-                      setSettingsCourseId(null)
-                    }}
-                    className="h-11 w-full rounded-xl border-dashed border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-                  >
-                    <Plus className="size-4 mr-2" />
-                    Add course
-                  </Button>
+        {termGpa !== null && (
+          <div className="hidden items-center gap-6 sm:flex">
+            <div className="text-right">
+              <div className="text-sm font-semibold text-foreground">
+                {termGpa.toFixed(2)} GPA
               </div>
             </div>
           </div>
         )}
-      </section>
-    )
-  })
 
-  const unassignedCourses = coursesBySemesterId.get('unassigned') ?? []
-  const unassignedCard = unassignedCourses.length > 0 ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            onOpenSemesterSettings(semester)
+          }}
+          title="Semester settings"
+        >
+          <Settings className="size-4" />
+        </Button>
+
+        <ChevronDown
+          className={cn(
+            'size-4 text-muted-foreground transition-transform',
+            isOpen && 'rotate-180'
+          )}
+        />
+      </button>
+
+      {isOpen && (
+        <CourseTable
+          courses={courses}
+          gradesByCourseId={gradesByCourseId}
+          currentSemester={currentSemester}
+          draggingCourseId={draggingCourseId}
+          onCourseDragStart={onCourseDragStart}
+          onCourseDragEnd={onCourseDragEnd}
+          onOpenCourseSettings={onOpenCourseSettings}
+          onAssignCourseToCurrent={onAssignCourseToCurrent}
+          onOpenAddCourse={() => onOpenAddCourse(semesterId)}
+        />
+      )}
+    </section>
+  )
+}
+
+function UnassignedCoursesCard({
+  courses,
+  gradesByCourseId,
+  currentSemester,
+  dragOverSemesterId,
+  draggingCourseId,
+  onCourseDragStart,
+  onCourseDragEnd,
+  onCourseDragOver,
+  onCourseDragLeave,
+  onCourseDrop,
+  onOpenCourseSettings,
+  onAssignCourseToCurrent,
+}: {
+  courses: Course[]
+  gradesByCourseId: GradesByCourseId
+  currentSemester: Semester | null
+  dragOverSemesterId: string | null
+  draggingCourseId: string | null
+  onCourseDragStart: (event: DragEvent<HTMLDivElement>, courseId: string) => void
+  onCourseDragEnd: () => void
+  onCourseDragOver: (event: DragEvent, semesterId: string) => void
+  onCourseDragLeave: (event: DragEvent, semesterId: string) => void
+  onCourseDrop: (event: DragEvent, semesterId: string) => void
+  onOpenCourseSettings: (course: Course) => void
+  onAssignCourseToCurrent: (course: Course) => void
+}) {
+  if (courses.length === 0) return null
+
+  return (
     <section
-      onDragOver={(event) => handleCourseDragOver(event, 'unassigned')}
-      onDragLeave={(event) => {
-        const nextTarget = event.relatedTarget
-        if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return
-        setDragOverSemesterId((prev) => (prev === 'unassigned' ? null : prev))
-      }}
-      onDrop={(event) => handleCourseDrop(event, 'unassigned')}
+      onDragOver={(event) => onCourseDragOver(event, 'unassigned')}
+      onDragLeave={(event) => onCourseDragLeave(event, 'unassigned')}
+      onDrop={(event) => onCourseDrop(event, 'unassigned')}
       className={cn(
-          'overflow-hidden rounded-xl border border-[#e1e5ea] bg-white transition-colors',
+        'overflow-hidden rounded-xl border border-[#e1e5ea] bg-white transition-colors',
         dragOverSemesterId === 'unassigned' && 'border-primary/30 bg-[#f7f9fb]'
       )}
     >
       <div className="bg-[#f7f9fb] p-4">
         <div className="flex items-center gap-3">
-          <div className="text-base font-semibold tracking-tight text-foreground">Unassigned</div>
+          <div className="text-base font-semibold tracking-tight text-foreground">
+            Unassigned
+          </div>
           <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-semibold tracking-wide text-muted-foreground">
             NEEDS SEMESTER
           </span>
@@ -531,490 +1422,197 @@ function SemestersPage() {
           Courses created outside a semester.
         </div>
       </div>
-      <div className="pb-5">
-        <div className="min-w-[42rem]">
-          <div className="grid grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] gap-3 border-y border-[#e8ebef] bg-[#fbfcfd] px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-            <span>Course</span>
-            <span className="text-center">Credits</span>
-            <span className="text-center">Grade</span>
-            <span className="text-center">Action</span>
-            <span></span>
-          </div>
-          <div className="divide-y divide-[#edf0f3]">
-            {unassignedCourses.map((course) =>
-              renderCourseRow(course, { showAssignToCurrent: true })
-            )}
-          </div>
-        </div>
-      </div>
+      <CourseTable
+        courses={courses}
+        gradesByCourseId={gradesByCourseId}
+        currentSemester={currentSemester}
+        draggingCourseId={draggingCourseId}
+        showAssignToCurrent
+        onCourseDragStart={onCourseDragStart}
+        onCourseDragEnd={onCourseDragEnd}
+        onOpenCourseSettings={onOpenCourseSettings}
+        onAssignCourseToCurrent={onAssignCourseToCurrent}
+      />
     </section>
-  ) : null
+  )
+}
+
+function CourseTable({
+  courses,
+  gradesByCourseId,
+  currentSemester,
+  draggingCourseId,
+  showAssignToCurrent = false,
+  onCourseDragStart,
+  onCourseDragEnd,
+  onOpenCourseSettings,
+  onAssignCourseToCurrent,
+  onOpenAddCourse,
+}: {
+  courses: Course[]
+  gradesByCourseId: GradesByCourseId
+  currentSemester: Semester | null
+  draggingCourseId: string | null
+  showAssignToCurrent?: boolean
+  onCourseDragStart: (event: DragEvent<HTMLDivElement>, courseId: string) => void
+  onCourseDragEnd: () => void
+  onOpenCourseSettings: (course: Course) => void
+  onAssignCourseToCurrent: (course: Course) => void
+  onOpenAddCourse?: () => void
+}) {
+  return (
+    <div className="pb-5">
+      <div className="min-w-[42rem]">
+        <CourseTableHeader />
+
+        <div className="divide-y divide-[#edf0f3]">
+          {courses.length === 0 ? (
+            <div className="px-4 py-5 text-sm text-muted-foreground">
+              No courses in this semester yet.
+            </div>
+          ) : (
+            courses.map((course) => (
+              <CourseRow
+                key={String(course._id)}
+                course={course}
+                gradesByCourseId={gradesByCourseId}
+                currentSemester={currentSemester}
+                draggingCourseId={draggingCourseId}
+                showAssignToCurrent={showAssignToCurrent}
+                onCourseDragStart={onCourseDragStart}
+                onCourseDragEnd={onCourseDragEnd}
+                onOpenCourseSettings={onOpenCourseSettings}
+                onAssignCourseToCurrent={onAssignCourseToCurrent}
+              />
+            ))
+          )}
+        </div>
+
+        {onOpenAddCourse && (
+          <div className="px-4 pt-3">
+            <Button
+              variant="outline"
+              onClick={onOpenAddCourse}
+              className="h-11 w-full rounded-xl border-dashed border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+            >
+              <Plus className="mr-2 size-4" />
+              Add course
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function CourseTableHeader() {
+  return (
+    <div className="grid grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] gap-3 border-y border-[#e8ebef] bg-[#fbfcfd] px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+      <span>Course</span>
+      <span className="text-center">Credits</span>
+      <span className="text-center">Grade</span>
+      <span className="text-center">Action</span>
+      <span></span>
+    </div>
+  )
+}
+
+function CourseRow({
+  course,
+  gradesByCourseId,
+  currentSemester,
+  draggingCourseId,
+  showAssignToCurrent = false,
+  onCourseDragStart,
+  onCourseDragEnd,
+  onOpenCourseSettings,
+  onAssignCourseToCurrent,
+}: {
+  course: Course
+  gradesByCourseId: GradesByCourseId
+  currentSemester: Semester | null
+  draggingCourseId: string | null
+  showAssignToCurrent?: boolean
+  onCourseDragStart: (event: DragEvent<HTMLDivElement>, courseId: string) => void
+  onCourseDragEnd: () => void
+  onOpenCourseSettings: (course: Course) => void
+  onAssignCourseToCurrent: (course: Course) => void
+}) {
+  const percent = calculateCoursePercent(course, gradesByCourseId)
+  const letter = percent === null ? null : getCourseLetter(course, percent)
+  const courseId = String(course._id)
 
   return (
-    <div className="app-page semesters-page">
-      {isAddSemesterOpen && (
-        <div
-          role="presentation"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
-          onMouseDown={() => setIsAddSemesterOpen(false)}
-        >
-          <div
-            role="presentation"
-            className="w-full max-w-md"
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            <Card className="border-border">
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-lg font-semibold text-foreground">
-                      Add semester
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Create a new term to organize courses.
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => setIsAddSemesterOpen(false)}>
-                    Close
-                  </Button>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Semester name</div>
-                  <Input
-                    value={newSemesterName}
-                    onChange={(e) => setNewSemesterName(e.target.value)}
-                    placeholder="e.g. Spring 2024"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Status</div>
-                  <select
-                    value={newSemesterStatus}
-                    onChange={(e) =>
-                      setNewSemesterStatus(
-                        e.target.value === 'completed' ? 'completed' : 'in_progress'
-                      )
-                    }
-                    className="w-full h-9 rounded-md border border-border bg-input px-3 text-sm text-foreground"
-                  >
-                    <option value="in_progress">In progress</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2 border-t border-border/60">
-                  <Button variant="outline" onClick={() => setIsAddSemesterOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleCreateSemester}>
-                    <CalendarPlus className="size-4 mr-2" />
-                    Create
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+    <div
+      draggable
+      onDragStart={(event) => onCourseDragStart(event, courseId)}
+      onDragEnd={onCourseDragEnd}
+      className={cn(
+        'grid cursor-grab grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/12 active:cursor-grabbing',
+        draggingCourseId === courseId && 'opacity-50'
       )}
-
-      {isAddCourseOpen && addCourseSemesterId && (
-        <div
-          role="presentation"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
-          onMouseDown={() => setIsAddCourseOpen(false)}
+    >
+      <div className="min-w-0 flex-1">
+        <Link
+          to="/grade-calculator/$courseId"
+          params={{ courseId: course._id }}
+          className="truncate font-medium text-foreground underline-offset-4 hover:underline"
         >
-          <div
-            role="presentation"
-            className="w-full max-w-md"
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            <Card className="border-border">
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-lg font-semibold text-foreground">
-                      Add course
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Add a class to this semester.
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => setIsAddCourseOpen(false)}>
-                    Close
-                  </Button>
-                </div>
+          {course.name}
+        </Link>
+      </div>
 
-                <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Course name</div>
-                  <Input
-                    value={newCourseName}
-                    onChange={(e) => setNewCourseName(e.target.value)}
-                    placeholder="e.g. Econ 101"
-                  />
-                </div>
+      <div className="text-center text-sm text-foreground">
+        {getCourseCredits(course)}
+      </div>
 
-                <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Credits</div>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
-                    value={newCourseCredits}
-                    onChange={(e) =>
-                      setNewCourseCredits(sanitizeNumberInput(e.target.value))
-                    }
-                    placeholder="3"
-                  />
-                </div>
+      <div className="text-center">
+        <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+          {percent === null || letter === null
+            ? '—'
+            : `${letter} (${Math.round(percent)}%)`}
+        </span>
+      </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t border-border/60">
-                  <Button variant="outline" onClick={() => setIsAddCourseOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleCreateCourse}>
-                    <Plus className="size-4 mr-2" />
-                    Add
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      {settingsCourseId && (
-        <div
-          role="presentation"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
-          onMouseDown={() => setSettingsCourseId(null)}
+      <div className="flex justify-center">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-8 rounded-xl px-3"
+          asChild
         >
-          <div
-            role="presentation"
-            className="w-full max-w-md"
-            onMouseDown={(e) => e.stopPropagation()}
+          <Link
+            to="/grade-calculator/$courseId"
+            params={{ courseId: course._id }}
           >
-            <Card className="border-border">
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-lg font-semibold text-foreground">
-                      Course settings
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Rename, edit credits, or delete this course.
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSettingsCourseId(null)}
-                    disabled={isCourseSettingsWorking}
-                  >
-                    Close
-                  </Button>
-                </div>
+            Open course
+          </Link>
+        </Button>
+      </div>
 
-                {(() => {
-                  const course = courseById.get(settingsCourseId) ?? null
-                  if (!course) {
-                    return (
-                      <div className="text-sm text-muted-foreground">
-                        Course not found.
-                      </div>
-                    )
-                  }
-                  return (
-                    <>
-                      <div className="space-y-1">
-                        <div className="text-xs text-muted-foreground">Course name</div>
-                        <Input
-                          value={courseSettingsName}
-                          onChange={(e) => setCourseSettingsName(e.target.value)}
-                          placeholder="e.g. Algebra II"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-xs text-muted-foreground">Credits</div>
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          value={courseSettingsCredits}
-                          onChange={(e) =>
-                            setCourseSettingsCredits(sanitizeNumberInput(e.target.value))
-                          }
-                          placeholder="3"
-                        />
-                      </div>
-
-                      <div className="pt-2 border-t border-border/60 flex items-center justify-between gap-2">
-                        <Button
-                          variant="destructive"
-                          onClick={handleDeleteCourseFromSettings}
-                          disabled={isCourseSettingsWorking}
-                        >
-                          <Trash2 className="size-4 mr-2" />
-                          Delete
-                        </Button>
-
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setSettingsCourseId(null)}
-                            disabled={isCourseSettingsWorking}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={handleSaveCourseSettings}
-                            disabled={!courseSettingsName.trim() || isCourseSettingsWorking}
-                          >
-                            Save
-                          </Button>
-                        </div>
-                      </div>
-                    </>
-                  )
-                })()}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      {settingsSemesterId && (
-        <div
-          role="presentation"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
-          onMouseDown={() => setSettingsSemesterId(null)}
+      <div className="flex items-center justify-end gap-1">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => onOpenCourseSettings(course)}
+          title="Course settings"
         >
-          <div
-            role="presentation"
-            className="w-full max-w-md"
-            onMouseDown={(e) => e.stopPropagation()}
+          <Settings className="size-4" />
+        </Button>
+
+        {showAssignToCurrent && currentSemester && (
+          <Button
+            size="icon-sm"
+            onClick={() => onAssignCourseToCurrent(course)}
+            title={`Assign to ${currentSemester.name}`}
           >
-            <Card className="border-border">
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-lg font-semibold text-foreground">
-                      Semester settings
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Rename, update status, or delete this semester.
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSettingsSemesterId(null)}
-                    disabled={isSemesterSettingsWorking}
-                  >
-                    Close
-                  </Button>
-                </div>
-
-                {(() => {
-                  const sem = semesters.find((s) => String(s._id) === settingsSemesterId) ?? null
-                  if (!sem) {
-                    return (
-                      <div className="text-sm text-muted-foreground">Semester not found.</div>
-                    )
-                  }
-                  return (
-                    <>
-                      <div className="space-y-1">
-                        <div className="text-xs text-muted-foreground">Semester name</div>
-                        <Input
-                          value={semesterSettingsName}
-                          onChange={(e) => setSemesterSettingsName(e.target.value)}
-                        />
-                      </div>
-
-                      <div className="flex flex-wrap items-end justify-between gap-3">
-                        <div className="w-44">
-                          <div className="text-xs text-muted-foreground mb-1">Status</div>
-                          <select
-                            value={sem.status}
-                            onChange={(e) =>
-                              updateSemesterStatus({
-                                id: sem._id,
-                                status: e.target.value,
-                              })
-                            }
-                            disabled={isSemesterSettingsWorking}
-                            className="w-full h-9 rounded-md border border-border bg-input px-3 text-sm text-foreground"
-                          >
-                            <option value="in_progress">In progress</option>
-                            <option value="completed">Completed</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-border/60 flex items-center justify-between gap-2">
-                        <Button
-                          variant="destructive"
-                          onClick={async () => {
-                            if (
-                              !window.confirm(
-                                `Delete “${sem.name}” and all courses/grades inside it? This cannot be undone.`
-                              )
-                            ) {
-                              return
-                            }
-                            await removeSemester({ id: sem._id })
-                            setSettingsSemesterId(null)
-                            setOpenSemesterIds((prev) => {
-                              const next = new Set(prev ?? defaultOpenSemesterIds)
-                              next.delete(String(sem._id))
-                              return next
-                            })
-                          }}
-                          disabled={isSemesterSettingsWorking}
-                        >
-                          <Trash2 className="size-4 mr-2" />
-                          Delete semester
-                        </Button>
-
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setSettingsSemesterId(null)}
-                            disabled={isSemesterSettingsWorking}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={handleSaveSemesterSettings}
-                            disabled={
-                              !semesterSettingsName.trim() || isSemesterSettingsWorking
-                            }
-                          >
-                            Save
-                          </Button>
-                        </div>
-                      </div>
-                    </>
-                  )
-                })()}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      <section className="app-page-header">
-        <div className="app-page-header-inner">
-          <div className="app-page-title-row">
-            <div>
-              <h1 className="app-page-title">Semesters</h1>
-              <p className="app-page-subtitle">
-                Manage terms, credits, course placement, and academic progress.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <main className="app-page-body">
-        <div className="app-page-body-narrow">
-          <div className="grid items-start gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
-            <div className="space-y-5">
-              <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
-                <CardContent className="space-y-6 p-6">
-                  <div>
-                    <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-                      Overall Summary
-                    </h2>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      Track cumulative progress across every semester.
-                    </p>
-                  </div>
-
-                  <div className="border-t border-border/70 pt-6">
-                    <div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-5xl font-semibold leading-none text-primary">
-                          {cumulative.gpa === null ? '—' : cumulative.gpa.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="mt-2 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        Overall GPA
-                      </div>
-                    </div>
-
-                    <div className="mt-5 border-t border-border/70 pt-5">
-                      <div className="text-3xl font-semibold leading-none text-foreground">
-                        {cumulative.credits}
-                      </div>
-                      <div className="mt-2 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        Credits taken
-                      </div>
-                    </div>
-
-                    <div className="mt-5 border-t border-border/70 pt-5">
-                      <div className="text-3xl font-semibold leading-none text-foreground">
-                        {courses.length}
-                      </div>
-                      <div className="mt-2 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        Total courses
-                      </div>
-                    </div>
-
-                  </div>
-
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
-              <CardContent className="p-0">
-                <div className="border-b border-border/70 px-6 py-5">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-                        All Semesters
-                      </h2>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        View your courses grouped by semester.
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CalendarCheck2 className="size-4" />
-                      {cumulative.semestersCompleted} completed
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3 overflow-x-auto p-4">
-                  {unassignedCard}
-                  {semesterCards.length > 0 ? (
-                    semesterCards
-                  ) : (
-                    <div className="rounded-xl border border-border/70 px-6 py-8 text-center text-sm text-muted-foreground">
-                      Create your first semester to start organizing courses.
-                    </div>
-                  )}
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsAddSemesterOpen(true)
-                      setSettingsSemesterId(null)
-                      setIsAddCourseOpen(false)
-                      setSettingsCourseId(null)
-                    }}
-                    className="h-11 w-full rounded-xl border-dashed border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-                  >
-                    <Plus className="size-4 mr-2" />
-                    Add semester
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </main>
+            <Plus className="size-4" />
+          </Button>
+        )}
+      </div>
     </div>
   )
 }
