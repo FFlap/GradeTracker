@@ -152,11 +152,11 @@ function CalendarPage() {
         </div>
       </section>
 
-      <main className="p-6">
+      <main className="p-4 sm:p-6">
         {!isLoaded ? null : !isSignedIn ? (
           <CalendarSignInPrompt />
         ) : (
-          <div className="grid w-full items-start gap-6 lg:grid-cols-[20.5rem_minmax(0,1fr)]">
+          <div className="grid w-full items-start gap-5 lg:grid-cols-[20.5rem_minmax(0,1fr)] lg:gap-6">
             <UpcomingSidebar
               upcoming={upcoming}
               todayISO={todayISO}
@@ -451,13 +451,13 @@ function MonthBoard({
             onToday={onToday}
           />
 
-          <div className="mt-7 overflow-x-auto">
-            <div className="min-w-[46rem] overflow-hidden rounded-xl border border-[#dfe4ea] bg-white">
+          <div className="mt-5 sm:mt-7">
+            <div className="overflow-hidden rounded-xl border border-[#dfe4ea] bg-white">
               <div className="grid grid-cols-7 border-b border-[#e5e9ee] bg-white">
                 {weekDays.map((day) => (
                   <div
                     key={day}
-                    className="px-4 py-3 text-center text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+                    className="px-1 py-2 text-center text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:px-4 sm:py-3 sm:text-[0.7rem] sm:tracking-[0.16em]"
                   >
                     {day}
                   </div>
@@ -507,8 +507,8 @@ function MonthBoardHeader({
   onToday: () => void
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4">
-      <div className="flex items-center gap-3">
+    <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-xl font-semibold tracking-tight text-foreground">
           Semester Calendar
         </h2>
@@ -517,9 +517,9 @@ function MonthBoardHeader({
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="grid grid-cols-[1fr_2.75rem_2.75rem] gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
         <Select value={String(monthCursor.month)} onValueChange={onSelectMonth}>
-          <SelectTrigger className="h-11 w-48 rounded-xl border-[#dfe4ea] bg-white text-base">
+          <SelectTrigger className="h-11 w-full rounded-xl border-[#dfe4ea] bg-white text-base sm:w-48">
             <SelectValue placeholder={formatMonthLabel(monthCursor)} />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
@@ -552,7 +552,7 @@ function MonthBoardHeader({
         </Button>
         <Button
           variant="outline"
-          className="h-11 rounded-xl border-[#dfe4ea] px-6 text-base"
+          className="col-span-full h-11 rounded-xl border-[#dfe4ea] px-6 text-base sm:col-span-auto"
           onClick={onToday}
           aria-label="Jump to current month"
           title="Today"
@@ -590,7 +590,7 @@ function MonthDayButton({
       disabled={!iso}
       onClick={() => iso && onOpenDay(iso)}
       className={cn(
-        'min-h-[clamp(6.6rem,9.6vh,7.8rem)] border-b border-r border-[#e5e9ee] px-4 py-3 text-left transition-colors',
+        'min-h-16 border-b border-r border-[#e5e9ee] px-1.5 py-2 text-left transition-colors sm:min-h-[clamp(6.6rem,9.6vh,7.8rem)] sm:px-4 sm:py-3',
         'hover:bg-[#f7f9fb] disabled:cursor-default disabled:hover:bg-white',
         index % 7 === 6 && 'border-r-0',
         'bg-white',
@@ -616,7 +616,7 @@ function MonthDayButton({
           {events.slice(0, 2).map((event) => (
             <div
               key={String(event._id)}
-              className="rounded-md bg-[#eaf2ff] px-2 py-1 text-xs leading-tight"
+              className="hidden rounded-md bg-[#eaf2ff] px-2 py-1 text-xs leading-tight sm:block"
             >
               <div className="truncate font-semibold text-primary">
                 {event.assignmentName?.trim() || 'Assessment'}
@@ -627,10 +627,13 @@ function MonthDayButton({
             </div>
           ))}
           {events.length > 2 && (
-            <div className="text-[0.68rem] font-medium text-muted-foreground">
+            <div className="hidden text-[0.68rem] font-medium text-muted-foreground sm:block">
               +{events.length - 2} more
             </div>
           )}
+          <div className="text-[0.65rem] font-semibold text-primary sm:hidden">
+            {events.length}
+          </div>
         </div>
       )}
     </button>

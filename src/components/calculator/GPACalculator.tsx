@@ -413,69 +413,84 @@ export function GPACalculator() {
             Add each course with its letter grade and credit hours.
           </div>
 
-          <div className="overflow-x-auto px-2 pb-5">
-            <div className="min-w-[34rem]">
-              <div className="grid grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] gap-3 border-b border-border/70 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+          <div className="px-2 pb-5">
+            <div>
+              <div className="hidden grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] gap-3 border-b border-border/70 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:grid">
                 <span>Course</span>
                 <span className="text-center">Grade</span>
                 <span className="text-center">Credits</span>
                 <span></span>
               </div>
 
-              <div className="divide-y divide-border/70">
+              <div className="space-y-3 sm:space-y-0 sm:divide-y sm:divide-border/70">
                 {courses.map((course) => (
                   <div
                     key={course.id}
-                    className="group grid grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/12"
+                    className="group grid grid-cols-1 items-center gap-3 rounded-xl border border-border/70 bg-card px-4 py-4 transition-colors hover:bg-muted/12 sm:grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] sm:gap-3 sm:rounded-none sm:border-0 sm:bg-transparent sm:py-3.5"
                   >
-                    <Input
-                      type="text"
-                      placeholder="e.g. Math 101"
-                      value={course.name}
-                      onChange={(e) =>
-                        handleUpdateCourse(course.id, 'name', e.target.value)
-                      }
-                      className="h-9 rounded-lg border-transparent bg-transparent px-2.5 shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
-                    />
-                    <Select
-                      value={course.grade}
-                      onValueChange={(value) =>
-                        handleUpdateCourse(course.id, 'grade', value)
-                      }
-                    >
-                      <SelectTrigger className="h-9 w-full rounded-lg border-transparent bg-transparent shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input">
-                        <SelectValue placeholder="Grade" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        {GRADE_OPTIONS.map((grade) => (
-                          <SelectItem key={grade} value={grade}>
-                            {grade}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="3"
-                      value={course.credits}
-                      onChange={(e) =>
-                        handleUpdateCourse(
-                          course.id,
-                          'credits',
-                          sanitizeNumberInput(e.target.value)
-                        )
-                      }
-                      className="h-9 rounded-lg border-transparent bg-transparent text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
-                    />
+                    <label className="space-y-1.5 sm:space-y-0">
+                      <span className="text-xs font-medium text-muted-foreground sm:sr-only">
+                        Course
+                      </span>
+                      <Input
+                        type="text"
+                        placeholder="e.g. Math 101"
+                        value={course.name}
+                        onChange={(e) =>
+                          handleUpdateCourse(course.id, 'name', e.target.value)
+                        }
+                        className="h-10 rounded-lg border-border/70 bg-input/70 px-2.5 shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent"
+                      />
+                    </label>
+                    <label className="space-y-1.5 sm:space-y-0">
+                      <span className="text-xs font-medium text-muted-foreground sm:sr-only">
+                        Grade
+                      </span>
+                      <Select
+                        value={course.grade}
+                        onValueChange={(value) =>
+                          handleUpdateCourse(course.id, 'grade', value)
+                        }
+                      >
+                        <SelectTrigger className="h-10 w-full rounded-lg border-border/70 bg-input/70 shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent">
+                          <SelectValue placeholder="Grade" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          {GRADE_OPTIONS.map((grade) => (
+                            <SelectItem key={grade} value={grade}>
+                              {grade}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </label>
+                    <label className="space-y-1.5 sm:space-y-0">
+                      <span className="text-xs font-medium text-muted-foreground sm:sr-only">
+                        Credits
+                      </span>
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="3"
+                        value={course.credits}
+                        onChange={(e) =>
+                          handleUpdateCourse(
+                            course.id,
+                            'credits',
+                            sanitizeNumberInput(e.target.value)
+                          )
+                        }
+                        className="h-10 rounded-lg border-border/70 bg-input/70 shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent sm:text-center"
+                      />
+                    </label>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDeleteCourse(course.id)}
-                      className={`h-9 w-9 rounded-xl text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive ${
+                      className={`h-10 w-full rounded-xl text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive sm:h-9 sm:w-9 ${
                         courses.length > 1
                           ? 'opacity-100'
-                          : 'opacity-0 group-hover:opacity-100'
+                          : 'hidden sm:inline-flex sm:opacity-0 sm:group-hover:opacity-100'
                       }`}
                       disabled={courses.length <= 1}
                     >

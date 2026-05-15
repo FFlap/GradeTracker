@@ -1176,7 +1176,7 @@ function SemesterListCard({
           </div>
         </div>
 
-        <div className="space-y-3 overflow-x-auto p-4">
+        <div className="space-y-3 p-3 sm:p-4">
           <UnassignedCoursesCard
             courses={unassignedCourses}
             gradesByCourseId={gradesByCourseId}
@@ -1297,10 +1297,10 @@ function SemesterCard({
         onDragOver={(event) => onCourseDragOver(event, semesterId)}
         onDrop={(event) => onCourseDrop(event, semesterId)}
         onClick={() => onToggleSemester(semesterId)}
-        className="flex w-full items-center gap-4 bg-[#f7f9fb] p-4 text-left transition-colors hover:bg-[#f0f4f7]"
+        className="flex w-full items-center gap-3 bg-[#f7f9fb] p-3 text-left transition-colors hover:bg-[#f0f4f7] sm:gap-4 sm:p-4"
       >
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
             <div className="truncate text-base font-semibold tracking-tight text-foreground">
               {semester.name}
             </div>
@@ -1462,7 +1462,7 @@ function CourseTable({
 }) {
   return (
     <div className="pb-5">
-      <div className="min-w-[42rem]">
+      <div>
         <CourseTableHeader />
 
         <div className="divide-y divide-[#edf0f3]">
@@ -1507,7 +1507,7 @@ function CourseTable({
 
 function CourseTableHeader() {
   return (
-    <div className="grid grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] gap-3 border-y border-[#e8ebef] bg-[#fbfcfd] px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+    <div className="hidden grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] gap-3 border-y border-[#e8ebef] bg-[#fbfcfd] px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:grid">
       <span>Course</span>
       <span className="text-center">Credits</span>
       <span className="text-center">Grade</span>
@@ -1548,7 +1548,7 @@ function CourseRow({
       onDragStart={(event) => onCourseDragStart(event, courseId)}
       onDragEnd={onCourseDragEnd}
       className={cn(
-        'grid cursor-grab grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/12 active:cursor-grabbing',
+        'grid cursor-grab grid-cols-1 items-start gap-3 px-4 py-3.5 transition-colors hover:bg-muted/12 active:cursor-grabbing sm:grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] sm:items-center',
         draggingCourseId === courseId && 'opacity-50'
       )}
     >
@@ -1562,11 +1562,17 @@ function CourseRow({
         </Link>
       </div>
 
-      <div className="text-center text-sm text-foreground">
-        {getCourseCredits(course)}
+      <div className="flex items-center justify-between gap-3 text-sm text-foreground sm:block sm:text-center">
+        <span className="text-xs font-medium text-muted-foreground sm:hidden">
+          Credits
+        </span>
+        <span>{getCourseCredits(course)}</span>
       </div>
 
-      <div className="text-center">
+      <div className="flex items-center justify-between gap-3 sm:block sm:text-center">
+        <span className="text-xs font-medium text-muted-foreground sm:hidden">
+          Grade
+        </span>
         <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
           {percent === null || letter === null
             ? '—'
@@ -1574,12 +1580,12 @@ function CourseRow({
         </span>
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex justify-stretch sm:justify-center">
         <Button
           type="button"
           variant="outline"
           size="sm"
-          className="h-8 rounded-xl px-3"
+          className="h-10 w-full rounded-xl px-3 sm:h-8 sm:w-auto"
           asChild
         >
           <Link

@@ -196,16 +196,16 @@ export function FinalGradeCalculator() {
             Enter percentages for your current course grade, final exam weight, and target grade.
           </div>
 
-          <div className="overflow-x-auto px-2 pb-5">
-            <div className="min-w-[34rem]">
-              <div className="grid grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] gap-3 border-b border-border/70 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+          <div className="px-2 pb-5">
+            <div>
+              <div className="hidden grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] gap-3 border-b border-border/70 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:grid">
                 <span>Metric</span>
                 <span className="text-center">Value</span>
                 <span></span>
               </div>
 
               <div className="divide-y divide-border/70">
-                <div className="group grid grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/12">
+                <div className="group grid grid-cols-1 items-center gap-2.5 px-4 py-3.5 transition-colors hover:bg-muted/12 sm:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] sm:gap-3">
                   <div>
                     <div className="font-medium text-foreground">Current grade</div>
                     <div className="text-sm text-muted-foreground">
@@ -225,7 +225,7 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-9 rounded-lg border-transparent bg-transparent pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
+                      className="h-10 rounded-lg border-border/70 bg-input/70 pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent"
                     />
                     <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       %
@@ -234,7 +234,7 @@ export function FinalGradeCalculator() {
                   <span />
                 </div>
 
-                <div className="group grid grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/12">
+                <div className="group grid grid-cols-1 items-center gap-2.5 px-4 py-3.5 transition-colors hover:bg-muted/12 sm:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] sm:gap-3">
                   <div>
                     <div className="font-medium text-foreground">Final exam weight</div>
                     <div className="text-sm text-muted-foreground">
@@ -254,7 +254,7 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-9 rounded-lg border-transparent bg-transparent pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
+                      className="h-10 rounded-lg border-border/70 bg-input/70 pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent"
                     />
                     <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       %
@@ -263,7 +263,7 @@ export function FinalGradeCalculator() {
                   <span />
                 </div>
 
-                <div className="group grid grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/12">
+                <div className="group grid grid-cols-1 items-center gap-2.5 px-4 py-3.5 transition-colors hover:bg-muted/12 sm:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] sm:gap-3">
                   <div>
                     <div className="font-medium text-foreground">Target grade</div>
                     <div className="text-sm text-muted-foreground">
@@ -283,7 +283,7 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-9 rounded-lg border-transparent bg-transparent pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input"
+                      className="h-10 rounded-lg border-border/70 bg-input/70 pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent"
                     />
                     <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       %

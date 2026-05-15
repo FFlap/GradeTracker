@@ -1,7 +1,7 @@
 import { useUser } from '@clerk/clerk-react'
 import { useLocation, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { Sidebar } from './Sidebar'
+import { MobileTopNav, Sidebar } from './Sidebar'
 import { cn } from '@/lib/utils'
 
 interface AppLayoutProps {
@@ -17,7 +17,6 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
       typeof window !== 'undefined' &&
       window.localStorage.getItem('sidebarCollapsed') === '1'
   )
-  const [isNarrowViewport, setIsNarrowViewport] = useState(false)
 
   // Redirect signed-in users from / to /grade-calculator
   useEffect(() => {
@@ -25,15 +24,6 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
       navigate({ to: '/grade-calculator' })
     }
   }, [isLoaded, isSignedIn, routerLocation.pathname, navigate])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const media = window.matchMedia('(max-width: 767px)')
-    const sync = () => setIsNarrowViewport(media.matches)
-    sync()
-    media.addEventListener('change', sync)
-    return () => media.removeEventListener('change', sync)
-  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -45,18 +35,17 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
     return null
   }
 
-  const effectiveSidebarCollapsed = sidebarCollapsed || isNarrowViewport
-
   return (
     <div className="flex min-h-screen bg-background">
+      <MobileTopNav />
       <Sidebar
-        collapsed={effectiveSidebarCollapsed}
+        collapsed={sidebarCollapsed}
         onToggleCollapsed={() => setSidebarCollapsed((v) => !v)}
       />
       <main
         className={cn(
-          'flex-1 transition-[margin] duration-300 ease-out',
-          effectiveSidebarCollapsed ? 'ml-16' : 'ml-60'
+          'flex-1 pt-16 transition-[margin] duration-300 ease-out md:pt-0',
+          sidebarCollapsed ? 'md:ml-16' : 'md:ml-60'
         )}
       >
         {children}

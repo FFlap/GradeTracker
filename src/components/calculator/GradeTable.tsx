@@ -26,9 +26,12 @@ export function GradeTable({
         <span></span>
       </div>
 
-      <div className="divide-y divide-border/60">
+      <div className="space-y-3 sm:space-y-0 sm:divide-y sm:divide-border/60">
         {rows.map((row) => (
-          <div key={row.id} className="px-5 py-3.5 transition-colors hover:bg-muted/12">
+          <div
+            key={row.id}
+            className="rounded-xl border border-border/70 bg-card px-4 py-4 transition-colors hover:bg-muted/12 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-5 sm:py-3.5"
+          >
             <GradeRow
               row={row}
               onUpdate={onUpdateRow}

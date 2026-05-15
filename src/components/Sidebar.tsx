@@ -9,9 +9,56 @@ import {
   ClipboardPenLine,
   GraduationCap,
   LogIn,
+  Menu,
+  X,
 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+
+function useNavigationItems() {
+  const location = useLocation()
+
+  return [
+    {
+      to: '/grade-calculator',
+      label: 'Grade Calculator',
+      icon: Calculator,
+      active:
+        location.pathname === '/grade-calculator' ||
+        location.pathname.startsWith('/grade-calculator/'),
+      signedInOnly: false,
+    },
+    {
+      to: '/gpa-calculator',
+      label: 'GPA Calculator',
+      icon: GraduationCap,
+      active: location.pathname === '/gpa-calculator',
+      signedInOnly: false,
+    },
+    {
+      to: '/final-exam',
+      label: 'Final Exam',
+      icon: ClipboardPenLine,
+      active: location.pathname === '/final-exam',
+      signedInOnly: false,
+    },
+    {
+      to: '/calendar',
+      label: 'Calendar',
+      icon: Calendar,
+      active: location.pathname === '/calendar',
+      signedInOnly: true,
+    },
+    {
+      to: '/semesters',
+      label: 'Semesters',
+      icon: CalendarDays,
+      active: location.pathname === '/semesters',
+      signedInOnly: true,
+    },
+  ] as const
+}
 
 function SectionLabel({
   label,
@@ -41,16 +88,8 @@ export function Sidebar({
   collapsed: boolean
   onToggleCollapsed: () => void
 }) {
-  const location = useLocation()
   const { isLoaded, user } = useUser()
-
-  const isGradeCalculatorActive =
-    location.pathname === '/grade-calculator' ||
-    location.pathname.startsWith('/grade-calculator/')
-  const isFinalExamActive = location.pathname === '/final-exam'
-  const isGpaCalculatorActive = location.pathname === '/gpa-calculator'
-  const isSemestersActive = location.pathname === '/semesters'
-  const isCalendarActive = location.pathname === '/calendar'
+  const navItems = useNavigationItems()
 
   const displayName =
     user?.fullName ??
@@ -78,7 +117,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 bottom-0 bg-sidebar border-r border-sidebar-border z-40 transition-[width] duration-300 ease-out',
+        'fixed left-0 top-0 bottom-0 z-40 hidden bg-sidebar border-r border-sidebar-border transition-[width] duration-300 ease-out md:block',
         collapsed ? 'w-16' : 'w-60'
       )}
     >
@@ -123,52 +162,41 @@ export function Sidebar({
 
         <div className="px-3">
           <SectionLabel label="Calculators" collapsedLabel="C" collapsed={collapsed} />
-          <Link
-            to="/grade-calculator"
-            className={navLinkClass(isGradeCalculatorActive)}
-            title="Grade Calculator"
-          >
-            <Calculator className="size-4" />
-            <span className={collapsedTextClass}>Grade Calculator</span>
-          </Link>
-
-          <Link
-            to="/gpa-calculator"
-            className={navLinkClass(isGpaCalculatorActive)}
-            title="GPA Calculator"
-          >
-            <GraduationCap className="size-4" />
-            <span className={collapsedTextClass}>GPA Calculator</span>
-          </Link>
-
-          <Link
-            to="/final-exam"
-            className={navLinkClass(isFinalExamActive)}
-            title="Final Exam"
-          >
-            <ClipboardPenLine className="size-4" />
-            <span className={collapsedTextClass}>Final Exam</span>
-          </Link>
+          {navItems
+            .filter((item) => !item.signedInOnly)
+            .map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={navLinkClass(item.active)}
+                  title={item.label}
+                >
+                  <Icon className="size-4" />
+                  <span className={collapsedTextClass}>{item.label}</span>
+                </Link>
+              )
+            })}
 
           <SignedIn>
             <SectionLabel label="Planning" collapsedLabel="P" collapsed={collapsed} />
-            <Link
-              to="/calendar"
-              className={navLinkClass(isCalendarActive)}
-              title="Calendar"
-            >
-              <Calendar className="size-4" />
-              <span className={collapsedTextClass}>Calendar</span>
-            </Link>
-
-            <Link
-              to="/semesters"
-              className={navLinkClass(isSemestersActive)}
-              title="Semesters"
-            >
-              <CalendarDays className="size-4" />
-              <span className={collapsedTextClass}>Semesters</span>
-            </Link>
+            {navItems
+              .filter((item) => item.signedInOnly)
+              .map((item) => {
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={navLinkClass(item.active)}
+                    title={item.label}
+                  >
+                    <Icon className="size-4" />
+                    <span className={collapsedTextClass}>{item.label}</span>
+                  </Link>
+                )
+              })}
           </SignedIn>
         </div>
 
@@ -227,5 +255,148 @@ export function Sidebar({
         </div>
       </nav>
     </aside>
+  )
+}
+
+export function MobileTopNav() {
+  const [isOpen, setIsOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  const { isLoaded, user } = useUser()
+  const navItems = useNavigationItems()
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false)
+    }
+
+    window.addEventListener('mousedown', handlePointerDown)
+    window.addEventListener('keydown', handleEscape)
+    return () => {
+      window.removeEventListener('mousedown', handlePointerDown)
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [isOpen])
+
+  const displayName =
+    user?.fullName ??
+    user?.username ??
+    user?.primaryEmailAddress?.emailAddress ??
+    'Account'
+
+  return (
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-sidebar-border bg-sidebar/95 backdrop-blur md:hidden">
+      <div ref={menuRef}>
+        <div className="flex h-16 items-center justify-between px-4">
+          <Link
+            to="/grade-calculator"
+            onClick={() => setIsOpen(false)}
+            className="flex min-w-0 items-center gap-2 font-semibold text-sidebar-foreground"
+          >
+            <span className="flex size-8 shrink-0 items-center justify-center rounded bg-foreground text-sm font-bold text-background">
+              G
+            </span>
+            <span className="truncate text-base">Grade Tracker</span>
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setIsOpen((value) => !value)}
+            className="inline-flex size-11 items-center justify-center rounded-md text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            aria-label={isOpen ? 'Close main menu' : 'Open main menu'}
+            aria-expanded={isOpen}
+          >
+            {isOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
+        </div>
+
+        <div className={cn('border-t border-sidebar-border bg-sidebar shadow-lg', !isOpen && 'hidden')}>
+          <nav className="px-2 py-2">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const content = (
+                <>
+                  <Icon className="size-4" />
+                  <span>{item.label}</span>
+                </>
+              )
+
+              if (item.signedInOnly) {
+                return (
+                  <SignedIn key={item.to}>
+                    <Link
+                      to={item.to}
+                      onClick={() => setIsOpen(false)}
+                      className={cn(
+                        'flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                        item.active
+                          ? 'bg-sidebar-accent text-primary'
+                          : 'text-sidebar-foreground/85 hover:bg-sidebar-accent/65 hover:text-sidebar-foreground'
+                      )}
+                    >
+                      {content}
+                    </Link>
+                  </SignedIn>
+                )
+              }
+
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    'flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    item.active
+                      ? 'bg-sidebar-accent text-primary'
+                      : 'text-sidebar-foreground/85 hover:bg-sidebar-accent/65 hover:text-sidebar-foreground'
+                  )}
+                >
+                  {content}
+                </Link>
+              )
+            })}
+          </nav>
+
+          <div className="border-t border-sidebar-border p-3">
+            <SignedIn>
+              <div className="flex items-center gap-3 rounded-md border border-sidebar-border/70 bg-sidebar-accent px-3 py-2">
+                <div
+                  className="min-w-0 flex-1 truncate text-sm text-sidebar-foreground/80"
+                  title={isLoaded ? displayName : undefined}
+                >
+                  {isLoaded ? displayName : '...'}
+                </div>
+                <UserButton
+                  afterSignOutUrl="/"
+                  appearance={{
+                    elements: {
+                      userButtonTrigger: 'size-8 p-0',
+                      avatarBox: 'size-8',
+                    },
+                  }}
+                />
+              </div>
+            </SignedIn>
+
+            <SignedOut>
+              <SignInButton mode="modal">
+                <Button className="h-11 w-full rounded-md" onClick={() => setIsOpen(false)}>
+                  <LogIn className="size-4 mr-2" />
+                  Sign In
+                </Button>
+              </SignInButton>
+            </SignedOut>
+          </div>
+        </div>
+      </div>
+    </header>
   )
 }

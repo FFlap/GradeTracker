@@ -185,7 +185,7 @@ function CourseSelectorInner({
 
   if (state.mode === 'creating') {
     return (
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <Input
           type="text"
           placeholder="Course name (e.g. Math 101)"
@@ -221,7 +221,7 @@ function CourseSelectorInner({
 
   if (state.mode === 'editing') {
     return (
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <Input
           type="text"
           placeholder="Course name (e.g. Math 101)"
@@ -256,7 +256,7 @@ function CourseSelectorInner({
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-col gap-2 sm:flex-row">
       <Select
         value={selectedCourseId ?? ('none' as const)}
         onValueChange={(value) =>
@@ -302,7 +302,7 @@ function CourseSelectorInner({
             disabled={state.isWorking}
             aria-expanded={state.isManageOpen}
             aria-haspopup="menu"
-            className="min-w-[7rem] justify-center gap-1.5 text-primary"
+            className="w-full justify-center gap-1.5 text-primary sm:w-auto sm:min-w-[7rem]"
           >
             <MoreHorizontal className="size-4" />
             Manage
@@ -364,7 +364,7 @@ function CourseSelectorInner({
             variant="outline"
             size="sm"
             disabled={state.isWorking}
-            className="min-w-[7rem] justify-center gap-1.5 text-primary"
+            className="w-full justify-center gap-1.5 text-primary sm:w-auto sm:min-w-[7rem]"
           >
             <MoreHorizontal className="size-4" />
             Manage
