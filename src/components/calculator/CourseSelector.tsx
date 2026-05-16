@@ -185,7 +185,7 @@ function CourseSelectorInner({
 
   if (state.mode === 'creating') {
     return (
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <div className="flex items-center gap-2">
         <Input
           type="text"
           placeholder="Course name (e.g. Math 101)"
@@ -197,12 +197,13 @@ function CourseSelectorInner({
             if (e.key === 'Enter') handleCreateCourse()
             if (e.key === 'Escape') dispatch({ type: 'set-mode', mode: 'select' })
           }}
-          className="flex-1"
+          className="h-10 min-w-0 flex-1 rounded-lg sm:h-9 sm:rounded-xl"
         />
         <Button
           size="icon"
           onClick={handleCreateCourse}
           disabled={!state.newCourseName.trim() || state.isWorking}
+          className="size-10 rounded-lg sm:size-9 sm:rounded-xl"
         >
           <Check className="size-4" />
         </Button>
@@ -211,6 +212,7 @@ function CourseSelectorInner({
           size="icon"
           onClick={() => dispatch({ type: 'set-mode', mode: 'select' })}
           disabled={state.isWorking}
+          className="size-10 rounded-lg sm:size-9 sm:rounded-xl"
         >
           <span className="sr-only">Cancel</span>
           <X className="size-4" />
@@ -221,7 +223,7 @@ function CourseSelectorInner({
 
   if (state.mode === 'editing') {
     return (
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <div className="flex items-center gap-2">
         <Input
           type="text"
           placeholder="Course name (e.g. Math 101)"
@@ -233,12 +235,13 @@ function CourseSelectorInner({
             if (e.key === 'Enter') handleRenameCourse()
             if (e.key === 'Escape') dispatch({ type: 'set-mode', mode: 'select' })
           }}
-          className="flex-1"
+          className="h-10 min-w-0 flex-1 rounded-lg sm:h-9 sm:rounded-xl"
         />
         <Button
           size="icon"
           onClick={handleRenameCourse}
           disabled={!state.editedCourseName.trim() || state.isWorking}
+          className="size-10 rounded-lg sm:size-9 sm:rounded-xl"
         >
           <Check className="size-4" />
         </Button>
@@ -247,6 +250,7 @@ function CourseSelectorInner({
           size="icon"
           onClick={() => dispatch({ type: 'set-mode', mode: 'select' })}
           disabled={state.isWorking}
+          className="size-10 rounded-lg sm:size-9 sm:rounded-xl"
         >
           <span className="sr-only">Cancel</span>
           <X className="size-4" />
@@ -256,7 +260,7 @@ function CourseSelectorInner({
   }
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row">
+    <div className="flex items-center gap-2">
       <Select
         value={selectedCourseId ?? ('none' as const)}
         onValueChange={(value) =>
@@ -266,7 +270,7 @@ function CourseSelectorInner({
       >
         <SelectTrigger
           className={cn(
-            'flex-1',
+            'h-10 min-w-0 flex-1 rounded-lg text-base sm:h-9 sm:rounded-xl sm:text-sm',
             selectedCourseId
               ? 'ring-2 ring-ring/35'
               : 'ring-1 ring-border/60'
@@ -289,7 +293,7 @@ function CourseSelectorInner({
       </Select>
 
       {isSignedIn ? (
-        <div ref={manageMenuRef} className="relative">
+        <div ref={manageMenuRef} className="relative shrink-0">
           <Button
             variant="outline"
             size="sm"
@@ -302,7 +306,7 @@ function CourseSelectorInner({
             disabled={state.isWorking}
             aria-expanded={state.isManageOpen}
             aria-haspopup="menu"
-            className="w-full justify-center gap-1.5 text-primary sm:w-auto sm:min-w-[7rem]"
+            className="h-10 w-[6.75rem] justify-center gap-1.5 rounded-lg text-primary sm:h-8 sm:w-auto sm:min-w-[7rem] sm:rounded-lg"
           >
             <MoreHorizontal className="size-4" />
             Manage
@@ -364,7 +368,7 @@ function CourseSelectorInner({
             variant="outline"
             size="sm"
             disabled={state.isWorking}
-            className="w-full justify-center gap-1.5 text-primary sm:w-auto sm:min-w-[7rem]"
+            className="h-10 w-[6.75rem] justify-center gap-1.5 rounded-lg text-primary sm:h-8 sm:w-auto sm:min-w-[7rem] sm:rounded-lg"
           >
             <MoreHorizontal className="size-4" />
             Manage

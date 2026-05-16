@@ -151,7 +151,7 @@ code {
   }
 
   .app-page-header-inner {
-    @apply px-4 py-6 sm:px-6 sm:py-8;
+    @apply px-4 py-5 sm:px-6 sm:py-8;
   }
 
   .app-page-title-row {
@@ -159,15 +159,15 @@ code {
   }
 
   .app-page-title {
-    @apply text-2xl font-semibold tracking-tight text-foreground sm:text-[1.8rem];
+    @apply text-[1.45rem] font-semibold tracking-tight text-foreground sm:text-[1.8rem];
   }
 
   .app-page-subtitle {
-    @apply mt-2 max-w-2xl text-[0.95rem] leading-6 text-muted-foreground/85;
+    @apply mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground/85 sm:mt-2 sm:text-[0.95rem];
   }
 
   .app-page-body {
-    @apply px-4 py-5 sm:px-6 sm:py-8;
+    @apply px-4 py-4 sm:px-6 sm:py-8;
   }
 
   .app-page-body-narrow {

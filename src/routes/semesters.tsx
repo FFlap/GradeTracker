@@ -635,7 +635,7 @@ function SemestersPageView({ model }: { model: SemestersPageModel }) {
 
       <main className="app-page-body">
         <div className="app-page-body-narrow">
-          <div className="grid items-start gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
+          <div className="grid items-start gap-4 sm:gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
             <OverallSummaryCard
               cumulative={model.cumulative}
               courseCount={model.courses.length}
@@ -1057,10 +1057,10 @@ function OverallSummaryCard({
 }) {
   return (
     <div className="space-y-5">
-      <Card className="gap-0 overflow-hidden rounded-2xl border-border/70 py-0">
-        <CardContent className="space-y-6 p-6">
+      <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
+        <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
               Overall Summary
             </h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -1068,7 +1068,7 @@ function OverallSummaryCard({
             </p>
           </div>
 
-          <div className="border-t border-border/70 pt-6">
+          <div className="border-t border-border/70 pt-4 sm:pt-6">
             <SummaryMetric
               value={cumulative.gpa === null ? '—' : cumulative.gpa.toFixed(2)}
               label="Overall GPA"
@@ -1093,18 +1093,18 @@ function SummaryMetric({
   primary?: boolean
 }) {
   return (
-    <div className={cn(!primary && 'mt-5 border-t border-border/70 pt-5')}>
+    <div className={cn(!primary && 'mt-4 border-t border-border/70 pt-4 sm:mt-5 sm:pt-5')}>
       <div className={primary ? 'flex items-baseline gap-2' : undefined}>
         <span
           className={cn(
             'font-semibold leading-none',
-            primary ? 'text-5xl text-primary' : 'text-3xl text-foreground'
+            primary ? 'text-4xl text-primary sm:text-5xl' : 'text-2xl text-foreground sm:text-3xl'
           )}
         >
           {value}
         </span>
       </div>
-      <div className="mt-2 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+      <div className="mt-2 text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-[0.72rem] sm:tracking-[0.14em]">
         {label}
       </div>
     </div>
@@ -1157,19 +1157,19 @@ function SemesterListCard({
   onOpenAddSemester: () => void
 }) {
   return (
-    <Card className="gap-0 overflow-hidden rounded-2xl border-border/70 py-0">
+    <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
       <CardContent className="p-0">
-        <div className="border-b border-border/70 px-6 py-5">
+        <div className="border-b border-border/70 px-4 py-4 sm:px-6 sm:py-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                 All Semesters
               </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-1.5 text-xs text-muted-foreground sm:mt-2 sm:text-sm">
                 View your courses grouped by semester.
               </p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground sm:text-sm">
               <CalendarCheck2 className="size-4" />
               {completedCount} completed
             </div>
@@ -1219,14 +1219,14 @@ function SemesterListCard({
               )
             })
           ) : (
-            <div className="rounded-xl border border-border/70 px-6 py-8 text-center text-sm text-muted-foreground">
+            <div className="rounded-lg border border-border/70 px-4 py-6 text-center text-xs text-muted-foreground sm:rounded-xl sm:px-6 sm:py-8 sm:text-sm">
               Create your first semester to start organizing courses.
             </div>
           )}
           <Button
             variant="outline"
             onClick={onOpenAddSemester}
-            className="h-11 w-full rounded-xl border-dashed border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+            className="h-10 w-full rounded-lg border-dashed border-border/80 bg-card text-sm hover:border-primary/40 hover:bg-primary/5 hover:text-primary sm:h-11 sm:rounded-xl"
           >
             <Plus className="mr-2 size-4" />
             Add semester

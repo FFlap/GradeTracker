@@ -284,11 +284,11 @@ export function GPACalculator() {
   }
 
   return (
-    <div className="grid items-start gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
-      <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
-        <CardContent className="space-y-6 p-6">
+    <div className="grid items-start gap-4 lg:gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
+      <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 lg:rounded-2xl">
+        <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground lg:text-2xl">
               GPA Summary
             </h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -296,7 +296,7 @@ export function GPACalculator() {
             </p>
           </div>
 
-          <div className="space-y-3 border-t border-border/70 pt-5">
+          <div className="space-y-3 border-t border-border/70 pt-4 sm:pt-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="text-sm">
                 <span className="font-medium text-foreground">Letter scale</span>{' '}
@@ -316,7 +316,7 @@ export function GPACalculator() {
 
             {isEditingScale && (
               <div className="space-y-3 rounded-xl border border-border/70 bg-muted/25 p-3.5">
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
                   {scaleDraft.map((entry, index) => (
                     <div key={entry.letter} className="flex items-center gap-2">
                       <div className="w-8 text-sm font-medium text-foreground">
@@ -350,30 +350,30 @@ export function GPACalculator() {
 
           {result && (
             <div className="border-t border-border/70 pt-6">
-              <div className="space-y-4">
-                <div className="rounded-xl border border-primary/15 bg-primary/5 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
-                  <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-primary">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="rounded-lg border border-primary/15 bg-primary/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] lg:rounded-xl sm:p-5">
+                  <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-primary lg:text-[0.72rem] sm:tracking-[0.14em]">
                     GPA
                   </div>
-                  <div className={`mt-3 text-6xl font-semibold leading-none ${getGPAColor(result.gpa)}`}>
+                  <div className={`mt-2 text-5xl font-semibold leading-none sm:mt-3 lg:text-6xl ${getGPAColor(result.gpa)}`}>
                     {result.gpa.toFixed(2)}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl border border-border/70 bg-card/90 px-4 py-3.5">
-                    <div className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <div className="grid grid-cols-2 gap-2 lg:gap-3">
+                  <div className="rounded-lg border border-border/70 bg-card/90 px-3 py-3 lg:rounded-xl lg:px-4 lg:py-3.5">
+                    <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground lg:text-[0.72rem] sm:tracking-[0.12em]">
                       Credits
                     </div>
-                    <div className="mt-4 text-3xl font-semibold leading-none text-foreground">
+                    <div className="mt-3 text-2xl font-semibold leading-none text-foreground sm:mt-4 lg:text-3xl">
                       {result.totalCredits}
                     </div>
                   </div>
-                  <div className="rounded-xl border border-border/70 bg-card/90 px-4 py-3.5">
-                    <div className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <div className="rounded-lg border border-border/70 bg-card/90 px-3 py-3 lg:rounded-xl lg:px-4 lg:py-3.5">
+                    <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground lg:text-[0.72rem] sm:tracking-[0.12em]">
                       Points
                     </div>
-                    <div className="mt-4 text-3xl font-semibold leading-none text-foreground">
+                    <div className="mt-3 text-2xl font-semibold leading-none text-foreground sm:mt-4 lg:text-3xl">
                       {result.totalPoints.toFixed(1)}
                     </div>
                   </div>
@@ -388,12 +388,12 @@ export function GPACalculator() {
             </div>
           )}
 
-          <div className="flex gap-3 pt-1">
-            <Button onClick={handleCalculate} className="h-11 flex-1 rounded-xl">
+          <div className="flex gap-2 pt-1 lg:gap-3">
+            <Button onClick={handleCalculate} className="h-10 flex-1 rounded-lg text-sm lg:h-11 lg:rounded-xl">
               <Calculator className="size-4 mr-2" />
               Calculate
             </Button>
-            <Button variant="outline" onClick={handleReset} className="h-11 flex-1 rounded-xl">
+            <Button variant="outline" onClick={handleReset} className="h-10 flex-1 rounded-lg text-sm lg:h-11 lg:rounded-xl">
               <RotateCcw className="size-4 mr-2" />
               Reset
             </Button>
@@ -401,35 +401,35 @@ export function GPACalculator() {
         </CardContent>
       </Card>
 
-      <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
+      <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 lg:rounded-2xl">
         <CardContent className="p-0">
-          <div className="border-b border-border/70 px-6 py-5">
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+          <div className="border-b border-border/70 px-4 py-4 lg:px-6 lg:py-5">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground lg:text-2xl">
               Course Entry
             </h2>
           </div>
 
-          <div className="px-6 py-4 text-sm text-muted-foreground">
+          <div className="px-4 py-3 text-xs text-muted-foreground lg:px-6 lg:py-4 lg:text-sm">
             Add each course with its letter grade and credit hours.
           </div>
 
-          <div className="px-2 pb-5">
-            <div>
-              <div className="hidden grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] gap-3 border-b border-border/70 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:grid">
+          <div className="overflow-x-auto px-1.5 pb-4 lg:px-2 sm:pb-5">
+            <div className="min-w-[25rem] lg:min-w-[34rem]">
+              <div className="grid grid-cols-[minmax(9rem,1fr)_5.5rem_4.5rem_2rem] gap-2 border-b border-border/70 px-3 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground lg:grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3 lg:text-[0.72rem]">
                 <span>Course</span>
                 <span className="text-center">Grade</span>
                 <span className="text-center">Credits</span>
                 <span></span>
               </div>
 
-              <div className="space-y-3 sm:space-y-0 sm:divide-y sm:divide-border/70">
+              <div className="divide-y divide-border/70">
                 {courses.map((course) => (
                   <div
                     key={course.id}
-                    className="group grid grid-cols-1 items-center gap-3 rounded-xl border border-border/70 bg-card px-4 py-4 transition-colors hover:bg-muted/12 sm:grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] sm:gap-3 sm:rounded-none sm:border-0 sm:bg-transparent sm:py-3.5"
+                    className="group grid grid-cols-[minmax(9rem,1fr)_5.5rem_4.5rem_2rem] items-center gap-2 px-3 py-2.5 transition-colors hover:bg-muted/12 lg:grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3.5"
                   >
-                    <label className="space-y-1.5 sm:space-y-0">
-                      <span className="text-xs font-medium text-muted-foreground sm:sr-only">
+                    <label>
+                      <span className="sr-only">
                         Course
                       </span>
                       <Input
@@ -439,11 +439,11 @@ export function GPACalculator() {
                         onChange={(e) =>
                           handleUpdateCourse(course.id, 'name', e.target.value)
                         }
-                        className="h-10 rounded-lg border-border/70 bg-input/70 px-2.5 shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent"
+                        className="h-8 rounded-md border-transparent bg-transparent px-2 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-2.5 lg:text-sm"
                       />
                     </label>
-                    <label className="space-y-1.5 sm:space-y-0">
-                      <span className="text-xs font-medium text-muted-foreground sm:sr-only">
+                    <label>
+                      <span className="sr-only">
                         Grade
                       </span>
                       <Select
@@ -452,7 +452,7 @@ export function GPACalculator() {
                           handleUpdateCourse(course.id, 'grade', value)
                         }
                       >
-                        <SelectTrigger className="h-10 w-full rounded-lg border-border/70 bg-input/70 shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent">
+                        <SelectTrigger className="h-8 w-full rounded-md border-transparent bg-transparent px-2 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-3 lg:text-sm">
                           <SelectValue placeholder="Grade" />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
@@ -464,8 +464,8 @@ export function GPACalculator() {
                         </SelectContent>
                       </Select>
                     </label>
-                    <label className="space-y-1.5 sm:space-y-0">
-                      <span className="text-xs font-medium text-muted-foreground sm:sr-only">
+                    <label>
+                      <span className="sr-only">
                         Credits
                       </span>
                       <Input
@@ -480,32 +480,32 @@ export function GPACalculator() {
                             sanitizeNumberInput(e.target.value)
                           )
                         }
-                        className="h-10 rounded-lg border-border/70 bg-input/70 shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent sm:text-center"
+                        className="h-8 rounded-md border-transparent bg-transparent px-1 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
                       />
                     </label>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDeleteCourse(course.id)}
-                      className={`h-10 w-full rounded-xl text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive sm:h-9 sm:w-9 ${
+                      className={`size-7 rounded-md text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:h-9 lg:w-9 lg:rounded-xl ${
                         courses.length > 1
                           ? 'opacity-100'
-                          : 'hidden sm:inline-flex sm:opacity-0 sm:group-hover:opacity-100'
+                          : 'opacity-0 group-hover:opacity-100'
                       }`}
                       disabled={courses.length <= 1}
                     >
-                      <X className="size-4" />
+                      <X className="size-3.5 lg:size-4" />
                     </Button>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="px-4 pt-3">
+            <div className="px-3 pt-3 lg:px-4">
               <Button
                 variant="outline"
                 onClick={handleAddCourse}
-                className="h-11 w-full rounded-xl border-dashed border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                className="h-10 w-full rounded-lg border-dashed border-border/80 bg-card text-sm hover:border-primary/40 hover:bg-primary/5 hover:text-primary lg:h-11 lg:rounded-xl"
               >
                 <Plus className="size-4 mr-2" />
                 Add course

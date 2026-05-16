@@ -113,11 +113,11 @@ export function FinalGradeCalculator() {
   }
 
   return (
-    <div className="grid items-start gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
-      <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
-        <CardContent className="space-y-6 p-6">
+    <div className="grid items-start gap-4 lg:gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
+      <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 lg:rounded-2xl">
+        <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground lg:text-2xl">
               Final Summary
             </h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -129,23 +129,23 @@ export function FinalGradeCalculator() {
             <div className="border-t border-border/70 pt-6">
               {result.isPossible ? (
                 <div className="space-y-4">
-                  <div className="rounded-xl border border-primary/15 bg-primary/5 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
-                    <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-primary">
+                  <div className="rounded-lg border border-primary/15 bg-primary/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] lg:rounded-xl sm:p-5">
+                    <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-primary lg:text-[0.72rem] sm:tracking-[0.14em]">
                       Required score
                     </div>
                     <div className="mt-3 flex items-baseline gap-3">
-                      <span className="text-6xl font-semibold leading-none text-primary">
+                      <span className="text-5xl font-semibold leading-none text-primary lg:text-6xl">
                         {result.neededGrade.toFixed(1)}%
                       </span>
                     </div>
                   </div>
                 </div>
               ) : result.neededGrade > 100 ? (
-                <div className="rounded-xl border border-destructive/25 bg-destructive/5 p-5">
-                  <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-destructive">
+                <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4 lg:rounded-xl sm:p-5">
+                  <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-destructive lg:text-[0.72rem] sm:tracking-[0.14em]">
                     Not achievable
                   </div>
-                  <div className="mt-3 text-4xl font-semibold leading-none text-destructive">
+                  <div className="mt-2 text-3xl font-semibold leading-none text-destructive sm:mt-3 lg:text-4xl">
                     {result.neededGrade.toFixed(1)}%
                   </div>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -153,8 +153,8 @@ export function FinalGradeCalculator() {
                   </p>
                 </div>
               ) : (
-                <div className="rounded-xl border border-primary/15 bg-primary/5 p-5">
-                  <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-primary">
+                <div className="rounded-lg border border-primary/15 bg-primary/5 p-4 lg:rounded-xl sm:p-5">
+                  <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-primary lg:text-[0.72rem] sm:tracking-[0.14em]">
                     Already reached
                   </div>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -171,12 +171,12 @@ export function FinalGradeCalculator() {
             </div>
           )}
 
-          <div className="flex gap-3 pt-1">
-            <Button onClick={handleCalculate} className="h-11 flex-1 rounded-xl">
+          <div className="flex gap-2 pt-1 lg:gap-3">
+            <Button onClick={handleCalculate} className="h-10 flex-1 rounded-lg text-sm lg:h-11 lg:rounded-xl">
               <Calculator className="size-4 mr-2" />
               Calculate
             </Button>
-            <Button variant="outline" onClick={handleReset} className="h-11 flex-1 rounded-xl">
+            <Button variant="outline" onClick={handleReset} className="h-10 flex-1 rounded-lg text-sm lg:h-11 lg:rounded-xl">
               <RotateCcw className="size-4 mr-2" />
               Reset
             </Button>
@@ -184,31 +184,31 @@ export function FinalGradeCalculator() {
         </CardContent>
       </Card>
 
-      <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
+      <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 lg:rounded-2xl">
         <CardContent className="p-0">
-          <div className="border-b border-border/70 px-6 py-5">
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+          <div className="border-b border-border/70 px-4 py-4 lg:px-6 lg:py-5">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground lg:text-2xl">
               Exam Inputs
             </h2>
           </div>
 
-          <div className="px-6 py-4 text-sm text-muted-foreground">
+          <div className="px-4 py-3 text-xs text-muted-foreground lg:px-6 lg:py-4 lg:text-sm">
             Enter percentages for your current course grade, final exam weight, and target grade.
           </div>
 
-          <div className="px-2 pb-5">
-            <div>
-              <div className="hidden grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] gap-3 border-b border-border/70 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:grid">
+          <div className="overflow-x-auto px-1.5 pb-4 lg:px-2 sm:pb-5">
+            <div className="min-w-[24rem] lg:min-w-[34rem]">
+              <div className="grid grid-cols-[minmax(10rem,1fr)_7rem_1rem] gap-2 border-b border-border/70 px-3 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground lg:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3 lg:text-[0.72rem]">
                 <span>Metric</span>
                 <span className="text-center">Value</span>
                 <span></span>
               </div>
 
               <div className="divide-y divide-border/70">
-                <div className="group grid grid-cols-1 items-center gap-2.5 px-4 py-3.5 transition-colors hover:bg-muted/12 sm:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] sm:gap-3">
+                <div className="group grid grid-cols-[minmax(10rem,1fr)_7rem_1rem] items-center gap-2 px-3 py-2.5 transition-colors hover:bg-muted/12 lg:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3.5">
                   <div>
-                    <div className="font-medium text-foreground">Current grade</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm font-medium text-foreground lg:text-base">Current grade</div>
+                    <div className="text-xs text-muted-foreground lg:text-sm">
                       Your grade before the final exam
                     </div>
                   </div>
@@ -225,19 +225,19 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-10 rounded-lg border-border/70 bg-input/70 pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent"
+                      className="h-8 rounded-md border-transparent bg-transparent pr-6 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
                     />
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %
                     </span>
                   </div>
                   <span />
                 </div>
 
-                <div className="group grid grid-cols-1 items-center gap-2.5 px-4 py-3.5 transition-colors hover:bg-muted/12 sm:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] sm:gap-3">
+                <div className="group grid grid-cols-[minmax(10rem,1fr)_7rem_1rem] items-center gap-2 px-3 py-2.5 transition-colors hover:bg-muted/12 lg:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3.5">
                   <div>
-                    <div className="font-medium text-foreground">Final exam weight</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm font-medium text-foreground lg:text-base">Final exam weight</div>
+                    <div className="text-xs text-muted-foreground lg:text-sm">
                       How much the final counts
                     </div>
                   </div>
@@ -254,19 +254,19 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-10 rounded-lg border-border/70 bg-input/70 pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent"
+                      className="h-8 rounded-md border-transparent bg-transparent pr-6 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
                     />
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %
                     </span>
                   </div>
                   <span />
                 </div>
 
-                <div className="group grid grid-cols-1 items-center gap-2.5 px-4 py-3.5 transition-colors hover:bg-muted/12 sm:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] sm:gap-3">
+                <div className="group grid grid-cols-[minmax(10rem,1fr)_7rem_1rem] items-center gap-2 px-3 py-2.5 transition-colors hover:bg-muted/12 lg:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3.5">
                   <div>
-                    <div className="font-medium text-foreground">Target grade</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm font-medium text-foreground lg:text-base">Target grade</div>
+                    <div className="text-xs text-muted-foreground lg:text-sm">
                       The overall grade you want
                     </div>
                   </div>
@@ -283,9 +283,9 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-10 rounded-lg border-border/70 bg-input/70 pr-8 text-center shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent"
+                      className="h-8 rounded-md border-transparent bg-transparent pr-6 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
                     />
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %
                     </span>
                   </div>

@@ -24,9 +24,9 @@ export function GradeRow({
   const dateInputRef = useRef<HTMLInputElement | null>(null)
 
   return (
-    <div className="group grid grid-cols-1 items-center gap-3 sm:grid-cols-[1fr_150px_100px_100px_40px] sm:gap-3.5">
-      <label className="space-y-1.5 sm:space-y-0">
-        <span className="text-xs font-medium text-muted-foreground sm:sr-only">
+    <div className="group grid grid-cols-[minmax(8rem,1fr)_7rem_4.5rem_4.5rem_2rem] items-center gap-2 lg:grid-cols-[1fr_150px_100px_100px_40px] lg:gap-3.5">
+      <label>
+        <span className="sr-only">
           Assignment
         </span>
         <Input
@@ -34,11 +34,11 @@ export function GradeRow({
           placeholder="e.g. Homework"
           value={row.assignment}
           onChange={(e) => onUpdate(row.id, 'assignment', e.target.value)}
-          className="h-10 rounded-lg border-border/70 bg-input/70 px-2.5 shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent"
+          className="h-8 rounded-md border-transparent bg-transparent px-2 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-2.5 lg:text-sm"
         />
       </label>
       <div>
-        <span className="mb-1.5 block text-xs font-medium text-muted-foreground sm:sr-only">
+        <span className="sr-only">
           Date
         </span>
         <div className="relative">
@@ -60,34 +60,34 @@ export function GradeRow({
                 el.click()
               }
             }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 size-7 rounded-lg transition-colors hover:bg-accent/45"
+            className="absolute left-1 top-1/2 size-6 -translate-y-1/2 rounded-md transition-colors hover:bg-accent/45 lg:left-2 lg:size-7 lg:rounded-lg"
             aria-label="Pick date"
             title="Pick date"
           >
-            <CalendarDays className="size-4 mx-auto text-primary" />
+            <CalendarDays className="mx-auto size-3.5 text-primary lg:size-4" />
           </button>
           <Input
             ref={dateInputRef}
             type="date"
             value={row.date}
             onChange={(e) => onUpdate(row.id, 'date', e.target.value)}
-            className="h-10 rounded-lg border-border/70 bg-input/70 pl-9 pr-9 text-sm shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent"
+            className="h-8 rounded-md border-transparent bg-transparent pl-7 pr-7 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pl-9 lg:pr-9 lg:text-sm"
           />
           {row.date.trim().length > 0 && (
             <button
               type="button"
               onClick={() => onUpdate(row.id, 'date', '')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 size-7 rounded-lg text-muted-foreground transition-colors hover:bg-accent/45 hover:text-foreground"
+              className="absolute right-1 top-1/2 size-6 -translate-y-1/2 rounded-md text-muted-foreground transition-colors hover:bg-accent/45 hover:text-foreground lg:right-2 lg:size-7 lg:rounded-lg"
               aria-label="Clear date"
               title="Clear date"
             >
-              <X className="size-4 mx-auto" />
+              <X className="mx-auto size-3.5 lg:size-4" />
             </button>
           )}
         </div>
       </div>
-      <label className="space-y-1.5 sm:space-y-0">
-        <span className="text-xs font-medium text-muted-foreground sm:sr-only">
+      <label>
+        <span className="sr-only">
           Grade
         </span>
         <Input
@@ -96,11 +96,11 @@ export function GradeRow({
           onChange={(e) =>
             onUpdate(row.id, 'grade', sanitizeGradeInput(e.target.value))
           }
-          className="h-10 rounded-lg border-border/70 bg-input/70 shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent sm:text-center"
+          className="h-8 rounded-md border-transparent bg-transparent px-1 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
         />
       </label>
-      <label className="space-y-1.5 sm:space-y-0">
-        <span className="text-xs font-medium text-muted-foreground sm:sr-only">
+      <label>
+        <span className="sr-only">
           Weight
         </span>
         <Input
@@ -110,19 +110,19 @@ export function GradeRow({
           onChange={(e) =>
             onUpdate(row.id, 'weight', sanitizeNumberInput(e.target.value))
           }
-          className="h-10 rounded-lg border-border/70 bg-input/70 shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input sm:h-9 sm:border-transparent sm:bg-transparent sm:text-center"
+          className="h-8 rounded-md border-transparent bg-transparent px-1 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
         />
       </label>
       <Button
         variant="ghost"
         size="icon"
         onClick={() => onDelete(row.id)}
-        className={`h-10 w-full rounded-lg text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive sm:size-8 ${
-          showDelete ? 'opacity-100' : 'hidden sm:inline-flex sm:opacity-0 sm:group-hover:opacity-100'
+        className={`size-7 rounded-md text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:size-8 lg:rounded-lg ${
+          showDelete ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}
         disabled={!showDelete}
       >
-        <X className="size-4" />
+        <X className="size-3.5 lg:size-4" />
       </Button>
     </div>
   )

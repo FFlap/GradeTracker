@@ -525,7 +525,7 @@ export function GradeCalculator({
   const showRequiredOnRemaining = result ? result.totalWeight < 100 : false
 
   return (
-    <div className="grid items-start gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
+    <div className="grid items-start gap-4 sm:gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
       <GradeWeightingPanel
         auth={{ isSignedIn }}
         courses={courses}
@@ -644,11 +644,11 @@ function GradeWeightingPanel({
     showRequiredOnRemaining,
   } = summary
   return (
-    <div className="space-y-5">
-      <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
-        <CardContent className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-5">
+      <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
+        <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
               Grade Weighting
             </h2>
           </div>
@@ -679,9 +679,9 @@ function GradeWeightingPanel({
                 onChange={(e) =>
                   onTargetGradeChange(sanitizeNumberInput(e.target.value))
                 }
-                className="h-12 rounded-xl pr-10 text-lg"
+                className="h-10 rounded-lg pr-9 text-base sm:h-12 sm:rounded-xl sm:pr-10 sm:text-lg"
               />
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg text-muted-foreground">
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-base text-muted-foreground sm:right-4 sm:text-lg">
                 %
               </span>
             </div>
@@ -715,12 +715,12 @@ function GradeWeightingPanel({
             </div>
           )}
 
-          <div className="flex gap-3 pt-1">
-            <Button onClick={onCalculate} className="h-11 flex-1 rounded-xl">
+          <div className="flex gap-2 pt-1 sm:gap-3">
+            <Button onClick={onCalculate} className="h-10 flex-1 rounded-lg text-sm sm:h-11 sm:rounded-xl">
               <Calculator className="size-4 mr-2" />
               Calculate
             </Button>
-            <Button variant="outline" onClick={onReset} className="h-11 flex-1 rounded-xl">
+            <Button variant="outline" onClick={onReset} className="h-10 flex-1 rounded-lg text-sm sm:h-11 sm:rounded-xl">
               <RotateCcw className="size-4 mr-2" />
               Reset
             </Button>
@@ -729,8 +729,8 @@ function GradeWeightingPanel({
       </Card>
 
       {!isSignedIn && (
-        <Card className="bg-card border-border/70 py-0 rounded-2xl">
-          <CardContent className="p-4 text-sm text-muted-foreground">
+        <Card className="rounded-xl border-border/70 bg-card py-0 sm:rounded-2xl">
+          <CardContent className="p-3 text-xs text-muted-foreground sm:p-4 sm:text-sm">
             Sign in to save your grades and create courses for easy access later.
           </CardContent>
         </Card>
@@ -761,7 +761,7 @@ function LetterScaleEditor({
   onSaveScale,
 }: LetterScaleEditorProps) {
   return (
-    <div className="space-y-3 border-t border-border/70 pt-5">
+    <div className="space-y-3 border-t border-border/70 pt-4 sm:pt-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="text-sm">
           <span className="font-medium text-foreground">Letter scale</span>{' '}
@@ -776,7 +776,7 @@ function LetterScaleEditor({
       </div>
 
       {isEditingScale && (
-        <div className="space-y-3 rounded-xl border border-border/70 bg-muted/25 p-3.5">
+        <div className="space-y-3 rounded-lg border border-border/70 bg-muted/25 p-3 sm:rounded-xl sm:p-3.5">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {scaleDraft.map((threshold, index) => (
               <div key={threshold.letter} className="flex items-center gap-2">
@@ -838,22 +838,22 @@ function GradeResultSummary({
   formatPercent,
 }: GradeResultSummaryProps) {
   return (
-    <div className="border-t border-border/70 pt-6">
-      <div className={`grid gap-4 ${showOverallSection ? 'grid-cols-2' : 'grid-cols-1'}`}>
-        <div className="rounded-xl border border-border/70 bg-card/90 px-4 py-3.5">
-          <div className="text-[0.72rem] leading-[1.35] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+    <div className="border-t border-border/70 pt-4 sm:pt-6">
+      <div className={`grid gap-3 sm:gap-4 ${showOverallSection ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        <div className="rounded-lg border border-border/70 bg-card/90 px-3 py-3 sm:rounded-xl sm:px-4 sm:py-3.5">
+          <div className="text-[0.64rem] leading-[1.35] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-[0.72rem] sm:tracking-[0.12em]">
             Current average
           </div>
-          <div className="mt-6 text-4xl font-semibold leading-none text-primary">
+          <div className="mt-4 text-3xl font-semibold leading-none text-primary sm:mt-6 sm:text-4xl">
             {formatPercent(currentAverage)}
           </div>
         </div>
         {showOverallSection && (
-          <div className="rounded-xl border border-border/70 bg-card/90 px-4 py-3.5">
-            <div className="text-[0.72rem] leading-[1.35] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="rounded-lg border border-border/70 bg-card/90 px-3 py-3 sm:rounded-xl sm:px-4 sm:py-3.5">
+            <div className="text-[0.64rem] leading-[1.35] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-[0.72rem] sm:tracking-[0.12em]">
               Overall
             </div>
-            <div className="mt-6 text-4xl font-semibold leading-none text-foreground">
+            <div className="mt-4 text-3xl font-semibold leading-none text-foreground sm:mt-6 sm:text-4xl">
               {formatPercent(projectedGrade)}
             </div>
           </div>
@@ -861,11 +861,11 @@ function GradeResultSummary({
       </div>
 
       {showRequiredOnRemaining && (
-        <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 p-4.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
-          <div className="text-[0.72rem] leading-[1.35] font-semibold uppercase tracking-[0.12em] text-primary">
+        <div className="mt-3 rounded-lg border border-primary/15 bg-primary/5 p-3.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] sm:rounded-xl sm:p-4.5">
+          <div className="text-[0.64rem] leading-[1.35] font-semibold uppercase tracking-[0.1em] text-primary sm:text-[0.72rem] sm:tracking-[0.12em]">
             Required on remaining
           </div>
-          <div className="mt-2.5 text-5xl font-semibold leading-none text-primary">
+          <div className="mt-2 text-4xl font-semibold leading-none text-primary sm:mt-2.5 sm:text-5xl">
             {neededOnRemaining !== null && neededOnRemaining < 0
               ? '0%'
               : `${neededOnRemaining?.toFixed(1)}%`}
@@ -890,21 +890,21 @@ function AssignmentEntryPanel({
   onAddRow,
 }: AssignmentEntryPanelProps) {
   return (
-    <Card className="border-border/70 py-0 gap-0 overflow-hidden rounded-2xl">
+    <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
       <CardContent className="p-0">
-        <div className="border-b border-border/70 px-6 py-5">
-          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+        <div className="border-b border-border/70 px-4 py-4 sm:px-6 sm:py-5">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Assignment Entry
           </h2>
         </div>
 
-        <div className="px-6 py-4 text-sm text-muted-foreground">
+        <div className="px-4 py-3 text-xs text-muted-foreground sm:px-6 sm:py-4 sm:text-sm">
           Enter grades as percentages, point fractions like{' '}
           <span className="font-medium text-foreground">17/20</span>, or letters like{' '}
           <span className="font-medium text-foreground">A-</span>.
         </div>
 
-        <div className="px-2 pb-5">
+        <div className="px-1.5 pb-4 sm:px-2 sm:pb-5">
           <GradeTable
             rows={rows}
             onUpdateRow={onUpdateRow}

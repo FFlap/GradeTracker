@@ -153,7 +153,9 @@ function CalendarPage() {
       </section>
 
       <main className="p-4 sm:p-6">
-        {!isLoaded ? null : !isSignedIn ? (
+        {!isLoaded ? (
+          <CalendarLoadingState />
+        ) : !isSignedIn ? (
           <CalendarSignInPrompt />
         ) : (
           <div className="grid w-full items-start gap-5 lg:grid-cols-[20.5rem_minmax(0,1fr)] lg:gap-6">
@@ -192,14 +194,32 @@ function CalendarPage() {
 
 type OpenDayHandler = (iso: string) => void
 
+function CalendarLoadingState() {
+  return (
+    <Card className="mx-auto max-w-2xl rounded-xl border-border/70 py-0 sm:rounded-2xl">
+      <CardContent className="p-6 text-center sm:p-10">
+        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 sm:mb-4 sm:size-12 sm:rounded-xl">
+          <Calendar className="size-5 text-foreground/70 sm:size-6" />
+        </div>
+        <div className="mb-1 text-base font-semibold text-foreground sm:text-lg">
+          Loading calendar
+        </div>
+        <div className="text-sm text-muted-foreground">
+          Preparing your assessment dates.
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function CalendarSignInPrompt() {
   return (
-    <Card className="mx-auto max-w-2xl rounded-2xl border-border/70 py-0">
-      <CardContent className="p-10 text-center">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-          <Calendar className="size-6 text-foreground/70" />
+    <Card className="mx-auto max-w-2xl rounded-xl border-border/70 py-0 sm:rounded-2xl">
+      <CardContent className="p-6 text-center sm:p-10">
+        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 sm:mb-4 sm:size-12 sm:rounded-xl">
+          <Calendar className="size-5 text-foreground/70 sm:size-6" />
         </div>
-        <div className="mb-1 text-lg font-semibold text-foreground">
+        <div className="mb-1 text-base font-semibold text-foreground sm:text-lg">
           Sign in to use the calendar
         </div>
         <div className="text-sm text-muted-foreground">
@@ -227,9 +247,9 @@ function UpcomingSidebar({
   const nextDeadline = upcoming[0]
 
   return (
-    <aside className="space-y-5">
-      <Card className="overflow-hidden rounded-2xl border-[#dfe4ea] bg-white py-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-        <CardContent className="space-y-6 p-6">
+    <aside className="space-y-4 sm:space-y-5">
+      <Card className="overflow-hidden rounded-xl border-[#dfe4ea] bg-white py-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:rounded-2xl">
+        <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
               Upcoming
@@ -327,14 +347,14 @@ function UpcomingStat({
   detail: string
 }) {
   return (
-    <div className="border-t border-[#e5e9ee] pt-5">
-      <div className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+    <div className="border-t border-[#e5e9ee] pt-4 sm:pt-5">
+      <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-[0.72rem] sm:tracking-[0.16em]">
         {label}
       </div>
-      <div className="mt-4 flex items-center gap-4">
+      <div className="mt-3 flex items-center gap-3 sm:mt-4 sm:gap-4">
         <div
           className={cn(
-            'text-5xl font-semibold leading-none text-foreground',
+            'text-4xl font-semibold leading-none text-foreground sm:text-5xl',
             valueClassName,
           )}
         >
@@ -438,9 +458,9 @@ function MonthBoard({
   onOpenDay: OpenDayHandler
 }) {
   return (
-    <Card className="overflow-hidden rounded-2xl border-[#dfe4ea] bg-white py-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+    <Card className="overflow-hidden rounded-xl border-[#dfe4ea] bg-white py-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:rounded-2xl">
       <CardContent className="p-0">
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <MonthBoardHeader
             monthCursor={monthCursor}
             monthOptions={monthOptions}
@@ -519,7 +539,7 @@ function MonthBoardHeader({
 
       <div className="grid grid-cols-[1fr_2.75rem_2.75rem] gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
         <Select value={String(monthCursor.month)} onValueChange={onSelectMonth}>
-          <SelectTrigger className="h-11 w-full rounded-xl border-[#dfe4ea] bg-white text-base sm:w-48">
+          <SelectTrigger className="h-10 w-full rounded-lg border-[#dfe4ea] bg-white text-sm sm:h-11 sm:w-48 sm:rounded-xl sm:text-base">
             <SelectValue placeholder={formatMonthLabel(monthCursor)} />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
@@ -533,7 +553,7 @@ function MonthBoardHeader({
         <Button
           variant="outline"
           size="icon"
-          className="size-11 rounded-xl border-[#dfe4ea]"
+          className="size-10 rounded-lg border-[#dfe4ea] sm:size-11 sm:rounded-xl"
           onClick={onPreviousMonth}
           aria-label="Previous month"
           title="Previous month"
@@ -543,7 +563,7 @@ function MonthBoardHeader({
         <Button
           variant="outline"
           size="icon"
-          className="size-11 rounded-xl border-[#dfe4ea]"
+          className="size-10 rounded-lg border-[#dfe4ea] sm:size-11 sm:rounded-xl"
           onClick={onNextMonth}
           aria-label="Next month"
           title="Next month"
@@ -552,7 +572,7 @@ function MonthBoardHeader({
         </Button>
         <Button
           variant="outline"
-          className="col-span-full h-11 rounded-xl border-[#dfe4ea] px-6 text-base sm:col-span-auto"
+          className="col-span-full h-10 rounded-lg border-[#dfe4ea] px-5 text-sm sm:col-span-auto sm:h-11 sm:rounded-xl sm:px-6 sm:text-base"
           onClick={onToday}
           aria-label="Jump to current month"
           title="Today"
