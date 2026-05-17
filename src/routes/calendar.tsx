@@ -752,8 +752,8 @@ function AssessmentDrawerItem({
       {assessment.courseId && (
         <Button variant="outline" size="sm" asChild>
           <Link
-            to="/grade-calculator/$courseId"
-            params={{ courseId: assessment.courseId }}
+            to="/grade-calculator"
+            search={{ courseId: assessment.courseId }}
           >
             Open
           </Link>

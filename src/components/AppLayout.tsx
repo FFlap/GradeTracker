@@ -21,7 +21,7 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
   // Redirect signed-in users from / to /grade-calculator
   useEffect(() => {
     if (isLoaded && isSignedIn && routerLocation.pathname === '/') {
-      navigate({ to: '/grade-calculator' })
+      navigate({ to: '/grade-calculator', search: { courseId: undefined } })
     }
   }, [isLoaded, isSignedIn, routerLocation.pathname, navigate])
 

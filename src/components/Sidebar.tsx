@@ -143,6 +143,7 @@ export function Sidebar({
         <div className="p-3">
           <Link
             to="/grade-calculator"
+            search={{ courseId: undefined }}
             className={cn(
               'flex min-w-0 items-center gap-2 rounded-md font-semibold text-sidebar-foreground transition-[background-color,color,padding,gap] duration-300 ease-out',
               collapsed
@@ -297,6 +298,7 @@ export function MobileTopNav() {
         <div className="flex h-16 items-center justify-between px-4">
           <Link
             to="/grade-calculator"
+            search={{ courseId: undefined }}
             onClick={() => setIsOpen(false)}
             className="flex min-w-0 items-center gap-2 font-semibold text-sidebar-foreground"
           >

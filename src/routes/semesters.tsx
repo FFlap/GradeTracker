@@ -1554,8 +1554,8 @@ function CourseRow({
     >
       <div className="min-w-0 flex-1">
         <Link
-          to="/grade-calculator/$courseId"
-          params={{ courseId: course._id }}
+          to="/grade-calculator"
+          search={{ courseId: course._id }}
           className="truncate font-medium text-foreground underline-offset-4 hover:underline"
         >
           {course.name}
@@ -1589,8 +1589,8 @@ function CourseRow({
           asChild
         >
           <Link
-            to="/grade-calculator/$courseId"
-            params={{ courseId: course._id }}
+            to="/grade-calculator"
+            search={{ courseId: course._id }}
           >
             Open course
           </Link>

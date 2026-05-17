@@ -1,22 +1,30 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
-import { useState } from 'react'
 import { useUser } from '@clerk/clerk-react'
 import { GradeCalculator } from '@/components/calculator/GradeCalculator'
 import type { Course, LetterGradeThreshold } from '@/components/calculator/types'
 import { useCourseMutations } from '@/hooks/useCourseMutations'
 
 export const Route = createFileRoute('/grade-calculator/')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    courseId: typeof search.courseId === 'string' ? search.courseId : undefined,
+  }),
   component: GradeCalculatorPage,
 })
 
 function GradeCalculatorPage() {
   const { isLoaded, isSignedIn } = useUser()
-  const [selectedCourseId, setSelectedCourseId] = useState<Course['_id'] | null>(null)
+  const navigate = useNavigate()
+  const { courseId } = Route.useSearch()
 
   const coursesData = useQuery(api.courses.list)
   const courses = (coursesData ?? []) as Course[]
+  const selectedCourseId =
+    courseId && (coursesData === undefined || courses.some((course) => course._id === courseId))
+      ? (courseId as Course['_id'])
+      : null
+
   const {
     addCourse,
     updateCourseName,
@@ -25,8 +33,8 @@ function GradeCalculatorPage() {
   } = useCourseMutations()
 
   const handleCreateCourse = async (name: string) => {
-    const courseId = await addCourse({ name })
-    setSelectedCourseId(courseId)
+    const newCourseId = await addCourse({ name })
+    navigate({ to: '/grade-calculator', search: { courseId: newCourseId } })
   }
 
   const handleRenameCourse = async (courseId: Course['_id'], name: string) => {
@@ -42,7 +50,9 @@ function GradeCalculatorPage() {
 
   const handleDeleteCourse = async (courseId: Course['_id']) => {
     await removeCourse(courseId)
-    setSelectedCourseId((prev) => (prev === courseId ? null : prev))
+    if (selectedCourseId === courseId) {
+      navigate({ to: '/grade-calculator', search: { courseId: undefined } })
+    }
   }
 
   return (
@@ -66,7 +76,12 @@ function GradeCalculatorPage() {
             isSignedIn={Boolean(isLoaded && isSignedIn)}
             courses={courses}
             selectedCourseId={selectedCourseId}
-            onSelectCourse={setSelectedCourseId}
+            onSelectCourse={(id) => {
+              navigate({
+                to: '/grade-calculator',
+                search: { courseId: id ?? undefined },
+              })
+            }}
             onCreateCourse={handleCreateCourse}
             onRenameCourse={handleRenameCourse}
             onDeleteCourse={handleDeleteCourse}
