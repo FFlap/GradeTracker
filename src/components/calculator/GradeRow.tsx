@@ -8,6 +8,20 @@ import {
   type GradeRow as GradeRowType,
 } from './types'
 
+function formatReadableDate(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  if (!match) return ''
+
+  const [, year, month, day] = match
+  const date = new Date(Number(year), Number(month) - 1, Number(day))
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date)
+}
+
 interface GradeRowProps {
   row: GradeRowType
   onUpdate: (id: string, field: keyof GradeRowType, value: string) => void
@@ -22,9 +36,10 @@ export function GradeRow({
   showDelete,
 }: GradeRowProps) {
   const dateInputRef = useRef<HTMLInputElement | null>(null)
+  const readableDate = formatReadableDate(row.date)
 
   return (
-    <div className="group grid grid-cols-[minmax(8rem,1fr)_7rem_4.5rem_4.5rem_2rem] items-center gap-2 lg:grid-cols-[1fr_150px_100px_100px_40px] lg:gap-3.5">
+    <div className="group grid grid-cols-[minmax(8rem,1fr)_9rem_4.5rem_4.5rem_2rem] items-center gap-2 lg:grid-cols-[1fr_170px_100px_100px_40px] lg:gap-3.5">
       <label>
         <span className="sr-only">
           Assignment
@@ -60,18 +75,23 @@ export function GradeRow({
                 el.click()
               }
             }}
-            className="absolute left-1 top-1/2 size-6 -translate-y-1/2 rounded-md transition-colors hover:bg-accent/45 lg:left-2 lg:size-7 lg:rounded-lg"
+            className="flex h-8 w-full items-center rounded-md border border-transparent bg-transparent pl-7 pr-7 text-left text-xs shadow-none transition-colors hover:border-border/70 hover:bg-input/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-9 lg:rounded-lg lg:pl-9 lg:pr-9 lg:text-sm"
             aria-label="Pick date"
             title="Pick date"
           >
-            <CalendarDays className="mx-auto size-3.5 text-primary lg:size-4" />
+            <span className={readableDate ? 'truncate text-foreground' : 'truncate text-muted-foreground'}>
+              {readableDate || 'Pick date'}
+            </span>
           </button>
+          <CalendarDays className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-primary lg:left-3 lg:size-4" />
           <Input
             ref={dateInputRef}
             type="date"
             value={row.date}
             onChange={(e) => onUpdate(row.id, 'date', e.target.value)}
-            className="h-8 rounded-md border-transparent bg-transparent pl-7 pr-7 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pl-9 lg:pr-9 lg:text-sm"
+            tabIndex={-1}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 opacity-0"
           />
           {row.date.trim().length > 0 && (
             <button
