@@ -39,7 +39,7 @@ export function GradeRow({
   const readableDate = formatReadableDate(row.date)
 
   return (
-    <div className="group grid grid-cols-[minmax(8rem,1fr)_9rem_4.5rem_4.5rem_2rem] items-center gap-2 lg:grid-cols-[1fr_170px_100px_100px_40px] lg:gap-3.5">
+    <div className="group grid grid-cols-[minmax(4.25rem,1fr)_3.8rem_2.5rem_2.625rem_1rem] items-center gap-1 sm:grid-cols-[minmax(5rem,2fr)_minmax(5.25rem,1.2fr)_minmax(3.2rem,0.7fr)_minmax(3.4rem,0.8fr)_1.5rem] sm:gap-1.5 xl:grid-cols-[minmax(12rem,2fr)_minmax(8.5rem,1.2fr)_minmax(5.25rem,0.7fr)_minmax(5.75rem,0.8fr)_2rem] xl:gap-2.5 2xl:gap-3.5">
       <label>
         <span className="sr-only">
           Assignment
@@ -49,7 +49,7 @@ export function GradeRow({
           placeholder="e.g. Homework"
           value={row.assignment}
           onChange={(e) => onUpdate(row.id, 'assignment', e.target.value)}
-          className="h-8 rounded-md border-transparent bg-transparent px-2 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-2.5 lg:text-sm"
+          className="h-8 rounded-md border-transparent bg-transparent px-1.5 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-2.5 lg:text-sm"
         />
       </label>
       <div>
@@ -75,7 +75,7 @@ export function GradeRow({
                 el.click()
               }
             }}
-            className="flex h-8 w-full items-center rounded-md border border-transparent bg-transparent pl-7 pr-7 text-left text-xs shadow-none transition-colors hover:border-border/70 hover:bg-input/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-9 lg:rounded-lg lg:pl-9 lg:pr-9 lg:text-sm"
+            className="flex h-8 w-full items-center rounded-md border border-transparent bg-transparent pl-6 pr-1.5 text-left text-xs shadow-none transition-colors hover:border-border/70 hover:bg-input/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-9 lg:rounded-lg lg:pl-9 lg:pr-9 lg:text-sm"
             aria-label="Pick date"
             title="Pick date"
           >
@@ -83,7 +83,7 @@ export function GradeRow({
               {readableDate || 'Pick date'}
             </span>
           </button>
-          <CalendarDays className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-primary lg:left-3 lg:size-4" />
+          <CalendarDays className="pointer-events-none absolute left-1.5 top-1/2 size-3.5 -translate-y-1/2 text-primary lg:left-3 lg:size-4" />
           <Input
             ref={dateInputRef}
             type="date"
@@ -116,7 +116,7 @@ export function GradeRow({
           onChange={(e) =>
             onUpdate(row.id, 'grade', sanitizeGradeInput(e.target.value))
           }
-          className="h-8 rounded-md border-transparent bg-transparent px-1 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
+          className="h-8 rounded-md border-transparent bg-transparent px-0.5 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
         />
       </label>
       <label>
@@ -130,19 +130,19 @@ export function GradeRow({
           onChange={(e) =>
             onUpdate(row.id, 'weight', sanitizeNumberInput(e.target.value))
           }
-          className="h-8 rounded-md border-transparent bg-transparent px-1 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
+          className="h-8 rounded-md border-transparent bg-transparent px-0.5 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
         />
       </label>
       <Button
         variant="ghost"
         size="icon"
         onClick={() => onDelete(row.id)}
-        className={`size-7 rounded-md text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:size-8 lg:rounded-lg ${
+        className={`size-6 rounded-md text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:size-8 lg:rounded-lg ${
           showDelete ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}
         disabled={!showDelete}
       >
-        <X className="size-3.5 lg:size-4" />
+        <X className="size-3 lg:size-4" />
       </Button>
     </div>
   )

@@ -284,7 +284,7 @@ export function GPACalculator() {
   }
 
   return (
-    <div className="grid items-start gap-4 lg:gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
+    <div className="grid items-start gap-4 lg:gap-7 xl:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
       <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 lg:rounded-2xl">
         <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>
@@ -413,9 +413,9 @@ export function GPACalculator() {
             Add each course with its letter grade and credit hours.
           </div>
 
-          <div className="overflow-x-auto px-1.5 pb-4 lg:px-2 sm:pb-5">
-            <div className="min-w-[25rem] lg:min-w-[34rem]">
-              <div className="grid grid-cols-[minmax(9rem,1fr)_5.5rem_4.5rem_2rem] gap-2 border-b border-border/70 px-3 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground lg:grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3 lg:text-[0.72rem]">
+          <div className="px-1.5 pb-4 lg:px-2 lg:pb-5">
+            <div className="w-full">
+              <div className="grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] gap-1.5 border-b border-border/70 px-2 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.06em] text-muted-foreground 2xl:grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3 2xl:text-[0.72rem] 2xl:tracking-[0.08em]">
                 <span>Course</span>
                 <span className="text-center">Grade</span>
                 <span className="text-center">Credits</span>
@@ -426,7 +426,7 @@ export function GPACalculator() {
                 {courses.map((course) => (
                   <div
                     key={course.id}
-                    className="group grid grid-cols-[minmax(9rem,1fr)_5.5rem_4.5rem_2rem] items-center gap-2 px-3 py-2.5 transition-colors hover:bg-muted/12 lg:grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3.5"
+                    className="group grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 2xl:grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5"
                   >
                     <label>
                       <span className="sr-only">
@@ -439,7 +439,7 @@ export function GPACalculator() {
                         onChange={(e) =>
                           handleUpdateCourse(course.id, 'name', e.target.value)
                         }
-                        className="h-8 rounded-md border-transparent bg-transparent px-2 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-2.5 lg:text-sm"
+                        className="h-8 rounded-md border-transparent bg-transparent px-1.5 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-2.5 lg:text-sm"
                       />
                     </label>
                     <label>
@@ -452,7 +452,7 @@ export function GPACalculator() {
                           handleUpdateCourse(course.id, 'grade', value)
                         }
                       >
-                        <SelectTrigger className="h-8 w-full rounded-md border-transparent bg-transparent px-2 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-3 lg:text-sm">
+                        <SelectTrigger className="h-8 w-full rounded-md border-transparent bg-transparent px-1.5 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-3 lg:text-sm">
                           <SelectValue placeholder="Grade" />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
@@ -480,21 +480,21 @@ export function GPACalculator() {
                             sanitizeNumberInput(e.target.value)
                           )
                         }
-                        className="h-8 rounded-md border-transparent bg-transparent px-1 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
+                        className="h-8 rounded-md border-transparent bg-transparent px-0.5 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-1 lg:text-sm"
                       />
                     </label>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDeleteCourse(course.id)}
-                      className={`size-7 rounded-md text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:h-9 lg:w-9 lg:rounded-xl ${
+                      className={`size-6 rounded-md text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:h-9 lg:w-9 lg:rounded-xl ${
                         courses.length > 1
                           ? 'opacity-100'
                           : 'opacity-0 group-hover:opacity-100'
                       }`}
                       disabled={courses.length <= 1}
                     >
-                      <X className="size-3.5 lg:size-4" />
+                      <X className="size-3 lg:size-4" />
                     </Button>
                   </div>
                 ))}

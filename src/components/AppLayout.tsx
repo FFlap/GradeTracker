@@ -27,7 +27,7 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
       />
       <main
         className={cn(
-          'flex-1 pt-16 transition-[margin] duration-300 ease-out md:pt-0',
+          'min-w-0 flex-1 pt-16 transition-[margin] duration-300 ease-out md:pt-0',
           sidebarCollapsed ? 'md:ml-16' : 'md:ml-60'
         )}
       >

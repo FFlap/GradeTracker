@@ -635,7 +635,7 @@ function SemestersPageView({ model }: { model: SemestersPageModel }) {
 
       <main className="app-page-body">
         <div className="app-page-body-narrow">
-          <div className="grid items-start gap-4 sm:gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
+          <div className="grid items-start gap-4 sm:gap-7 xl:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
             <OverallSummaryCard
               cumulative={model.cumulative}
               courseCount={model.courses.length}

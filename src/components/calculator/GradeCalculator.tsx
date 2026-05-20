@@ -525,7 +525,7 @@ export function GradeCalculator({
   const showRequiredOnRemaining = result ? result.totalWeight < 100 : false
 
   return (
-    <div className="grid items-start gap-4 sm:gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
+    <div className="grid items-start gap-4 sm:gap-7 xl:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
       <GradeWeightingPanel
         auth={{ isSignedIn }}
         courses={courses}

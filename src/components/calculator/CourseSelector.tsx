@@ -306,7 +306,7 @@ function CourseSelectorInner({
             disabled={state.isWorking}
             aria-expanded={state.isManageOpen}
             aria-haspopup="menu"
-            className="h-10 w-[6.75rem] justify-center gap-1.5 rounded-lg text-primary sm:h-8 sm:w-auto sm:min-w-[7rem] sm:rounded-lg"
+            className="h-10 w-[5.75rem] justify-center gap-1 rounded-lg text-sm text-primary sm:h-8 sm:w-auto sm:min-w-[7rem] sm:gap-1.5 sm:rounded-lg"
           >
             <MoreHorizontal className="size-4" />
             Manage
@@ -368,7 +368,7 @@ function CourseSelectorInner({
             variant="outline"
             size="sm"
             disabled={state.isWorking}
-            className="h-10 w-[6.75rem] justify-center gap-1.5 rounded-lg text-primary sm:h-8 sm:w-auto sm:min-w-[7rem] sm:rounded-lg"
+            className="h-10 w-[5.75rem] justify-center gap-1 rounded-lg text-sm text-primary sm:h-8 sm:w-auto sm:min-w-[7rem] sm:gap-1.5 sm:rounded-lg"
           >
             <MoreHorizontal className="size-4" />
             Manage

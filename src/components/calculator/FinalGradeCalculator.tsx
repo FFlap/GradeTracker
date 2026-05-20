@@ -113,7 +113,7 @@ export function FinalGradeCalculator() {
   }
 
   return (
-    <div className="grid items-start gap-4 lg:gap-7 lg:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
+    <div className="grid items-start gap-4 lg:gap-7 xl:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
       <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 lg:rounded-2xl">
         <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>
@@ -196,19 +196,19 @@ export function FinalGradeCalculator() {
             Enter percentages for your current course grade, final exam weight, and target grade.
           </div>
 
-          <div className="overflow-x-auto px-1.5 pb-4 lg:px-2 sm:pb-5">
-            <div className="min-w-[24rem] lg:min-w-[34rem]">
-              <div className="grid grid-cols-[minmax(10rem,1fr)_7rem_1rem] gap-2 border-b border-border/70 px-3 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground lg:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3 lg:text-[0.72rem]">
+          <div className="px-1.5 pb-4 lg:px-2 lg:pb-5">
+            <div className="w-full">
+              <div className="grid grid-cols-[minmax(7rem,1fr)_4.5rem_1rem] gap-1.5 border-b border-border/70 px-2 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.06em] text-muted-foreground 2xl:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3 2xl:text-[0.72rem] 2xl:tracking-[0.08em]">
                 <span>Metric</span>
                 <span className="text-center">Value</span>
                 <span></span>
               </div>
 
               <div className="divide-y divide-border/70">
-                <div className="group grid grid-cols-[minmax(10rem,1fr)_7rem_1rem] items-center gap-2 px-3 py-2.5 transition-colors hover:bg-muted/12 lg:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3.5">
+                <div className="group grid grid-cols-[minmax(7rem,1fr)_4.5rem_1rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 2xl:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5">
                   <div>
                     <div className="text-sm font-medium text-foreground lg:text-base">Current grade</div>
-                    <div className="text-xs text-muted-foreground lg:text-sm">
+                    <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
                       Your grade before the final exam
                     </div>
                   </div>
@@ -225,19 +225,19 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-8 rounded-md border-transparent bg-transparent pr-6 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
+                      className="h-8 rounded-md border-transparent bg-transparent pr-5 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
                     />
-                    <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
+                    <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %
                     </span>
                   </div>
                   <span />
                 </div>
 
-                <div className="group grid grid-cols-[minmax(10rem,1fr)_7rem_1rem] items-center gap-2 px-3 py-2.5 transition-colors hover:bg-muted/12 lg:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3.5">
+                <div className="group grid grid-cols-[minmax(7rem,1fr)_4.5rem_1rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 2xl:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5">
                   <div>
                     <div className="text-sm font-medium text-foreground lg:text-base">Final exam weight</div>
-                    <div className="text-xs text-muted-foreground lg:text-sm">
+                    <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
                       How much the final counts
                     </div>
                   </div>
@@ -254,19 +254,19 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-8 rounded-md border-transparent bg-transparent pr-6 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
+                      className="h-8 rounded-md border-transparent bg-transparent pr-5 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
                     />
-                    <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
+                    <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %
                     </span>
                   </div>
                   <span />
                 </div>
 
-                <div className="group grid grid-cols-[minmax(10rem,1fr)_7rem_1rem] items-center gap-2 px-3 py-2.5 transition-colors hover:bg-muted/12 lg:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] lg:gap-3 lg:px-4 lg:py-3.5">
+                <div className="group grid grid-cols-[minmax(7rem,1fr)_4.5rem_1rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 2xl:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5">
                   <div>
                     <div className="text-sm font-medium text-foreground lg:text-base">Target grade</div>
-                    <div className="text-xs text-muted-foreground lg:text-sm">
+                    <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
                       The overall grade you want
                     </div>
                   </div>
@@ -283,9 +283,9 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-8 rounded-md border-transparent bg-transparent pr-6 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
+                      className="h-8 rounded-md border-transparent bg-transparent pr-5 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
                     />
-                    <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
+                    <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %
                     </span>
                   </div>

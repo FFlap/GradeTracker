@@ -18,9 +18,9 @@ export function GradeTable({
 }: GradeTableProps) {
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto">
-        <div className="min-w-[28rem] lg:min-w-[36rem]">
-          <div className="grid grid-cols-[minmax(8rem,1fr)_9rem_4.5rem_4.5rem_2rem] gap-2 border-b border-border/70 px-3 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground lg:grid-cols-[1fr_170px_100px_100px_40px] lg:gap-3 lg:px-5 lg:py-3.5 lg:text-[0.72rem] sm:tracking-[0.14em]">
+      <div>
+        <div className="w-full">
+          <div className="grid grid-cols-[minmax(4.25rem,1fr)_3.8rem_2.5rem_2.625rem_1rem] gap-1 border-b border-border/70 px-2 py-2.5 text-[0.6rem] font-semibold uppercase tracking-[0.05em] text-muted-foreground sm:grid-cols-[minmax(5rem,2fr)_minmax(5.25rem,1.2fr)_minmax(3.2rem,0.7fr)_minmax(3.4rem,0.8fr)_1.5rem] sm:gap-1.5 sm:px-3 sm:text-[0.64rem] sm:tracking-[0.08em] xl:grid-cols-[minmax(12rem,2fr)_minmax(8.5rem,1.2fr)_minmax(5.25rem,0.7fr)_minmax(5.75rem,0.8fr)_2rem] xl:gap-2.5 xl:px-5 xl:py-3.5 xl:text-[0.72rem] xl:tracking-[0.12em] 2xl:gap-3 2xl:tracking-[0.14em]">
             <span>Assignment</span>
             <span className="text-center">Date</span>
             <span className="text-center">Grade</span>
