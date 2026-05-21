@@ -39,7 +39,7 @@ export function GradeRow({
   const readableDate = formatReadableDate(row.date)
 
   return (
-    <div className="group grid grid-cols-[minmax(4.25rem,1fr)_3.8rem_2.5rem_2.625rem_1rem] items-center gap-1 sm:grid-cols-[minmax(5rem,2fr)_minmax(5.25rem,1.2fr)_minmax(3.2rem,0.7fr)_minmax(3.4rem,0.8fr)_1.5rem] sm:gap-1.5 xl:grid-cols-[minmax(12rem,2fr)_minmax(8.5rem,1.2fr)_minmax(5.25rem,0.7fr)_minmax(5.75rem,0.8fr)_2rem] xl:gap-2.5 2xl:gap-3.5">
+    <div className="group grid grid-cols-[minmax(4.25rem,1fr)_3.8rem_2.5rem_2.625rem_1rem] items-center gap-1 min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(5.25rem,1.25fr)_minmax(3.2rem,0.95fr)_minmax(3.4rem,0.95fr)_1.5rem] min-[390px]:gap-1.5 xl:grid-cols-[minmax(12rem,1.35fr)_minmax(8.5rem,1.25fr)_minmax(5.25rem,0.95fr)_minmax(5.75rem,0.95fr)_2rem] xl:gap-2.5 2xl:gap-3.5">
       <label>
         <span className="sr-only">
           Assignment

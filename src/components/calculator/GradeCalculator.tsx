@@ -644,7 +644,7 @@ function GradeWeightingPanel({
     showRequiredOnRemaining,
   } = summary
   return (
-    <div className="space-y-4 sm:space-y-5">
+    <div className="min-w-0 space-y-4 sm:space-y-5">
       <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
         <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>

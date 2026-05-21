@@ -260,7 +260,7 @@ function CourseSelectorInner({
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex min-w-0 items-center gap-2">
       <Select
         value={selectedCourseId ?? ('none' as const)}
         onValueChange={(value) =>
