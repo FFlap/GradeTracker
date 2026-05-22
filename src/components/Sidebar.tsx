@@ -16,6 +16,25 @@ import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
+function AppLogo({
+  className,
+  imageClassName,
+}: {
+  className?: string
+  imageClassName?: string
+}) {
+  return (
+    <span className={cn('flex shrink-0 items-center justify-center', className)}>
+      <img
+        src="/logo192.png"
+        alt=""
+        aria-hidden="true"
+        className={cn('object-contain', imageClassName)}
+      />
+    </span>
+  )
+}
+
 function useNavigationItems() {
   const location = useLocation()
 
@@ -107,8 +126,10 @@ export function Sidebar({
     )
 
   const collapsedTextClass = cn(
-    'inline-block overflow-hidden whitespace-nowrap transition-[max-width,opacity,transform] duration-200 ease-out',
-    collapsed ? 'max-w-0 -translate-x-1 opacity-0' : 'max-w-40 translate-x-0 opacity-100'
+    'inline-block overflow-hidden whitespace-nowrap transition-[width,max-width,opacity,transform] duration-200 ease-out',
+    collapsed
+      ? 'w-0 max-w-0 -translate-x-1 opacity-0'
+      : 'w-auto max-w-40 translate-x-0 opacity-100'
   )
 
   const collapsedAccountTileClass =
@@ -147,14 +168,15 @@ export function Sidebar({
             className={cn(
               'flex min-w-0 items-center gap-2 rounded-md font-semibold text-sidebar-foreground transition-[background-color,color,padding,gap] duration-300 ease-out',
               collapsed
-                ? 'h-10 w-10 justify-center gap-0 px-0 py-0'
-                : 'px-3 py-2 hover:bg-sidebar-accent/50'
+                ? 'mx-auto h-12 w-12 justify-center gap-0 px-0 py-0'
+                : 'px-3 py-2.5 hover:bg-sidebar-accent/50'
             )}
             title="Grade Tracker"
           >
-            <span className="flex size-5 shrink-0 items-center justify-center rounded bg-foreground text-[0.68rem] font-bold text-background">
-              G
-            </span>
+            <AppLogo
+              className="size-11"
+              imageClassName={cn('h-11 w-8', collapsed && '-translate-x-1')}
+            />
             <span className={cn('text-sm truncate', collapsedTextClass)}>
               Grade Tracker
             </span>
@@ -300,11 +322,9 @@ export function MobileTopNav() {
             to="/grade-calculator"
             search={{ courseId: undefined }}
             onClick={() => setIsOpen(false)}
-            className="flex min-w-0 items-center gap-2 font-semibold text-sidebar-foreground"
+            className="flex min-w-0 items-center gap-2.5 font-semibold text-sidebar-foreground"
           >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded bg-foreground text-sm font-bold text-background">
-              G
-            </span>
+            <AppLogo className="size-12" imageClassName="h-12 w-9" />
             <span className="truncate text-base">Grade Tracker</span>
           </Link>
 
