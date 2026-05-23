@@ -198,21 +198,21 @@ export function FinalGradeCalculator() {
 
           <div className="px-1.5 pb-4 lg:px-2 lg:pb-5">
             <div className="w-full">
-              <div className="grid grid-cols-[minmax(7rem,1fr)_4.5rem_1rem] gap-1.5 border-b border-border/70 px-2 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.06em] text-muted-foreground 2xl:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3 2xl:text-[0.72rem] 2xl:tracking-[0.08em]">
+              <div className="grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] gap-1.5 border-b border-border/70 px-2 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.06em] text-muted-foreground 2xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3 2xl:text-[0.72rem] 2xl:tracking-[0.08em]">
                 <span>Metric</span>
                 <span className="text-center">Value</span>
                 <span></span>
               </div>
 
               <div className="divide-y divide-border/70">
-                <div className="group grid grid-cols-[minmax(7rem,1fr)_4.5rem_1rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 2xl:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5">
+                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 2xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5">
                   <div>
                     <div className="text-sm font-medium text-foreground lg:text-base">Current grade</div>
                     <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
                       Your grade before the final exam
                     </div>
                   </div>
-                  <div className="relative">
+                  <div className="relative w-full max-w-[7.5rem] justify-self-center">
                     <Input
                       id="current-grade"
                       type="text"
@@ -234,14 +234,14 @@ export function FinalGradeCalculator() {
                   <span />
                 </div>
 
-                <div className="group grid grid-cols-[minmax(7rem,1fr)_4.5rem_1rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 2xl:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5">
+                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 2xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5">
                   <div>
                     <div className="text-sm font-medium text-foreground lg:text-base">Final exam weight</div>
                     <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
                       How much the final counts
                     </div>
                   </div>
-                  <div className="relative">
+                  <div className="relative w-full max-w-[7.5rem] justify-self-center">
                     <Input
                       id="final-weight"
                       type="text"
@@ -263,14 +263,14 @@ export function FinalGradeCalculator() {
                   <span />
                 </div>
 
-                <div className="group grid grid-cols-[minmax(7rem,1fr)_4.5rem_1rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 2xl:grid-cols-[minmax(12rem,1fr)_12rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5">
+                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 2xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5">
                   <div>
                     <div className="text-sm font-medium text-foreground lg:text-base">Target grade</div>
                     <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
                       The overall grade you want
                     </div>
                   </div>
-                  <div className="relative">
+                  <div className="relative w-full max-w-[7.5rem] justify-self-center">
                     <Input
                       id="target-grade"
                       type="text"

@@ -415,7 +415,7 @@ export function GPACalculator() {
 
           <div className="px-1.5 pb-4 lg:px-2 lg:pb-5">
             <div className="w-full">
-              <div className="grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] gap-1.5 border-b border-border/70 px-2 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.06em] text-muted-foreground 2xl:grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3 2xl:text-[0.72rem] 2xl:tracking-[0.08em]">
+              <div className="grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] gap-1.5 border-b border-border/70 px-2 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.06em] text-muted-foreground min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(4.25rem,1fr)_minmax(3.8rem,1fr)_1.5rem] 2xl:grid-cols-[minmax(12rem,1.35fr)_minmax(7.5rem,1fr)_minmax(6rem,1fr)_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3 2xl:text-[0.72rem] 2xl:tracking-[0.08em]">
                 <span>Course</span>
                 <span className="text-center">Grade</span>
                 <span className="text-center">Credits</span>
@@ -426,9 +426,9 @@ export function GPACalculator() {
                 {courses.map((course) => (
                   <div
                     key={course.id}
-                    className="group grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 2xl:grid-cols-[minmax(12rem,1fr)_7.5rem_6rem_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5"
+                    className="group grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(4.25rem,1fr)_minmax(3.8rem,1fr)_1.5rem] 2xl:grid-cols-[minmax(12rem,1.35fr)_minmax(7.5rem,1fr)_minmax(6rem,1fr)_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5"
                   >
-                    <label>
+                    <label className="min-w-0">
                       <span className="sr-only">
                         Course
                       </span>
@@ -442,7 +442,7 @@ export function GPACalculator() {
                         className="h-8 rounded-md border-transparent bg-transparent px-1.5 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-2.5 lg:text-sm"
                       />
                     </label>
-                    <label>
+                    <label className="w-full max-w-[7rem] justify-self-center">
                       <span className="sr-only">
                         Grade
                       </span>
@@ -464,7 +464,7 @@ export function GPACalculator() {
                         </SelectContent>
                       </Select>
                     </label>
-                    <label>
+                    <label className="w-full max-w-[6.25rem] justify-self-center">
                       <span className="sr-only">
                         Credits
                       </span>
