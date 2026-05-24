@@ -1226,7 +1226,7 @@ function SemesterListCard({
           <Button
             variant="outline"
             onClick={onOpenAddSemester}
-            className="h-10 w-full rounded-lg border-dashed border-border/80 bg-card text-sm hover:border-primary/40 hover:bg-primary/5 hover:text-primary sm:h-11 sm:rounded-xl"
+            className="h-10 w-full rounded-lg border-dashed border-primary/25 bg-card text-sm text-primary hover:border-primary/45 hover:bg-primary/5 sm:h-11 sm:rounded-xl"
           >
             <Plus className="mr-2 size-4" />
             Add semester
@@ -1288,8 +1288,8 @@ function SemesterCard({
       onDragLeave={(event) => onCourseDragLeave(event, semesterId)}
       onDrop={(event) => onCourseDrop(event, semesterId)}
       className={cn(
-        'overflow-hidden rounded-xl border border-[#e1e5ea] bg-white transition-colors',
-        dragOverSemesterId === semesterId && 'border-primary/30 bg-[#f7f9fb]'
+        'overflow-hidden rounded-xl border border-border/70 bg-card transition-colors',
+        dragOverSemesterId === semesterId && 'border-primary/30 bg-muted/45'
       )}
     >
       <button
@@ -1297,7 +1297,7 @@ function SemesterCard({
         onDragOver={(event) => onCourseDragOver(event, semesterId)}
         onDrop={(event) => onCourseDrop(event, semesterId)}
         onClick={() => onToggleSemester(semesterId)}
-        className="flex w-full items-center gap-3 bg-[#f7f9fb] p-3 text-left transition-colors hover:bg-[#f0f4f7] sm:gap-4 sm:p-4"
+        className="flex w-full items-center gap-3 bg-muted/45 p-3 text-left transition-colors hover:bg-muted/75 sm:gap-4 sm:p-4"
       >
         <div className="min-w-0 flex-1">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
@@ -1405,11 +1405,11 @@ function UnassignedCoursesCard({
       onDragLeave={(event) => onCourseDragLeave(event, 'unassigned')}
       onDrop={(event) => onCourseDrop(event, 'unassigned')}
       className={cn(
-        'overflow-hidden rounded-xl border border-[#e1e5ea] bg-white transition-colors',
-        dragOverSemesterId === 'unassigned' && 'border-primary/30 bg-[#f7f9fb]'
+        'overflow-hidden rounded-xl border border-border/70 bg-card transition-colors',
+        dragOverSemesterId === 'unassigned' && 'border-primary/30 bg-muted/45'
       )}
     >
-      <div className="bg-[#f7f9fb] p-4">
+      <div className="bg-muted/45 p-4">
         <div className="flex items-center gap-3">
           <div className="text-base font-semibold tracking-tight text-foreground">
             Unassigned
@@ -1465,7 +1465,7 @@ function CourseTable({
       <div>
         <CourseTableHeader />
 
-        <div className="divide-y divide-[#edf0f3]">
+        <div className="divide-y divide-border/60">
           {courses.length === 0 ? (
             <div className="px-4 py-5 text-sm text-muted-foreground">
               No courses in this semester yet.
@@ -1493,7 +1493,7 @@ function CourseTable({
             <Button
               variant="outline"
               onClick={onOpenAddCourse}
-              className="h-11 w-full rounded-xl border-dashed border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+              className="h-11 w-full rounded-xl border-dashed border-primary/25 bg-card text-primary hover:border-primary/45 hover:bg-primary/5"
             >
               <Plus className="mr-2 size-4" />
               Add course
@@ -1507,7 +1507,7 @@ function CourseTable({
 
 function CourseTableHeader() {
   return (
-    <div className="hidden grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] gap-3 border-y border-[#e8ebef] bg-[#fbfcfd] px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:grid">
+    <div className="hidden grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] gap-3 border-y border-border/70 bg-muted/35 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:grid">
       <span>Course</span>
       <span className="text-center">Credits</span>
       <span className="text-center">Grade</span>

@@ -248,7 +248,7 @@ function UpcomingSidebar({
 
   return (
     <aside className="space-y-4 sm:space-y-5">
-      <Card className="overflow-hidden rounded-xl border-[#dfe4ea] bg-white py-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:rounded-2xl">
+      <Card className="overflow-hidden rounded-xl border-border/70 bg-card py-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:rounded-2xl">
         <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
@@ -263,7 +263,7 @@ function UpcomingSidebar({
             {nextDeadline ? (
               <NextDeadlineButton item={nextDeadline} onOpenDay={onOpenDay} />
             ) : (
-              <div className="mt-4 rounded-xl border border-[#dfe4ea] bg-[#f7f9fb] p-4 text-sm text-muted-foreground">
+              <div className="mt-4 rounded-xl border border-border/70 bg-muted/45 p-4 text-sm text-muted-foreground">
                 No upcoming assessments.
               </div>
             )}
@@ -309,7 +309,7 @@ function NextDeadlineButton({
       onClick={() => onOpenDay(item.dueDate)}
       className="mt-4 flex w-full items-center gap-3 text-left"
     >
-      <div className="overflow-hidden rounded-lg border border-[#dfe4ea] bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm">
         <div className="bg-primary px-3 py-1 text-center text-[0.62rem] font-bold uppercase tracking-[0.12em] text-primary-foreground">
           {deadlineDate?.toLocaleDateString(undefined, { month: 'short' }) ??
             'Date'}
@@ -347,7 +347,7 @@ function UpcomingStat({
   detail: string
 }) {
   return (
-    <div className="border-t border-[#e5e9ee] pt-4 sm:pt-5">
+    <div className="border-t border-border/70 pt-4 sm:pt-5">
       <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-[0.72rem] sm:tracking-[0.16em]">
         {label}
       </div>
@@ -377,13 +377,13 @@ function UpcomingEventList({
   onOpenDay: OpenDayHandler
 }) {
   return (
-    <div className="border-t border-[#e5e9ee] pt-5">
+    <div className="border-t border-border/70 pt-5">
       <div className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
         Upcoming events
       </div>
       <div className="mt-4 space-y-3">
         {upcoming.length === 0 ? (
-          <div className="rounded-xl border border-[#dfe4ea] bg-[#f7f9fb] p-4 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-border/70 bg-muted/45 p-4 text-sm text-muted-foreground">
             No upcoming assessments in the next 30 days.
           </div>
         ) : (
@@ -458,7 +458,7 @@ function MonthBoard({
   onOpenDay: OpenDayHandler
 }) {
   return (
-    <Card className="overflow-hidden rounded-xl border-[#dfe4ea] bg-white py-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:rounded-2xl">
+    <Card className="overflow-hidden rounded-xl border-border/70 bg-card py-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:rounded-2xl">
       <CardContent className="p-0">
         <div className="p-4 sm:p-6">
           <MonthBoardHeader
@@ -472,8 +472,8 @@ function MonthBoard({
           />
 
           <div className="mt-5 sm:mt-7">
-            <div className="overflow-hidden rounded-xl border border-[#dfe4ea] bg-white">
-              <div className="grid grid-cols-7 border-b border-[#e5e9ee] bg-white">
+            <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
+              <div className="grid grid-cols-7 border-b border-border/70 bg-card">
                 {weekDays.map((day) => (
                   <div
                     key={day}
@@ -484,7 +484,7 @@ function MonthBoard({
                 ))}
               </div>
 
-              <div className="grid grid-cols-7 bg-white">
+              <div className="grid grid-cols-7 bg-card">
                 {grid.map((cell, index) => (
                   <MonthDayButton
                     key={cell.key}
@@ -539,7 +539,7 @@ function MonthBoardHeader({
 
       <div className="grid grid-cols-[1fr_2.75rem_2.75rem] gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
         <Select value={String(monthCursor.month)} onValueChange={onSelectMonth}>
-          <SelectTrigger className="h-10 w-full rounded-lg border-[#dfe4ea] bg-white text-sm sm:h-11 sm:w-48 sm:rounded-xl sm:text-base">
+          <SelectTrigger className="h-10 w-full rounded-lg border-border/70 bg-card text-sm sm:h-11 sm:w-48 sm:rounded-xl sm:text-base">
             <SelectValue placeholder={formatMonthLabel(monthCursor)} />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
@@ -553,7 +553,7 @@ function MonthBoardHeader({
         <Button
           variant="outline"
           size="icon"
-          className="size-10 rounded-lg border-[#dfe4ea] sm:size-11 sm:rounded-xl"
+          className="size-10 rounded-lg border-border/70 sm:size-11 sm:rounded-xl"
           onClick={onPreviousMonth}
           aria-label="Previous month"
           title="Previous month"
@@ -563,7 +563,7 @@ function MonthBoardHeader({
         <Button
           variant="outline"
           size="icon"
-          className="size-10 rounded-lg border-[#dfe4ea] sm:size-11 sm:rounded-xl"
+          className="size-10 rounded-lg border-border/70 sm:size-11 sm:rounded-xl"
           onClick={onNextMonth}
           aria-label="Next month"
           title="Next month"
@@ -572,7 +572,7 @@ function MonthBoardHeader({
         </Button>
         <Button
           variant="outline"
-          className="col-span-full h-10 rounded-lg border-[#dfe4ea] px-5 text-sm sm:col-span-auto sm:h-11 sm:rounded-xl sm:px-6 sm:text-base"
+          className="col-span-full h-10 rounded-lg border-border/70 px-5 text-sm sm:col-span-auto sm:h-11 sm:rounded-xl sm:px-6 sm:text-base"
           onClick={onToday}
           aria-label="Jump to current month"
           title="Today"
@@ -610,10 +610,10 @@ function MonthDayButton({
       disabled={!iso}
       onClick={() => iso && onOpenDay(iso)}
       className={cn(
-        'min-h-16 border-b border-r border-[#e5e9ee] px-1.5 py-2 text-left transition-colors sm:min-h-[clamp(6.6rem,9.6vh,7.8rem)] sm:px-4 sm:py-3',
-        'hover:bg-[#f7f9fb] disabled:cursor-default disabled:hover:bg-white',
+        'min-h-16 border-b border-r border-border/70 px-1.5 py-2 text-left transition-colors sm:min-h-[clamp(6.6rem,9.6vh,7.8rem)] sm:px-4 sm:py-3',
+        'hover:bg-muted/45 disabled:cursor-default disabled:hover:bg-card',
         index % 7 === 6 && 'border-r-0',
-        'bg-white',
+        'bg-card',
       )}
     >
       <div className="flex items-center gap-2">
@@ -636,7 +636,7 @@ function MonthDayButton({
           {events.slice(0, 2).map((event) => (
             <div
               key={String(event._id)}
-              className="hidden rounded-md bg-[#eaf2ff] px-2 py-1 text-xs leading-tight sm:block"
+              className="hidden rounded-md bg-accent px-2 py-1 text-xs leading-tight sm:block"
             >
               <div className="truncate font-semibold text-primary">
                 {event.assignmentName?.trim() || 'Assessment'}

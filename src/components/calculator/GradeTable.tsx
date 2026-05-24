@@ -50,7 +50,7 @@ export function GradeTable({
         variant="outline"
         size="sm"
         onClick={onAddRow}
-        className="w-full rounded-xl border-dashed border-border/75 bg-card/80 hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+        className="w-full rounded-xl border-dashed border-primary/25 bg-card/80 text-primary hover:border-primary/45 hover:bg-primary/5"
       >
         <Plus className="size-4 mr-2" />
         Add row

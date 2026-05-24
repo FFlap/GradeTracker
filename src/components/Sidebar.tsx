@@ -121,7 +121,7 @@ export function Sidebar({
       'flex items-center gap-2 rounded-md text-sm font-medium transition-[background-color,color,box-shadow,padding,gap] duration-300 ease-out',
       collapsed ? 'justify-center gap-0 px-0 py-2.5' : 'px-3 py-2',
       active
-        ? 'bg-sidebar-accent text-primary shadow-[0_1px_2px_rgba(15,23,42,0.05)]'
+        ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_1px_2px_rgba(15,23,42,0.05)]'
         : 'text-sidebar-foreground/85 hover:bg-sidebar-accent/65 hover:text-sidebar-foreground'
     )
 
@@ -256,7 +256,7 @@ export function Sidebar({
           <SignedOut>
             <div
               className={cn(
-                'rounded-md border border-sidebar-border/70 bg-sidebar-accent transition-[height,padding,width] duration-300 ease-out',
+                'rounded-md border border-sidebar-border/70 bg-sidebar-accent/70 transition-[height,padding,width] duration-300 ease-out',
                 collapsed ? collapsedAccountTileClass : 'p-3'
               )}
             >
@@ -359,7 +359,7 @@ export function MobileTopNav() {
                       className={cn(
                         'flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                         item.active
-                          ? 'bg-sidebar-accent text-primary'
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                           : 'text-sidebar-foreground/85 hover:bg-sidebar-accent/65 hover:text-sidebar-foreground'
                       )}
                     >
@@ -377,7 +377,7 @@ export function MobileTopNav() {
                   className={cn(
                     'flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                     item.active
-                      ? 'bg-sidebar-accent text-primary'
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                       : 'text-sidebar-foreground/85 hover:bg-sidebar-accent/65 hover:text-sidebar-foreground'
                   )}
                 >
