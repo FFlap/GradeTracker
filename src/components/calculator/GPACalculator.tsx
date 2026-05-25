@@ -415,7 +415,7 @@ export function GPACalculator() {
 
           <div className="px-1.5 pb-4 lg:px-2 lg:pb-5">
             <div className="w-full">
-              <div className="grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] gap-1.5 border-b border-border/70 px-2 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.06em] text-muted-foreground min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(4.25rem,1fr)_minmax(3.8rem,1fr)_1.5rem] 2xl:grid-cols-[minmax(12rem,1.35fr)_minmax(7.5rem,1fr)_minmax(6rem,1fr)_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3 2xl:text-[0.72rem] 2xl:tracking-[0.08em]">
+              <div className="grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] gap-1 border-b border-border/70 px-2 py-2.5 text-[0.6rem] font-semibold uppercase tracking-[0.05em] text-muted-foreground min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(4.25rem,1fr)_minmax(3.8rem,1fr)_1.5rem] min-[390px]:gap-1.5 sm:px-3 sm:text-[0.64rem] sm:tracking-[0.08em] xl:grid-cols-[minmax(12rem,1.35fr)_minmax(7.5rem,1fr)_minmax(6rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 xl:text-[0.72rem] xl:tracking-[0.12em] 2xl:gap-3 2xl:tracking-[0.14em]">
                 <span>Course</span>
                 <span className="text-center">Grade</span>
                 <span className="text-center">Credits</span>
@@ -426,7 +426,7 @@ export function GPACalculator() {
                 {courses.map((course) => (
                   <div
                     key={course.id}
-                    className="group grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] items-center gap-1.5 px-2 py-2.5 transition-colors hover:bg-muted/12 min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(4.25rem,1fr)_minmax(3.8rem,1fr)_1.5rem] 2xl:grid-cols-[minmax(12rem,1.35fr)_minmax(7.5rem,1fr)_minmax(6rem,1fr)_2.5rem] 2xl:gap-3 2xl:px-4 2xl:py-3.5"
+                    className="group grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-muted/12 min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(4.25rem,1fr)_minmax(3.8rem,1fr)_1.5rem] min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.35fr)_minmax(7.5rem,1fr)_minmax(6rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3"
                   >
                     <label className="min-w-0">
                       <span className="sr-only">
