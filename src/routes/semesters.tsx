@@ -3,6 +3,7 @@ import {
   useMemo,
   useReducer,
   useRef,
+  useState,
   type Dispatch,
   type DragEvent,
   type ReactNode,
@@ -502,20 +503,18 @@ function useSemestersPageModel() {
   }
 
   const handleDeleteSemester = async (semester: Semester) => {
-    if (
-      !window.confirm(
-        `Delete “${semester.name}” and all courses/grades inside it? This cannot be undone.`
-      )
-    ) {
-      return
+    try {
+      setIsSemesterSettingsWorking(true)
+      await removeSemester({ id: semester._id })
+      setSettingsSemesterId(null)
+      setOpenSemesterIds((prev) => {
+        const next = new Set(prev ?? defaultOpenSemesterIds)
+        next.delete(String(semester._id))
+        return next
+      })
+    } finally {
+      setIsSemesterSettingsWorking(false)
     }
-    await removeSemester({ id: semester._id })
-    setSettingsSemesterId(null)
-    setOpenSemesterIds((prev) => {
-      const next = new Set(prev ?? defaultOpenSemesterIds)
-      next.delete(String(semester._id))
-      return next
-    })
   }
 
   return {
@@ -958,13 +957,15 @@ function SemesterSettingsDialog({
   onClose: () => void
   onNameChange: (value: string) => void
   onStatusChange: (semester: Semester, status: SemesterStatus) => void
-  onDelete: (semester: Semester) => void
+  onDelete: (semester: Semester) => void | Promise<void>
   onSave: () => void
 }) {
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
+
   if (!open) return null
 
   return (
-    <DialogShell onClose={onClose}>
+    <DialogShell onClose={isWorking ? () => {} : onClose}>
       <DialogHeader
         title="Semester settings"
         description="Rename, update status, or delete this semester."
@@ -1006,15 +1007,50 @@ function SemesterSettingsDialog({
             </div>
           </div>
 
+          {isConfirmingDelete && (
+            <div className="space-y-3 rounded-xl border border-destructive/25 bg-destructive/5 p-4">
+              <div>
+                <div className="text-sm font-semibold text-destructive">
+                  Delete “{semester.name}”?
+                </div>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  This will permanently delete the semester and all courses and grades inside it.
+                  This action cannot be undone.
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsConfirmingDelete(false)}
+                  disabled={isWorking}
+                >
+                  Keep semester
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => onDelete(semester)}
+                  disabled={isWorking}
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  {isWorking ? 'Deleting...' : 'Delete permanently'}
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center justify-between gap-2 border-t border-border/60 pt-2">
-            <Button
-              variant="destructive"
-              onClick={() => onDelete(semester)}
-              disabled={isWorking}
-            >
-              <Trash2 className="mr-2 size-4" />
-              Delete semester
-            </Button>
+            {!isConfirmingDelete ? (
+              <Button
+                variant="destructive"
+                onClick={() => setIsConfirmingDelete(true)}
+                disabled={isWorking}
+              >
+                <Trash2 className="mr-2 size-4" />
+                Delete semester
+              </Button>
+            ) : (
+              <div />
+            )}
 
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={onClose} disabled={isWorking}>
