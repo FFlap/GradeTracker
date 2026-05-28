@@ -228,33 +228,38 @@ export function Sidebar({
           </SignedIn>
         </div>
 
-        <div className="mt-auto p-3 space-y-2">
+        <div
+          className={cn(
+            'mt-auto p-3 space-y-2',
+            !collapsed && 'border-t border-sidebar-border'
+          )}
+        >
           <SignedIn>
             <div
               className={cn(
-                'flex items-center gap-2 rounded-md border border-sidebar-border/70 bg-sidebar-accent transition-[padding,gap] duration-300 ease-out',
-                collapsed ? collapsedAccountTileClass : 'px-3 py-2'
+                'flex items-center transition-[padding,gap] duration-300 ease-out',
+                collapsed ? collapsedAccountTileClass : 'gap-3 px-3 py-2'
               )}
             >
-              {!collapsed && (
-                <div
-                  className="min-w-0 flex-1 truncate text-xs text-sidebar-foreground/80"
-                  title={isLoaded ? displayName : undefined}
-                >
-                  {isLoaded ? displayName : '...'}
-                </div>
-              )}
               <UserButton
                 afterSignOutUrl="/"
                 appearance={{
                   elements: {
                     userButtonTrigger: collapsed
                       ? 'size-8 p-0 flex items-center justify-center'
-                      : 'size-8 p-0',
+                      : 'size-9 p-0 flex items-center justify-center',
                     avatarBox: 'size-8',
                   },
                 }}
               />
+              {!collapsed && (
+                <div
+                  className="min-w-0 flex-1 truncate text-sm font-semibold text-sidebar-foreground"
+                  title={isLoaded ? displayName : undefined}
+                >
+                  {isLoaded ? displayName : '...'}
+                </div>
+              )}
             </div>
           </SignedIn>
 
