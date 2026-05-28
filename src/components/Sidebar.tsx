@@ -177,7 +177,12 @@ export function Sidebar({
               className="size-11"
               imageClassName={cn('h-11 w-8', collapsed && '-translate-x-1')}
             />
-            <span className={cn('text-sm truncate', collapsedTextClass)}>
+            <span
+              className={cn(
+                'truncate text-base font-semibold tracking-tight',
+                collapsedTextClass
+              )}
+            >
               Grade Tracker
             </span>
           </Link>
@@ -325,7 +330,9 @@ export function MobileTopNav() {
             className="flex min-w-0 items-center gap-2.5 font-semibold text-sidebar-foreground"
           >
             <AppLogo className="size-12" imageClassName="h-12 w-9" />
-            <span className="truncate text-base">Grade Tracker</span>
+            <span className="truncate text-lg font-semibold tracking-tight">
+              Grade Tracker
+            </span>
           </Link>
 
           <button
