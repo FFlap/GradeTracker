@@ -112,11 +112,12 @@ export function GradeRow({
         </span>
         <Input
           type="text"
+          placeholder="80"
           value={row.grade}
           onChange={(e) =>
             onUpdate(row.id, 'grade', sanitizeGradeInput(e.target.value))
           }
-          className="h-8 rounded-md border-transparent bg-transparent px-0.5 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
+          className="h-8 rounded-md border-transparent bg-transparent px-0.5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
         />
       </label>
       <label>
@@ -126,11 +127,12 @@ export function GradeRow({
         <Input
           type="text"
           inputMode="decimal"
+          placeholder="20"
           value={row.weight}
           onChange={(e) =>
             onUpdate(row.id, 'weight', sanitizeNumberInput(e.target.value))
           }
-          className="h-8 rounded-md border-transparent bg-transparent px-0.5 text-center text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
+          className="h-8 rounded-md border-transparent bg-transparent px-0.5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
         />
       </label>
       <Button
