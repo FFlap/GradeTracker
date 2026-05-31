@@ -426,7 +426,7 @@ export function GPACalculator() {
                 {courses.map((course) => (
                   <div
                     key={course.id}
-                    className="group grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-muted/12 min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(4.25rem,1fr)_minmax(3.8rem,1fr)_1.5rem] min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.35fr)_minmax(7.5rem,1fr)_minmax(6rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3"
+                    className="group grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-accent/45 min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(4.25rem,1fr)_minmax(3.8rem,1fr)_1.5rem] min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.35fr)_minmax(7.5rem,1fr)_minmax(6rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3"
                   >
                     <label className="min-w-0">
                       <span className="sr-only">

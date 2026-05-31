@@ -205,7 +205,7 @@ export function FinalGradeCalculator() {
               </div>
 
               <div className="divide-y divide-border/70">
-                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-muted/12 min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3">
+                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-accent/45 min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3">
                   <div>
                     <div className="text-sm font-medium text-foreground lg:text-base">Current grade</div>
                     <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
@@ -234,7 +234,7 @@ export function FinalGradeCalculator() {
                   <span />
                 </div>
 
-                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-muted/12 min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3">
+                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-accent/45 min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3">
                   <div>
                     <div className="text-sm font-medium text-foreground lg:text-base">Final exam weight</div>
                     <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
@@ -263,7 +263,7 @@ export function FinalGradeCalculator() {
                   <span />
                 </div>
 
-                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-muted/12 min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3">
+                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-accent/45 min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3">
                   <div>
                     <div className="text-sm font-medium text-foreground lg:text-base">Target grade</div>
                     <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
