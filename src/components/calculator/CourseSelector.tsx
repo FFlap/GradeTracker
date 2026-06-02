@@ -197,13 +197,13 @@ function CourseSelectorInner({
             if (e.key === 'Enter') handleCreateCourse()
             if (e.key === 'Escape') dispatch({ type: 'set-mode', mode: 'select' })
           }}
-          className="h-10 min-w-0 flex-1 rounded-lg sm:h-9 sm:rounded-xl"
+          className="h-10 min-w-0 flex-1 rounded-md sm:h-9"
         />
         <Button
           size="icon"
           onClick={handleCreateCourse}
           disabled={!state.newCourseName.trim() || state.isWorking}
-          className="size-10 rounded-lg sm:size-9 sm:rounded-xl"
+          className="size-10 rounded-md sm:size-9"
         >
           <Check className="size-4" />
         </Button>
@@ -212,7 +212,7 @@ function CourseSelectorInner({
           size="icon"
           onClick={() => dispatch({ type: 'set-mode', mode: 'select' })}
           disabled={state.isWorking}
-          className="size-10 rounded-lg sm:size-9 sm:rounded-xl"
+          className="size-10 rounded-md sm:size-9"
         >
           <span className="sr-only">Cancel</span>
           <X className="size-4" />
@@ -235,13 +235,13 @@ function CourseSelectorInner({
             if (e.key === 'Enter') handleRenameCourse()
             if (e.key === 'Escape') dispatch({ type: 'set-mode', mode: 'select' })
           }}
-          className="h-10 min-w-0 flex-1 rounded-lg sm:h-9 sm:rounded-xl"
+          className="h-10 min-w-0 flex-1 rounded-md sm:h-9"
         />
         <Button
           size="icon"
           onClick={handleRenameCourse}
           disabled={!state.editedCourseName.trim() || state.isWorking}
-          className="size-10 rounded-lg sm:size-9 sm:rounded-xl"
+          className="size-10 rounded-md sm:size-9"
         >
           <Check className="size-4" />
         </Button>
@@ -250,7 +250,7 @@ function CourseSelectorInner({
           size="icon"
           onClick={() => dispatch({ type: 'set-mode', mode: 'select' })}
           disabled={state.isWorking}
-          className="size-10 rounded-lg sm:size-9 sm:rounded-xl"
+          className="size-10 rounded-md sm:size-9"
         >
           <span className="sr-only">Cancel</span>
           <X className="size-4" />
@@ -270,7 +270,7 @@ function CourseSelectorInner({
       >
         <SelectTrigger
           className={cn(
-            'h-10 min-w-0 flex-1 rounded-lg text-base sm:h-9 sm:rounded-xl sm:text-sm',
+            'h-10 min-w-0 flex-1 rounded-md text-base sm:h-9 sm:text-sm',
             selectedCourseId
               ? 'ring-2 ring-ring/35'
               : 'ring-1 ring-border/60'
@@ -306,7 +306,7 @@ function CourseSelectorInner({
             disabled={state.isWorking}
             aria-expanded={state.isManageOpen}
             aria-haspopup="menu"
-            className="h-10 w-[5.75rem] justify-center gap-1 rounded-lg text-sm text-primary sm:h-8 sm:w-auto sm:min-w-[7rem] sm:gap-1.5 sm:rounded-lg"
+            className="h-10 w-[5.75rem] justify-center gap-1 rounded-md text-sm text-primary sm:h-8 sm:w-auto sm:min-w-[7rem] sm:gap-1.5"
           >
             <MoreHorizontal className="size-4" />
             Manage
@@ -368,7 +368,7 @@ function CourseSelectorInner({
             variant="outline"
             size="sm"
             disabled={state.isWorking}
-            className="h-10 w-[5.75rem] justify-center gap-1 rounded-lg text-sm text-primary sm:h-8 sm:w-auto sm:min-w-[7rem] sm:gap-1.5 sm:rounded-lg"
+            className="h-10 w-[5.75rem] justify-center gap-1 rounded-md text-sm text-primary sm:h-8 sm:w-auto sm:min-w-[7rem] sm:gap-1.5"
           >
             <MoreHorizontal className="size-4" />
             Manage
