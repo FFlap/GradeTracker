@@ -403,10 +403,19 @@ export function GPACalculator() {
 
       <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 lg:rounded-2xl">
         <CardContent className="p-0">
-          <div className="border-b border-border/70 px-4 py-4 lg:px-6 lg:py-5">
+          <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-4 lg:px-6 lg:py-5">
             <h2 className="text-xl font-semibold tracking-tight text-foreground lg:text-2xl">
               Course Entry
             </h2>
+            <Button
+              size="sm"
+              onClick={handleAddCourse}
+              className="gap-1 px-4"
+              aria-label="Add course"
+            >
+              <Plus className="size-4" />
+              Add
+            </Button>
           </div>
 
           <div className="px-4 py-3 text-xs text-muted-foreground lg:px-6 lg:py-4 lg:text-sm">
@@ -499,17 +508,6 @@ export function GPACalculator() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            <div className="px-3 pt-3 lg:px-4">
-              <Button
-                variant="outline"
-                onClick={handleAddCourse}
-                className="h-10 w-full rounded-lg border-dashed border-primary/25 bg-card text-sm text-primary hover:border-primary/45 hover:bg-primary/5 lg:h-11 lg:rounded-xl"
-              >
-                <Plus className="size-4 mr-2" />
-                Add course
-              </Button>
             </div>
           </div>
         </CardContent>

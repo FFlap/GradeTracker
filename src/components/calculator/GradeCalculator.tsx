@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Calculator, RotateCcw, SlidersHorizontal } from 'lucide-react'
+import { Calculator, Plus, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { GradeTable } from './GradeTable'
 import { CourseSelector } from './CourseSelector'
 import {
@@ -892,10 +892,19 @@ function AssignmentEntryPanel({
   return (
     <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
       <CardContent className="p-0">
-        <div className="border-b border-border/70 px-4 py-4 sm:px-6 sm:py-5">
+        <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-4 sm:px-6 sm:py-5">
           <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Assignment Entry
           </h2>
+          <Button
+            size="sm"
+            onClick={onAddRow}
+            className="gap-1 px-4"
+            aria-label="Add row"
+          >
+            <Plus className="size-4" />
+            Add
+          </Button>
         </div>
 
         <div className="px-4 py-3 text-xs text-muted-foreground sm:px-6 sm:py-4 sm:text-sm">
@@ -909,7 +918,6 @@ function AssignmentEntryPanel({
             rows={rows}
             onUpdateRow={onUpdateRow}
             onDeleteRow={onDeleteRow}
-            onAddRow={onAddRow}
           />
         </div>
       </CardContent>

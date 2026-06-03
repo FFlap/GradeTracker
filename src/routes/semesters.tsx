@@ -1527,9 +1527,8 @@ function CourseTable({
         {onOpenAddCourse && (
           <div className="px-4 pt-3">
             <Button
-              variant="outline"
               onClick={onOpenAddCourse}
-              className="h-11 w-full rounded-xl border-dashed border-primary/25 bg-card text-primary hover:border-primary/45 hover:bg-primary/5"
+              className="h-11 w-full rounded-xl"
             >
               <Plus className="mr-2 size-4" />
               Add course
