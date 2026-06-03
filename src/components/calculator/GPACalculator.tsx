@@ -285,7 +285,7 @@ export function GPACalculator() {
 
   return (
     <div className="grid items-start gap-4 lg:gap-7 xl:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
-      <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 lg:rounded-2xl">
+      <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 lg:rounded-2xl xl:sticky xl:top-6">
         <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-foreground lg:text-2xl">

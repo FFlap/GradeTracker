@@ -1092,7 +1092,7 @@ function OverallSummaryCard({
   courseCount: number
 }) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 xl:sticky xl:top-6">
       <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
         <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>
