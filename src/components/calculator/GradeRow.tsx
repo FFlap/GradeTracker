@@ -49,7 +49,7 @@ export function GradeRow({
           placeholder="e.g. Homework"
           value={row.assignment}
           onChange={(e) => onUpdate(row.id, 'assignment', e.target.value)}
-          className="h-8 rounded-md border-transparent bg-transparent px-1.5 text-xs shadow-none hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-2.5 lg:text-sm"
+          className="h-8 rounded-md border-transparent bg-transparent px-1.5 text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-2.5 lg:text-sm"
         />
       </label>
       <div>
@@ -79,7 +79,7 @@ export function GradeRow({
             aria-label="Pick date"
             title="Pick date"
           >
-            <span className={readableDate ? 'truncate text-foreground' : 'truncate text-muted-foreground'}>
+            <span className={readableDate ? 'truncate text-foreground' : 'truncate text-muted-foreground/70'}>
               {readableDate || 'Pick date'}
             </span>
           </button>
