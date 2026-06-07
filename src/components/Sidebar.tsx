@@ -83,15 +83,18 @@ function SectionLabel({
   label,
   collapsedLabel,
   collapsed,
+  compact = false,
 }: {
   label: string
   collapsedLabel: string
   collapsed: boolean
+  compact?: boolean
 }) {
   return (
     <div
       className={cn(
         'px-3 pt-5 pb-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-sidebar-foreground/55',
+        compact && 'pt-2',
         collapsed && 'px-0 text-center'
       )}
     >
@@ -161,25 +164,25 @@ export function Sidebar({
       </button>
 
       <nav className="flex h-full flex-col">
-        <div className="p-3">
+        <div className={cn('pt-2 pb-1', collapsed ? 'px-2' : 'px-4')}>
           <Link
             to="/grade-calculator"
             search={{ courseId: undefined }}
             className={cn(
-              'flex min-w-0 items-center gap-2 rounded-md font-semibold text-sidebar-foreground transition-[background-color,color,padding,gap] duration-300 ease-out',
+              'flex min-w-0 items-center gap-0 rounded-md font-semibold text-sidebar-foreground transition-[background-color,color,padding,gap] duration-300 ease-out',
               collapsed
                 ? 'mx-auto h-12 w-12 justify-center gap-0 px-0 py-0'
-                : 'px-3 py-2.5 hover:bg-sidebar-accent/50'
+                : 'px-0 py-1.5 hover:bg-sidebar-accent/50'
             )}
             title="Grade Tracker"
           >
             <AppLogo
-              className="size-11"
-              imageClassName={cn('h-11 w-8', collapsed && '-translate-x-1')}
+              className={collapsed ? 'size-11' : 'h-10 w-8'}
+              imageClassName={collapsed ? 'h-11 w-8' : 'h-10 w-8'}
             />
             <span
               className={cn(
-                'truncate text-base font-semibold tracking-tight',
+                'truncate text-[1.35rem] font-semibold leading-none tracking-tight',
                 collapsedTextClass
               )}
             >
@@ -189,7 +192,7 @@ export function Sidebar({
         </div>
 
         <div className="px-3">
-          <SectionLabel label="Calculators" collapsedLabel="C" collapsed={collapsed} />
+          <SectionLabel label="Calculators" collapsedLabel="C" collapsed={collapsed} compact />
           {navItems
             .filter((item) => !item.signedInOnly)
             .map((item) => {
