@@ -49,7 +49,7 @@ export function GradeRow({
           placeholder="e.g. Homework"
           value={row.assignment}
           onChange={(e) => onUpdate(row.id, 'assignment', e.target.value)}
-          className="h-8 rounded-md border-transparent bg-transparent px-1.5 text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-2.5 lg:text-sm"
+          className="h-8 rounded-lg border-transparent bg-transparent px-1.5 text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:px-2.5 lg:text-sm"
         />
       </label>
       <div>
@@ -75,7 +75,7 @@ export function GradeRow({
                 el.click()
               }
             }}
-            className="flex h-8 w-full items-center rounded-md border border-transparent bg-transparent pl-6 pr-1.5 text-left text-xs shadow-none transition-colors hover:border-border/70 hover:bg-input/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-9 lg:rounded-lg lg:pl-9 lg:pr-9 lg:text-sm"
+            className="flex h-8 w-full items-center rounded-lg border border-transparent bg-transparent pl-6 pr-1.5 text-left text-xs shadow-none transition-colors hover:border-border/70 hover:bg-input/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-9 lg:pl-9 lg:pr-9 lg:text-sm"
             aria-label="Pick date"
             title="Pick date"
           >
@@ -97,7 +97,7 @@ export function GradeRow({
             <button
               type="button"
               onClick={() => onUpdate(row.id, 'date', '')}
-              className="absolute right-1 top-1/2 size-6 -translate-y-1/2 rounded-md text-muted-foreground transition-colors hover:bg-accent/45 hover:text-foreground lg:right-2 lg:size-7 lg:rounded-lg"
+              className="absolute right-1 top-1/2 size-6 -translate-y-1/2 rounded-lg text-muted-foreground transition-colors hover:bg-accent/45 hover:text-foreground lg:right-2 lg:size-7"
               aria-label="Clear date"
               title="Clear date"
             >
@@ -117,7 +117,7 @@ export function GradeRow({
           onChange={(e) =>
             onUpdate(row.id, 'grade', sanitizeGradeInput(e.target.value))
           }
-          className="h-8 rounded-md border-transparent bg-transparent px-0.5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
+          className="h-8 rounded-lg border-transparent bg-transparent px-0.5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:text-sm"
         />
       </label>
       <label>
@@ -132,14 +132,14 @@ export function GradeRow({
           onChange={(e) =>
             onUpdate(row.id, 'weight', sanitizeNumberInput(e.target.value))
           }
-          className="h-8 rounded-md border-transparent bg-transparent px-0.5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:text-sm"
+          className="h-8 rounded-lg border-transparent bg-transparent px-0.5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:text-sm"
         />
       </label>
       <Button
         variant="ghost"
         size="icon"
         onClick={() => onDelete(row.id)}
-        className={`size-6 rounded-md text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:size-8 lg:rounded-lg ${
+        className={`size-6 rounded-lg text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:size-8 ${
           showDelete ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}
         disabled={!showDelete}

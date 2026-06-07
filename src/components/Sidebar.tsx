@@ -422,7 +422,7 @@ export function MobileTopNav() {
 
             <SignedOut>
               <SignInButton mode="modal">
-                <Button className="h-11 w-full rounded-md" onClick={() => setIsOpen(false)}>
+                <Button className="h-10 w-full" onClick={() => setIsOpen(false)}>
                   <LogIn className="size-4 mr-2" />
                   Sign In
                 </Button>

@@ -537,12 +537,12 @@ function MonthBoardHeader({
         </span>
       </div>
 
-      <div className="grid grid-cols-[1fr_2.75rem_2.75rem] gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+      <div className="grid grid-cols-[1fr_2.25rem_2.25rem] gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
         <Select value={String(monthCursor.month)} onValueChange={onSelectMonth}>
-          <SelectTrigger className="h-10 w-full rounded-lg border-border/70 bg-card text-sm sm:h-11 sm:w-48 sm:rounded-xl sm:text-base">
+          <SelectTrigger className="h-9 w-full border-border/70 bg-card text-sm sm:w-48">
             <SelectValue placeholder={formatMonthLabel(monthCursor)} />
           </SelectTrigger>
-          <SelectContent className="rounded-xl">
+          <SelectContent>
             {monthOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
@@ -553,7 +553,7 @@ function MonthBoardHeader({
         <Button
           variant="outline"
           size="icon"
-          className="size-10 rounded-lg border-border/70 sm:size-11 sm:rounded-xl"
+          className="size-9 border-border/70"
           onClick={onPreviousMonth}
           aria-label="Previous month"
           title="Previous month"
@@ -563,7 +563,7 @@ function MonthBoardHeader({
         <Button
           variant="outline"
           size="icon"
-          className="size-10 rounded-lg border-border/70 sm:size-11 sm:rounded-xl"
+          className="size-9 border-border/70"
           onClick={onNextMonth}
           aria-label="Next month"
           title="Next month"
@@ -572,7 +572,7 @@ function MonthBoardHeader({
         </Button>
         <Button
           variant="outline"
-          className="col-span-full h-10 rounded-lg border-border/70 px-5 text-sm sm:col-span-auto sm:h-11 sm:rounded-xl sm:px-6 sm:text-base"
+          className="col-span-full h-9 border-border/70 px-5 text-sm sm:col-span-auto"
           onClick={onToday}
           aria-label="Jump to current month"
           title="Today"

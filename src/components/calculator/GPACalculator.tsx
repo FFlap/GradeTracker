@@ -389,11 +389,11 @@ export function GPACalculator() {
           )}
 
           <div className="flex gap-2 pt-1 lg:gap-3">
-            <Button onClick={handleCalculate} className="h-10 flex-1 rounded-lg text-sm lg:h-11 lg:rounded-xl">
+            <Button onClick={handleCalculate} className="h-10 flex-1 text-sm">
               <Calculator className="size-4 mr-2" />
               Calculate
             </Button>
-            <Button variant="outline" onClick={handleReset} className="h-10 flex-1 rounded-lg text-sm lg:h-11 lg:rounded-xl">
+            <Button variant="outline" onClick={handleReset} className="h-10 flex-1 text-sm">
               <RotateCcw className="size-4 mr-2" />
               Reset
             </Button>
@@ -448,7 +448,7 @@ export function GPACalculator() {
                         onChange={(e) =>
                           handleUpdateCourse(course.id, 'name', e.target.value)
                         }
-                        className="h-8 rounded-md border-transparent bg-transparent px-1.5 text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-2.5 lg:text-sm"
+                        className="h-8 rounded-lg border-transparent bg-transparent px-1.5 text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:px-2.5 lg:text-sm"
                       />
                     </label>
                     <label className="w-full max-w-[7rem] justify-self-center">
@@ -461,10 +461,10 @@ export function GPACalculator() {
                           handleUpdateCourse(course.id, 'grade', value)
                         }
                       >
-                        <SelectTrigger className="h-8 w-full rounded-md border-transparent bg-transparent px-1.5 text-xs shadow-none data-[placeholder]:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-3 lg:text-sm">
+                        <SelectTrigger className="h-8 w-full border-transparent bg-transparent px-1.5 text-xs shadow-none data-[placeholder]:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:px-3 lg:text-sm">
                           <SelectValue placeholder="Grade" />
                         </SelectTrigger>
-                        <SelectContent className="rounded-xl">
+                        <SelectContent>
                           {GRADE_OPTIONS.map((grade) => (
                             <SelectItem key={grade} value={grade}>
                               {grade}
@@ -489,14 +489,14 @@ export function GPACalculator() {
                             sanitizeNumberInput(e.target.value)
                           )
                         }
-                        className="h-8 rounded-md border-transparent bg-transparent px-0.5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:px-1 lg:text-sm"
+                        className="h-8 rounded-lg border-transparent bg-transparent px-0.5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:px-1 lg:text-sm"
                       />
                     </label>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDeleteCourse(course.id)}
-                      className={`size-6 rounded-md text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:h-9 lg:w-9 lg:rounded-xl ${
+                      className={`size-6 rounded-lg text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:h-9 lg:w-9 ${
                         courses.length > 1
                           ? 'opacity-100'
                           : 'opacity-0 group-hover:opacity-100'

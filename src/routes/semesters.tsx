@@ -769,7 +769,7 @@ function AddSemesterDialog({
               event.target.value === 'completed' ? 'completed' : 'in_progress'
             )
           }
-          className="h-9 w-full rounded-md border border-border bg-input px-3 text-sm text-foreground"
+          className="h-9 w-full rounded-lg border border-border bg-input px-3 text-sm text-foreground"
         >
           <option value="in_progress">In progress</option>
           <option value="completed">Completed</option>
@@ -999,7 +999,7 @@ function SemesterSettingsDialog({
                   )
                 }
                 disabled={isWorking}
-                className="h-9 w-full rounded-md border border-border bg-input px-3 text-sm text-foreground"
+                className="h-9 w-full rounded-lg border border-border bg-input px-3 text-sm text-foreground"
               >
                 <option value="in_progress">In progress</option>
                 <option value="completed">Completed</option>
@@ -1262,7 +1262,7 @@ function SemesterListCard({
           <Button
             variant="outline"
             onClick={onOpenAddSemester}
-            className="h-10 w-full rounded-lg border-dashed border-primary/25 bg-card text-sm text-primary hover:border-primary/45 hover:bg-primary/5 sm:h-11 sm:rounded-xl"
+            className="h-10 w-full border-dashed border-primary/25 bg-card text-sm text-primary hover:border-primary/45 hover:bg-primary/5"
           >
             <Plus className="mr-2 size-4" />
             Add semester
@@ -1528,7 +1528,7 @@ function CourseTable({
           <div className="px-4 pt-3">
             <Button
               onClick={onOpenAddCourse}
-              className="h-11 w-full rounded-xl"
+              className="h-10 w-full"
             >
               <Plus className="mr-2 size-4" />
               Add course
@@ -1620,7 +1620,7 @@ function CourseRow({
           type="button"
           variant="outline"
           size="sm"
-          className="h-10 w-full rounded-xl px-3 sm:h-8 sm:w-auto"
+          className="h-9 w-full px-3 sm:w-auto"
           asChild
         >
           <Link

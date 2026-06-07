@@ -172,11 +172,11 @@ export function FinalGradeCalculator() {
           )}
 
           <div className="flex gap-2 pt-1 lg:gap-3">
-            <Button onClick={handleCalculate} className="h-10 flex-1 rounded-lg text-sm lg:h-11 lg:rounded-xl">
+            <Button onClick={handleCalculate} className="h-10 flex-1 text-sm">
               <Calculator className="size-4 mr-2" />
               Calculate
             </Button>
-            <Button variant="outline" onClick={handleReset} className="h-10 flex-1 rounded-lg text-sm lg:h-11 lg:rounded-xl">
+            <Button variant="outline" onClick={handleReset} className="h-10 flex-1 text-sm">
               <RotateCcw className="size-4 mr-2" />
               Reset
             </Button>
@@ -225,7 +225,7 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-8 rounded-md border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
+                      className="h-8 rounded-lg border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
                     />
                     <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %
@@ -254,7 +254,7 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-8 rounded-md border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
+                      className="h-8 rounded-lg border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
                     />
                     <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %
@@ -283,7 +283,7 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-8 rounded-md border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:rounded-lg lg:pr-8 lg:text-sm"
+                      className="h-8 rounded-lg border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
                     />
                     <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %

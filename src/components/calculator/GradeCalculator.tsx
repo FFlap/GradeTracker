@@ -679,9 +679,9 @@ function GradeWeightingPanel({
                 onChange={(e) =>
                   onTargetGradeChange(sanitizeNumberInput(e.target.value))
                 }
-                className="h-10 rounded-lg pr-9 text-base sm:h-12 sm:rounded-xl sm:pr-10 sm:text-lg"
+                className="h-9 pr-9 text-sm sm:pr-10"
               />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-base text-muted-foreground sm:right-4 sm:text-lg">
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground sm:right-4">
                 %
               </span>
             </div>
@@ -716,11 +716,11 @@ function GradeWeightingPanel({
           )}
 
           <div className="flex gap-2 pt-1 sm:gap-3">
-            <Button onClick={onCalculate} className="h-10 flex-1 rounded-lg text-sm sm:h-11 sm:rounded-xl">
+            <Button onClick={onCalculate} className="h-10 flex-1 text-sm">
               <Calculator className="size-4 mr-2" />
               Calculate
             </Button>
-            <Button variant="outline" onClick={onReset} className="h-10 flex-1 rounded-lg text-sm sm:h-11 sm:rounded-xl">
+            <Button variant="outline" onClick={onReset} className="h-10 flex-1 text-sm">
               <RotateCcw className="size-4 mr-2" />
               Reset
             </Button>
