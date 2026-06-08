@@ -121,7 +121,7 @@ export function Sidebar({
 
   const navLinkClass = (active: boolean) =>
     cn(
-      'flex items-center gap-2 rounded-md text-sm font-medium transition-[background-color,color,box-shadow,padding,gap] duration-300 ease-out',
+      'flex items-center gap-2 rounded-sm text-sm font-medium transition-[background-color,color,box-shadow,padding,gap] duration-300 ease-out',
       collapsed ? 'justify-center gap-0 px-0 py-2.5' : 'px-3 py-2',
       active
         ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_1px_2px_rgba(15,23,42,0.05)]'
@@ -150,7 +150,7 @@ export function Sidebar({
         onClick={onToggleCollapsed}
         className={cn(
           'absolute top-7 right-0 z-50 -translate-y-1/2 translate-x-1/2',
-          'size-7 rounded-md border border-border/80 bg-card shadow-[0_10px_22px_rgba(15,23,42,0.08)]',
+          'size-7 rounded-sm border border-border/80 bg-card shadow-[0_10px_22px_rgba(15,23,42,0.08)]',
           'hover:bg-muted/70 text-sidebar-foreground/80 transition-colors'
         )}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -169,7 +169,7 @@ export function Sidebar({
             to="/grade-calculator"
             search={{ courseId: undefined }}
             className={cn(
-              'flex min-w-0 items-center gap-0 rounded-md font-semibold text-sidebar-foreground transition-[background-color,color,padding,gap] duration-300 ease-out',
+              'flex min-w-0 items-center gap-0 rounded-sm font-semibold text-sidebar-foreground transition-[background-color,color,padding,gap] duration-300 ease-out',
               collapsed
                 ? 'mx-auto h-12 w-12 justify-center gap-0 px-0 py-0'
                 : 'px-0 py-1.5 hover:bg-sidebar-accent/50'
@@ -269,7 +269,7 @@ export function Sidebar({
           <SignedOut>
             <div
               className={cn(
-                'rounded-md border border-sidebar-border/70 bg-sidebar-accent/70 transition-[height,padding,width] duration-300 ease-out',
+                'rounded-sm border border-sidebar-border/70 bg-sidebar-accent/70 transition-[height,padding,width] duration-300 ease-out',
                 collapsed ? collapsedAccountTileClass : 'p-3'
               )}
             >
@@ -346,7 +346,7 @@ export function MobileTopNav() {
           <button
             type="button"
             onClick={() => setIsOpen((value) => !value)}
-            className="inline-flex size-11 items-center justify-center rounded-md text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            className="inline-flex size-11 items-center justify-center rounded-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
             aria-label={isOpen ? 'Close main menu' : 'Open main menu'}
             aria-expanded={isOpen}
           >
@@ -372,7 +372,7 @@ export function MobileTopNav() {
                       to={item.to}
                       onClick={() => setIsOpen(false)}
                       className={cn(
-                        'flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                        'flex min-h-11 w-full items-center gap-3 rounded-sm px-3 py-2 text-sm font-medium transition-colors',
                         item.active
                           ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                           : 'text-muted-foreground hover:bg-sidebar-accent/65'
@@ -390,7 +390,7 @@ export function MobileTopNav() {
                   to={item.to}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    'flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    'flex min-h-11 w-full items-center gap-3 rounded-sm px-3 py-2 text-sm font-medium transition-colors',
                     item.active
                       ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                       : 'text-muted-foreground hover:bg-sidebar-accent/65'
@@ -404,7 +404,7 @@ export function MobileTopNav() {
 
           <div className="border-t border-sidebar-border p-3">
             <SignedIn>
-              <div className="flex items-center gap-3 rounded-md border border-sidebar-border/70 bg-sidebar-accent px-3 py-2">
+              <div className="flex items-center gap-3 rounded-sm border border-sidebar-border/70 bg-sidebar-accent px-3 py-2">
                 <div
                   className="min-w-0 flex-1 truncate text-sm text-sidebar-foreground/80"
                   title={isLoaded ? displayName : undefined}

@@ -198,7 +198,7 @@ function CalendarLoadingState() {
   return (
     <Card className="mx-auto max-w-2xl rounded-xl border-border/70 py-0 sm:rounded-2xl">
       <CardContent className="p-6 text-center sm:p-10">
-        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 sm:mb-4 sm:size-12 sm:rounded-xl">
+        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-md border border-primary/20 bg-primary/10 sm:mb-4 sm:size-12 sm:rounded-md">
           <Calendar className="size-5 text-foreground/70 sm:size-6" />
         </div>
         <div className="mb-1 text-base font-semibold text-foreground sm:text-lg">
@@ -216,7 +216,7 @@ function CalendarSignInPrompt() {
   return (
     <Card className="mx-auto max-w-2xl rounded-xl border-border/70 py-0 sm:rounded-2xl">
       <CardContent className="p-6 text-center sm:p-10">
-        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 sm:mb-4 sm:size-12 sm:rounded-xl">
+        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-md border border-primary/20 bg-primary/10 sm:mb-4 sm:size-12 sm:rounded-md">
           <Calendar className="size-5 text-foreground/70 sm:size-6" />
         </div>
         <div className="mb-1 text-base font-semibold text-foreground sm:text-lg">
@@ -263,7 +263,7 @@ function UpcomingSidebar({
             {nextDeadline ? (
               <NextDeadlineButton item={nextDeadline} onOpenDay={onOpenDay} />
             ) : (
-              <div className="mt-4 rounded-xl border border-border/70 bg-muted/45 p-4 text-sm text-muted-foreground">
+              <div className="mt-4 rounded-md border border-border/70 bg-muted/45 p-4 text-sm text-muted-foreground">
                 No upcoming assessments.
               </div>
             )}
@@ -309,7 +309,7 @@ function NextDeadlineButton({
       onClick={() => onOpenDay(item.dueDate)}
       className="mt-4 flex w-full items-center gap-3 text-left"
     >
-      <div className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm">
         <div className="bg-primary px-3 py-1 text-center text-[0.62rem] font-bold uppercase tracking-[0.12em] text-primary-foreground">
           {deadlineDate?.toLocaleDateString(undefined, { month: 'short' }) ??
             'Date'}
@@ -383,7 +383,7 @@ function UpcomingEventList({
       </div>
       <div className="mt-4 space-y-3">
         {upcoming.length === 0 ? (
-          <div className="rounded-xl border border-border/70 bg-muted/45 p-4 text-sm text-muted-foreground">
+          <div className="rounded-md border border-border/70 bg-muted/45 p-4 text-sm text-muted-foreground">
             No upcoming assessments in the next 30 days.
           </div>
         ) : (
@@ -707,7 +707,7 @@ function DayDrawer({
 
             <div className="space-y-2">
               {assessments.length === 0 ? (
-                <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+                <div className="rounded-md border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
                   Add a date to an assessment in the Grade Calculator to see it
                   here.
                 </div>
@@ -735,7 +735,7 @@ function AssessmentDrawerItem({
   const done = isCompletedAssessment(assessment)
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
+    <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-card px-4 py-3">
       <div className="min-w-0">
         <div className="truncate font-medium text-foreground">
           {assessment.assignmentName?.trim() || 'Assessment'}

@@ -129,7 +129,7 @@ export function FinalGradeCalculator() {
             <div className="border-t border-border/70 pt-6">
               {result.isPossible ? (
                 <div className="space-y-4">
-                  <div className="rounded-lg border border-primary/15 bg-primary/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] lg:rounded-xl sm:p-5">
+                  <div className="rounded-sm border border-primary/15 bg-primary/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] lg:rounded-sm sm:p-5">
                     <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-primary lg:text-[0.72rem] sm:tracking-[0.14em]">
                       Required score
                     </div>
@@ -141,7 +141,7 @@ export function FinalGradeCalculator() {
                   </div>
                 </div>
               ) : result.neededGrade > 100 ? (
-                <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4 lg:rounded-xl sm:p-5">
+                <div className="rounded-sm border border-destructive/25 bg-destructive/5 p-4 lg:rounded-sm sm:p-5">
                   <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-destructive lg:text-[0.72rem] sm:tracking-[0.14em]">
                     Not achievable
                   </div>
@@ -153,7 +153,7 @@ export function FinalGradeCalculator() {
                   </p>
                 </div>
               ) : (
-                <div className="rounded-lg border border-primary/15 bg-primary/5 p-4 lg:rounded-xl sm:p-5">
+                <div className="rounded-sm border border-primary/15 bg-primary/5 p-4 lg:rounded-sm sm:p-5">
                   <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-primary lg:text-[0.72rem] sm:tracking-[0.14em]">
                     Already reached
                   </div>
@@ -166,7 +166,7 @@ export function FinalGradeCalculator() {
           )}
 
           {invalidMessage && (
-            <div className="rounded-xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            <div className="rounded-sm border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
               {invalidMessage}
             </div>
           )}
@@ -225,7 +225,7 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-8 rounded-lg border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
+                      className="h-8 rounded-sm border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
                     />
                     <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %
@@ -254,7 +254,7 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-8 rounded-lg border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
+                      className="h-8 rounded-sm border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
                     />
                     <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %
@@ -283,7 +283,7 @@ export function FinalGradeCalculator() {
                           value: sanitizeNumberInput(e.target.value),
                         })
                       }}
-                      className="h-8 rounded-lg border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
+                      className="h-8 rounded-sm border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
                     />
                     <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
                       %

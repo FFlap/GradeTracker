@@ -305,14 +305,14 @@ function CourseSelectorInner({
           </Button>
 
           {state.isManageOpen && (
-            <div className="absolute right-0 top-[calc(100%+0.5rem)] z-30 w-[12.75rem] rounded-xl border border-border/80 bg-card p-1.5 shadow-[0_14px_30px_rgba(15,23,42,0.1)]">
+            <div className="absolute right-0 top-[calc(100%+0.5rem)] z-30 w-[12.75rem] rounded-sm border border-border/80 bg-card p-1.5 shadow-[0_14px_30px_rgba(15,23,42,0.1)]">
               <button
                 type="button"
                 onClick={() => {
                   dispatch({ type: 'set-manage-open', value: false })
                   dispatch({ type: 'set-mode', mode: 'creating' })
                 }}
-                className="flex w-full items-center gap-2.5 rounded-lg p-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent/35"
+                className="flex w-full items-center gap-2.5 rounded-sm p-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent/35"
               >
                 <span className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <Plus className="size-4" />
@@ -332,7 +332,7 @@ function CourseSelectorInner({
                   dispatch({ type: 'set-manage-open', value: false })
                 }}
                 disabled={!selectedCourseId || !onRenameCourse || state.isWorking}
-                className="flex w-full items-center gap-2.5 rounded-lg p-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent/35 disabled:pointer-events-none disabled:opacity-45"
+                className="flex w-full items-center gap-2.5 rounded-sm p-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent/35 disabled:pointer-events-none disabled:opacity-45"
               >
                 <span className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <Pencil className="size-4" />
@@ -344,7 +344,7 @@ function CourseSelectorInner({
                 type="button"
                 onClick={handleDeleteCourse}
                 disabled={!selectedCourseId || !onDeleteCourse || state.isWorking}
-                className="flex w-full items-center gap-2.5 rounded-lg p-2.5 text-left text-sm text-destructive transition-colors hover:bg-destructive/6 disabled:pointer-events-none disabled:opacity-45"
+                className="flex w-full items-center gap-2.5 rounded-sm p-2.5 text-left text-sm text-destructive transition-colors hover:bg-destructive/6 disabled:pointer-events-none disabled:opacity-45"
               >
                 <span className="flex size-8 items-center justify-center rounded-full bg-destructive/10 text-destructive">
                   <Trash2 className="size-4" />

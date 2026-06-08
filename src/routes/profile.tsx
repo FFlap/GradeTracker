@@ -14,7 +14,7 @@ function ProfilePage() {
           <UserProfile />
         </SignedIn>
         <SignedOut>
-          <div className="rounded-lg border border-border bg-card p-6">
+          <div className="rounded-xl border border-border bg-card p-6">
             <div className="text-lg font-medium text-foreground">Profile</div>
             <div className="mt-1 text-sm text-muted-foreground">
               Sign in to view your profile.

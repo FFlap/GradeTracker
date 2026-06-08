@@ -710,7 +710,7 @@ function GradeWeightingPanel({
           )}
 
           {invalidMessage && (
-            <div className="rounded-xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            <div className="rounded-md border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
               {invalidMessage}
             </div>
           )}
@@ -776,7 +776,7 @@ function LetterScaleEditor({
       </div>
 
       {isEditingScale && (
-        <div className="space-y-3 rounded-lg border border-border/70 bg-muted/25 p-3 sm:rounded-xl sm:p-3.5">
+        <div className="space-y-3 rounded-md border border-border/70 bg-muted/25 p-3 sm:rounded-md sm:p-3.5">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {scaleDraft.map((threshold, index) => (
               <div key={threshold.letter} className="flex items-center gap-2">
@@ -840,7 +840,7 @@ function GradeResultSummary({
   return (
     <div className="border-t border-border/70 pt-4 sm:pt-6">
       <div className={`grid gap-3 sm:gap-4 ${showOverallSection ? 'grid-cols-2' : 'grid-cols-1'}`}>
-        <div className="rounded-lg border border-border/70 bg-card/90 px-3 py-3 sm:rounded-xl sm:px-4 sm:py-3.5">
+        <div className="rounded-md border border-border/70 bg-card/90 px-3 py-3 sm:rounded-md sm:px-4 sm:py-3.5">
           <div className="text-[0.64rem] leading-[1.35] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-[0.72rem] sm:tracking-[0.12em]">
             Current average
           </div>
@@ -849,7 +849,7 @@ function GradeResultSummary({
           </div>
         </div>
         {showOverallSection && (
-          <div className="rounded-lg border border-border/70 bg-card/90 px-3 py-3 sm:rounded-xl sm:px-4 sm:py-3.5">
+          <div className="rounded-md border border-border/70 bg-card/90 px-3 py-3 sm:rounded-md sm:px-4 sm:py-3.5">
             <div className="text-[0.64rem] leading-[1.35] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:text-[0.72rem] sm:tracking-[0.12em]">
               Overall
             </div>
@@ -861,7 +861,7 @@ function GradeResultSummary({
       </div>
 
       {showRequiredOnRemaining && (
-        <div className="mt-3 rounded-lg border border-primary/15 bg-primary/5 p-3.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] sm:rounded-xl sm:p-4.5">
+        <div className="mt-3 rounded-md border border-primary/15 bg-primary/5 p-3.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] sm:rounded-md sm:p-4.5">
           <div className="text-[0.64rem] leading-[1.35] font-semibold uppercase tracking-[0.1em] text-primary sm:text-[0.72rem] sm:tracking-[0.12em]">
             Required on remaining
           </div>

@@ -769,7 +769,7 @@ function AddSemesterDialog({
               event.target.value === 'completed' ? 'completed' : 'in_progress'
             )
           }
-          className="h-9 w-full rounded-lg border border-border bg-input px-3 text-sm text-foreground"
+          className="h-9 w-full rounded-sm border border-border bg-input px-3 text-sm text-foreground"
         >
           <option value="in_progress">In progress</option>
           <option value="completed">Completed</option>
@@ -999,7 +999,7 @@ function SemesterSettingsDialog({
                   )
                 }
                 disabled={isWorking}
-                className="h-9 w-full rounded-lg border border-border bg-input px-3 text-sm text-foreground"
+                className="h-9 w-full rounded-sm border border-border bg-input px-3 text-sm text-foreground"
               >
                 <option value="in_progress">In progress</option>
                 <option value="completed">Completed</option>
@@ -1008,7 +1008,7 @@ function SemesterSettingsDialog({
           </div>
 
           {isConfirmingDelete && (
-            <div className="space-y-3 rounded-xl border border-destructive/25 bg-destructive/5 p-4">
+            <div className="space-y-3 rounded-sm border border-destructive/25 bg-destructive/5 p-4">
               <div>
                 <div className="text-sm font-semibold text-destructive">
                   Delete “{semester.name}”?
@@ -1255,7 +1255,7 @@ function SemesterListCard({
               )
             })
           ) : (
-            <div className="rounded-lg border border-border/70 px-4 py-6 text-center text-xs text-muted-foreground sm:rounded-xl sm:px-6 sm:py-8 sm:text-sm">
+            <div className="rounded-sm border border-border/70 px-4 py-6 text-center text-xs text-muted-foreground sm:rounded-sm sm:px-6 sm:py-8 sm:text-sm">
               Create your first semester to start organizing courses.
             </div>
           )}

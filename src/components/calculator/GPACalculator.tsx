@@ -315,7 +315,7 @@ export function GPACalculator() {
             </div>
 
             {isEditingScale && (
-              <div className="space-y-3 rounded-xl border border-border/70 bg-muted/25 p-3.5">
+              <div className="space-y-3 rounded-sm border border-border/70 bg-muted/25 p-3.5">
                 <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
                   {scaleDraft.map((entry, index) => (
                     <div key={entry.letter} className="flex items-center gap-2">
@@ -330,7 +330,7 @@ export function GPACalculator() {
                           const points = sanitizeNumberInput(event.target.value)
                           dispatch({ type: 'update-scale-draft', index, points })
                         }}
-                        className="h-8 rounded-lg"
+                        className="h-8 rounded-sm"
                       />
                     </div>
                   ))}
@@ -351,7 +351,7 @@ export function GPACalculator() {
           {result && (
             <div className="border-t border-border/70 pt-6">
               <div className="space-y-3 sm:space-y-4">
-                <div className="rounded-lg border border-primary/15 bg-primary/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] lg:rounded-xl sm:p-5">
+                <div className="rounded-sm border border-primary/15 bg-primary/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] lg:rounded-sm sm:p-5">
                   <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-primary lg:text-[0.72rem] sm:tracking-[0.14em]">
                     GPA
                   </div>
@@ -361,7 +361,7 @@ export function GPACalculator() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 lg:gap-3">
-                  <div className="rounded-lg border border-border/70 bg-card/90 px-3 py-3 lg:rounded-xl lg:px-4 lg:py-3.5">
+                  <div className="rounded-sm border border-border/70 bg-card/90 px-3 py-3 lg:rounded-sm lg:px-4 lg:py-3.5">
                     <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground lg:text-[0.72rem] sm:tracking-[0.12em]">
                       Credits
                     </div>
@@ -369,7 +369,7 @@ export function GPACalculator() {
                       {result.totalCredits}
                     </div>
                   </div>
-                  <div className="rounded-lg border border-border/70 bg-card/90 px-3 py-3 lg:rounded-xl lg:px-4 lg:py-3.5">
+                  <div className="rounded-sm border border-border/70 bg-card/90 px-3 py-3 lg:rounded-sm lg:px-4 lg:py-3.5">
                     <div className="text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground lg:text-[0.72rem] sm:tracking-[0.12em]">
                       Points
                     </div>
@@ -383,7 +383,7 @@ export function GPACalculator() {
           )}
 
           {error && (
-            <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive">
+            <div className="rounded-sm border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive">
               {error}
             </div>
           )}
@@ -448,7 +448,7 @@ export function GPACalculator() {
                         onChange={(e) =>
                           handleUpdateCourse(course.id, 'name', e.target.value)
                         }
-                        className="h-8 rounded-lg border-transparent bg-transparent px-1.5 text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:px-2.5 lg:text-sm"
+                        className="h-8 rounded-sm border-transparent bg-transparent px-1.5 text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:px-2.5 lg:text-sm"
                       />
                     </label>
                     <label className="w-full max-w-[7rem] justify-self-center">
@@ -489,14 +489,14 @@ export function GPACalculator() {
                             sanitizeNumberInput(e.target.value)
                           )
                         }
-                        className="h-8 rounded-lg border-transparent bg-transparent px-0.5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:px-1 lg:text-sm"
+                        className="h-8 rounded-sm border-transparent bg-transparent px-0.5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:px-1 lg:text-sm"
                       />
                     </label>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDeleteCourse(course.id)}
-                      className={`size-6 rounded-lg text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:h-9 lg:w-9 ${
+                      className={`size-6 rounded-sm text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:h-9 lg:w-9 ${
                         courses.length > 1
                           ? 'opacity-100'
                           : 'opacity-0 group-hover:opacity-100'
