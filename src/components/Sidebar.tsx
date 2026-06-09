@@ -124,7 +124,7 @@ export function Sidebar({
       'flex items-center gap-2 rounded-sm text-sm font-medium transition-[background-color,color,box-shadow,padding,gap] duration-300 ease-out',
       collapsed ? 'justify-center gap-0 px-0 py-2.5' : 'px-3 py-2',
       active
-        ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_1px_2px_rgba(15,23,42,0.05)]'
+        ? 'bg-muted/65 text-sidebar-foreground'
         : 'text-muted-foreground hover:bg-sidebar-accent/65'
     )
 
@@ -374,7 +374,7 @@ export function MobileTopNav() {
                       className={cn(
                         'flex min-h-11 w-full items-center gap-3 rounded-sm px-3 py-2 text-sm font-medium transition-colors',
                         item.active
-                          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                          ? 'bg-muted/65 text-sidebar-foreground'
                           : 'text-muted-foreground hover:bg-sidebar-accent/65'
                       )}
                     >
@@ -392,7 +392,7 @@ export function MobileTopNav() {
                   className={cn(
                     'flex min-h-11 w-full items-center gap-3 rounded-sm px-3 py-2 text-sm font-medium transition-colors',
                     item.active
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      ? 'bg-muted/65 text-sidebar-foreground'
                       : 'text-muted-foreground hover:bg-sidebar-accent/65'
                   )}
                 >
