@@ -913,7 +913,7 @@ function AssignmentEntryPanel({
           <span className="font-medium text-foreground">A-</span>.
         </div>
 
-        <div className="px-1.5 pb-4 sm:px-2 sm:pb-5">
+        <div className="pb-4 sm:pb-5">
           <GradeTable
             rows={rows}
             onUpdateRow={onUpdateRow}

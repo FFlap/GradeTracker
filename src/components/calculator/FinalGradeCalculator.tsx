@@ -196,7 +196,7 @@ export function FinalGradeCalculator() {
             Enter percentages for your current course grade, final exam weight, and target grade.
           </div>
 
-          <div className="px-1.5 pb-4 lg:px-2 lg:pb-5">
+          <div className="pb-4 lg:pb-5">
             <div className="w-full">
               <div className="grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] gap-1 border-b border-border/70 px-2 py-2.5 text-[0.6rem] font-semibold uppercase tracking-[0.05em] text-muted-foreground min-[390px]:gap-1.5 sm:px-3 sm:text-[0.64rem] sm:tracking-[0.08em] xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 xl:text-[0.72rem] xl:tracking-[0.12em] 2xl:gap-3 2xl:tracking-[0.14em]">
                 <span>Metric</span>
