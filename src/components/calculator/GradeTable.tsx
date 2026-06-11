@@ -28,7 +28,7 @@ export function GradeTable({
             {rows.map((row) => (
               <div
                 key={row.id}
-                className="px-3 py-2.5 transition-colors hover:bg-accent/45 lg:px-5 lg:py-3.5"
+                className="px-3 py-2.5 transition-colors hover:bg-muted/45 lg:px-5 lg:py-3.5"
               >
                 <GradeRow
                   row={row}

@@ -97,7 +97,7 @@ export function GradeRow({
             <button
               type="button"
               onClick={() => onUpdate(row.id, 'date', '')}
-              className="absolute right-1 top-1/2 size-6 -translate-y-1/2 rounded-sm text-muted-foreground transition-colors hover:bg-accent/45 hover:text-foreground lg:right-2 lg:size-7"
+              className="absolute right-1 top-1/2 size-6 -translate-y-1/2 rounded-sm text-muted-foreground transition-colors hover:bg-muted/45 hover:text-foreground lg:right-2 lg:size-7"
               aria-label="Clear date"
               title="Clear date"
             >
