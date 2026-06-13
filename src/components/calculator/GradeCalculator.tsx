@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Calculator, Plus, RotateCcw, SlidersHorizontal } from 'lucide-react'
+import { Calculator, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { GradeTable } from './GradeTable'
 import { CourseSelector } from './CourseSelector'
 import {
@@ -892,19 +892,10 @@ function AssignmentEntryPanel({
   return (
     <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
       <CardContent className="p-0">
-        <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-4 sm:px-6 sm:py-5">
+        <div className="border-b border-border/70 px-4 py-4 sm:px-6 sm:py-5">
           <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Assignment Entry
           </h2>
-          <Button
-            size="sm"
-            onClick={onAddRow}
-            className="gap-1 px-4"
-            aria-label="Add row"
-          >
-            <Plus className="size-4" />
-            Add
-          </Button>
         </div>
 
         <div className="px-4 py-3 text-xs text-muted-foreground sm:px-6 sm:py-4 sm:text-sm">
@@ -913,12 +904,23 @@ function AssignmentEntryPanel({
           <span className="font-medium text-foreground">A-</span>.
         </div>
 
-        <div className="pb-4 sm:pb-5">
+        <div>
           <GradeTable
             rows={rows}
             onUpdateRow={onUpdateRow}
             onDeleteRow={onDeleteRow}
           />
+        </div>
+
+        <div className="border-t border-border/60 px-[1.125rem] pt-1.5 pb-2.5 xl:px-[1.875rem] xl:pt-2 xl:pb-3.5">
+          <button
+            type="button"
+            onClick={onAddRow}
+            className="-ml-2.5 inline-flex h-8 items-center rounded-sm border border-transparent bg-transparent px-2.5 text-sm font-medium text-primary transition-colors hover:border-border/70 hover:bg-background hover:text-primary focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35"
+            aria-label="Add row"
+          >
+            + Add Assignment
+          </button>
         </div>
       </CardContent>
     </Card>
