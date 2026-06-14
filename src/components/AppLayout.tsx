@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useUser } from '@clerk/clerk-react'
+import { useQuery } from 'convex/react'
 import { MobileTopNav, Sidebar } from './Sidebar'
 import { cn } from '@/lib/utils'
+import { api } from '../../convex/_generated/api'
+import type { Course } from './calculator/types'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -38,5 +42,29 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  return <ShellLayout>{children}</ShellLayout>
+  return (
+    <>
+      <AppDataPreloader />
+      <ShellLayout>{children}</ShellLayout>
+    </>
+  )
+}
+
+function AppDataPreloader() {
+  const { isLoaded, isSignedIn } = useUser()
+  const canLoadAccountData = Boolean(isLoaded && isSignedIn)
+  const courses = useQuery(
+    api.courses.list,
+    canLoadAccountData ? {} : 'skip'
+  ) as Course[] | undefined
+  const firstCourseId = courses?.[0]?._id
+
+  useQuery(api.semesters.overview, canLoadAccountData ? {} : 'skip')
+  useQuery(api.grades.listDated, canLoadAccountData ? {} : 'skip')
+  useQuery(
+    api.grades.listByCourse,
+    firstCourseId ? { courseId: firstCourseId } : 'skip'
+  )
+
+  return null
 }
