@@ -52,6 +52,7 @@ function CalendarPage() {
   const datedGradesData = useQuery(api.grades.listDated) as
     | CalendarAssessment[]
     | undefined
+  const isInitialLoading = !isLoaded || (isSignedIn && datedGradesData === undefined)
   const dated = datedGradesData ?? []
 
   const [calendarClock, setCalendarClock] = useState<CalendarClock | null>(null)
@@ -153,8 +154,8 @@ function CalendarPage() {
       </section>
 
       <main className="p-4 sm:p-6">
-        {!isLoaded ? (
-          <CalendarLoadingState />
+        {isInitialLoading ? (
+          null
         ) : !isSignedIn ? (
           <CalendarSignInPrompt />
         ) : (
@@ -193,24 +194,6 @@ function CalendarPage() {
 }
 
 type OpenDayHandler = (iso: string) => void
-
-function CalendarLoadingState() {
-  return (
-    <Card className="mx-auto max-w-2xl rounded-xl border-border/70 py-0 sm:rounded-2xl">
-      <CardContent className="p-6 text-center sm:p-10">
-        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-md border border-primary/20 bg-primary/10 sm:mb-4 sm:size-12 sm:rounded-md">
-          <Calendar className="size-5 text-foreground/70 sm:size-6" />
-        </div>
-        <div className="mb-1 text-base font-semibold text-foreground sm:text-lg">
-          Loading calendar
-        </div>
-        <div className="text-sm text-muted-foreground">
-          Preparing your assessment dates.
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 function CalendarSignInPrompt() {
   return (

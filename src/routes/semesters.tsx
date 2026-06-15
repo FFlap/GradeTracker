@@ -9,6 +9,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from 'react'
+import { useUser } from '@clerk/clerk-react'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { Card, CardContent } from '@/components/ui/card'
@@ -124,10 +125,14 @@ function makeSemesterBoardSetter<K extends keyof SemesterBoardState>(
 }
 
 function useSemestersPageModel() {
-  const overview = useQuery(api.semesters.overview) as
+  const { isLoaded, isSignedIn } = useUser()
+  const overview = useQuery(
+    api.semesters.overview,
+    isLoaded && isSignedIn ? {} : 'skip'
+  ) as
     | { semesters: Semester[]; courses: Course[]; grades: Grade[] }
     | undefined
-  const isLoading = overview === undefined
+  const isLoading = !isLoaded || (isSignedIn && overview === undefined)
 
   const addSemester = useMutation(api.semesters.add)
   const updateSemesterStatus = useMutation(api.semesters.updateStatus)
@@ -637,7 +642,7 @@ function SemestersPageView({ model }: { model: SemestersPageModel }) {
       <main className="app-page-body">
         <div className="app-page-body-narrow">
           {model.isLoading ? (
-            <SemestersPageSkeleton />
+            null
           ) : (
             <div className="grid items-start gap-4 sm:gap-7 xl:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
               <OverallSummaryCard
@@ -671,53 +676,6 @@ function SemestersPageView({ model }: { model: SemestersPageModel }) {
           )}
         </div>
       </main>
-    </div>
-  )
-}
-
-function SkeletonBlock({ className }: { className: string }) {
-  return <div className={`animate-pulse rounded-sm bg-muted/70 ${className}`} />
-}
-
-function SemestersPageSkeleton() {
-  return (
-    <div className="grid items-start gap-4 sm:gap-7 xl:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
-      <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
-        <CardContent className="space-y-5 p-4 sm:p-6">
-          <SkeletonBlock className="h-8 w-44" />
-          <div className="grid grid-cols-2 gap-3">
-            <SkeletonBlock className="h-24 w-full" />
-            <SkeletonBlock className="h-24 w-full" />
-          </div>
-          <SkeletonBlock className="h-28 w-full" />
-        </CardContent>
-      </Card>
-
-      <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
-        <CardContent className="p-0">
-          <div className="border-b border-border/70 px-4 py-4 sm:px-6 sm:py-5">
-            <SkeletonBlock className="h-8 w-48" />
-            <SkeletonBlock className="mt-2 h-5 w-72 max-w-full" />
-          </div>
-          <div className="space-y-3 p-3 sm:p-4">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="rounded-xl border border-border/70 bg-background/70 p-4 sm:rounded-2xl"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <SkeletonBlock className="h-6 w-44" />
-                  <SkeletonBlock className="h-6 w-20" />
-                </div>
-                <div className="mt-4 space-y-2">
-                  <SkeletonBlock className="h-10 w-full" />
-                  <SkeletonBlock className="h-10 w-full" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
@@ -1159,7 +1117,7 @@ function OverallSummaryCard({
 
           <div className="border-t border-border/70 pt-4 sm:pt-6">
             <SummaryMetric
-              value={cumulative.gpa === null ? '—' : cumulative.gpa.toFixed(2)}
+              value={cumulative.gpa === null ? 'N/A' : cumulative.gpa.toFixed(2)}
               label="Overall GPA"
               primary
             />
