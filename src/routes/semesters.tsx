@@ -525,6 +525,7 @@ function useSemestersPageModel() {
 
   return {
     isLoading,
+    isSignedIn,
     isAddSemesterOpen,
     newSemesterName,
     newSemesterStatus,
@@ -643,6 +644,8 @@ function SemestersPageView({ model }: { model: SemestersPageModel }) {
         <div className="app-page-body-narrow">
           {model.isLoading ? (
             null
+          ) : !model.isSignedIn ? (
+            <SemestersSignInPrompt />
           ) : (
             <div className="grid items-start gap-4 sm:gap-7 xl:grid-cols-[22.5rem_minmax(0,1fr)] xl:gap-8">
               <OverallSummaryCard
@@ -677,6 +680,24 @@ function SemestersPageView({ model }: { model: SemestersPageModel }) {
         </div>
       </main>
     </div>
+  )
+}
+
+function SemestersSignInPrompt() {
+  return (
+    <Card className="mx-auto max-w-2xl rounded-xl border-border/70 py-0 sm:rounded-2xl">
+      <CardContent className="p-6 text-center sm:p-10">
+        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-md border border-primary/20 bg-primary/10 sm:mb-4 sm:size-12 sm:rounded-md">
+          <CalendarPlus className="size-5 text-foreground/70 sm:size-6" />
+        </div>
+        <div className="mb-1 text-base font-semibold text-foreground sm:text-lg">
+          Sign in to use semesters
+        </div>
+        <div className="text-sm text-muted-foreground">
+          Semesters, courses, credits, and GPA progress are saved to your account.
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
