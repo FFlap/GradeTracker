@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
+import { SignInPrompt } from '@/components/SignInPrompt'
 import {
   formatGradeInputForDisplay,
   type Grade,
@@ -153,11 +154,13 @@ function CalendarPage() {
         </div>
       </section>
 
-      <main className="p-4 sm:p-6">
+      <main className={isInitialLoading || !isSignedIn ? 'app-page-body' : 'p-4 sm:p-6'}>
         {isInitialLoading ? (
           null
         ) : !isSignedIn ? (
-          <CalendarSignInPrompt />
+          <div className="app-page-body-narrow">
+            <CalendarSignInPrompt />
+          </div>
         ) : (
           <div className="grid w-full items-start gap-5 lg:grid-cols-[20.5rem_minmax(0,1fr)] lg:gap-6">
             <UpcomingSidebar
@@ -197,20 +200,11 @@ type OpenDayHandler = (iso: string) => void
 
 function CalendarSignInPrompt() {
   return (
-    <Card className="mx-auto max-w-2xl rounded-xl border-border/70 py-0 sm:rounded-2xl">
-      <CardContent className="p-6 text-center sm:p-10">
-        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-md border border-primary/20 bg-primary/10 sm:mb-4 sm:size-12 sm:rounded-md">
-          <Calendar className="size-5 text-foreground/70 sm:size-6" />
-        </div>
-        <div className="mb-1 text-base font-semibold text-foreground sm:text-lg">
-          Sign in to use the calendar
-        </div>
-        <div className="text-sm text-muted-foreground">
-          Assessment dates are saved to your account, so you’ll need to sign in
-          to see them here.
-        </div>
-      </CardContent>
-    </Card>
+    <SignInPrompt
+      icon={Calendar}
+      title="Sign in to use the calendar"
+      description="Assessment dates are saved to your account, so you'll need to sign in to see them here."
+    />
   )
 }
 

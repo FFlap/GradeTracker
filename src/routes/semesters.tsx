@@ -16,6 +16,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { SignInPrompt } from '@/components/SignInPrompt'
 import {
   sanitizeNumberInput,
   type Course,
@@ -685,19 +686,11 @@ function SemestersPageView({ model }: { model: SemestersPageModel }) {
 
 function SemestersSignInPrompt() {
   return (
-    <Card className="mx-auto max-w-2xl rounded-xl border-border/70 py-0 sm:rounded-2xl">
-      <CardContent className="p-6 text-center sm:p-10">
-        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-md border border-primary/20 bg-primary/10 sm:mb-4 sm:size-12 sm:rounded-md">
-          <CalendarPlus className="size-5 text-foreground/70 sm:size-6" />
-        </div>
-        <div className="mb-1 text-base font-semibold text-foreground sm:text-lg">
-          Sign in to use semesters
-        </div>
-        <div className="text-sm text-muted-foreground">
-          Semesters, courses, credits, and GPA progress are saved to your account.
-        </div>
-      </CardContent>
-    </Card>
+    <SignInPrompt
+      icon={CalendarPlus}
+      title="Sign in to use semesters"
+      description="Semesters, courses, credits, and GPA progress are saved to your account."
+    />
   )
 }
 
