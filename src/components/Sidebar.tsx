@@ -273,7 +273,12 @@ export function Sidebar({
                 collapsed ? collapsedAccountTileClass : 'p-3'
               )}
             >
-              <div className={cn('text-xs text-sidebar-foreground/80', collapsedTextClass)}>
+              <div
+                className={cn(
+                  'overflow-hidden text-xs leading-5 text-sidebar-foreground/80 transition-[max-height,opacity] duration-200 ease-out',
+                  collapsed ? 'max-h-0 opacity-0' : 'max-h-16 opacity-100'
+                )}
+              >
                 Sign in to save courses, semesters, and grades.
               </div>
               <SignInButton mode="modal">
