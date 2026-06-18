@@ -1,7 +1,16 @@
-import { useReducer } from 'react'
+import { useMemo, useReducer, useState } from 'react'
+import { SortableHeader } from '@/components/SortableHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  compareNumbers,
+  compareText,
+  cycleSort,
+  stableSort,
+  toFiniteNumber,
+  type SortState,
+} from '@/lib/table-sorting'
 import { Calculator, RotateCcw } from 'lucide-react'
 import { sanitizeNumberInput } from './types'
 
@@ -25,6 +34,91 @@ type FinalGradeAction =
   | { type: 'calculation-success'; result: FinalResult }
   | { type: 'calculation-error'; message: string }
   | { type: 'reset' }
+
+type FinalExamRowKey = 'currentGrade' | 'finalWeight' | 'targetGrade'
+type FinalExamSortColumn = 'metric' | 'value'
+type FinalExamInputAction =
+  | 'set-current-grade'
+  | 'set-final-weight'
+  | 'set-target-grade'
+
+type FinalExamRow = {
+  key: FinalExamRowKey
+  label: string
+  description: string
+  inputId: string
+  labelId: string
+  descriptionId: string
+  placeholder: string
+  action: FinalExamInputAction
+  value: string
+}
+
+type FinalExamValues = Pick<
+  FinalGradeState,
+  'currentGrade' | 'finalWeight' | 'targetGrade'
+>
+
+export const FINAL_EXAM_ROWS: readonly FinalExamRow[] = [
+  {
+    key: 'currentGrade',
+    label: 'Current grade',
+    description: 'Your grade before the final exam',
+    inputId: 'current-grade',
+    labelId: 'current-grade-label',
+    descriptionId: 'current-grade-description',
+    placeholder: '88',
+    action: 'set-current-grade',
+    value: '',
+  },
+  {
+    key: 'finalWeight',
+    label: 'Final exam weight',
+    description: 'How much the final counts',
+    inputId: 'final-weight',
+    labelId: 'final-weight-label',
+    descriptionId: 'final-weight-description',
+    placeholder: '40',
+    action: 'set-final-weight',
+    value: '',
+  },
+  {
+    key: 'targetGrade',
+    label: 'Target grade',
+    description: 'The overall grade you want',
+    inputId: 'target-grade',
+    labelId: 'target-grade-label',
+    descriptionId: 'target-grade-description',
+    placeholder: '90',
+    action: 'set-target-grade',
+    value: '',
+  },
+]
+
+export function buildFinalExamRows(values: FinalExamValues) {
+  return FINAL_EXAM_ROWS.map((row) => ({
+    ...row,
+    value: values[row.key],
+  }))
+}
+
+export function sortFinalExamRows(
+  rows: readonly FinalExamRow[],
+  sort: SortState<FinalExamSortColumn>
+) {
+  if (!sort) return [...rows]
+
+  if (sort.column === 'metric') {
+    return stableSort(rows, sort.direction, (row) => row.label, compareText)
+  }
+
+  return stableSort(
+    rows,
+    sort.direction,
+    (row) => toFiniteNumber(row.value),
+    compareNumbers
+  )
+}
 
 const initialFinalGradeState: FinalGradeState = {
   currentGrade: '',
@@ -71,7 +165,16 @@ function finalGradeReducer(
 
 export function FinalGradeCalculator() {
   const [state, dispatch] = useReducer(finalGradeReducer, initialFinalGradeState)
+  const [sort, setSort] = useState<SortState<FinalExamSortColumn>>(null)
   const { currentGrade, finalWeight, targetGrade, result, invalidMessage } = state
+  const sortedRows = useMemo(
+    () =>
+      sortFinalExamRows(
+        buildFinalExamRows({ currentGrade, finalWeight, targetGrade }),
+        sort
+      ),
+    [currentGrade, finalWeight, sort, targetGrade]
+  )
 
   const handleCalculate = () => {
     const current = Number.parseFloat(currentGrade)
@@ -197,100 +300,73 @@ export function FinalGradeCalculator() {
           </div>
 
           <div className="pb-4 lg:pb-5">
-            <div className="w-full">
-              <div className="grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] gap-1 border-b border-border/70 px-2 py-2.5 text-[0.6rem] font-semibold uppercase tracking-[0.05em] text-muted-foreground min-[390px]:gap-1.5 sm:px-3 sm:text-[0.64rem] sm:tracking-[0.08em] xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 xl:text-[0.72rem] xl:tracking-[0.12em] 2xl:gap-3 2xl:tracking-[0.14em]">
-                <span>Metric</span>
-                <span className="text-center">Value</span>
-                <span></span>
+            <div role="table" aria-label="Final exam inputs" className="w-full">
+              <div
+                role="row"
+                className="grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] gap-1 border-b border-border/70 px-2 py-2.5 text-[0.6rem] font-semibold uppercase tracking-[0.05em] text-muted-foreground min-[390px]:gap-1.5 sm:px-3 sm:text-[0.64rem] sm:tracking-[0.08em] xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 xl:text-[0.72rem] xl:tracking-[0.12em] 2xl:gap-3 2xl:tracking-[0.14em]"
+              >
+                <SortableHeader
+                  label="Metric"
+                  direction={sort?.column === 'metric' ? sort.direction : null}
+                  onClick={() => setSort((current) => cycleSort(current, 'metric'))}
+                />
+                <SortableHeader
+                  label="Value"
+                  align="center"
+                  direction={sort?.column === 'value' ? sort.direction : null}
+                  onClick={() => setSort((current) => cycleSort(current, 'value'))}
+                />
+                <span role="columnheader" aria-label="Actions" />
               </div>
 
-              <div className="divide-y divide-border/70">
-                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-muted/45 min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3">
-                  <div>
-                    <div className="text-sm font-medium text-foreground lg:text-base">Current grade</div>
-                    <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
-                      Your grade before the final exam
+              <div role="rowgroup" className="divide-y divide-border/70">
+                {sortedRows.map((row) => (
+                  <div
+                    key={row.key}
+                    role="row"
+                    className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-muted/45 min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3"
+                  >
+                    <div role="cell">
+                      <div
+                        id={row.labelId}
+                        className="text-sm font-medium text-foreground lg:text-base"
+                      >
+                        {row.label}
+                      </div>
+                      <div
+                        id={row.descriptionId}
+                        className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm"
+                      >
+                        {row.description}
+                      </div>
                     </div>
-                  </div>
-                  <div className="relative w-full max-w-[7.5rem] justify-self-center">
-                    <Input
-                      id="current-grade"
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="88"
-                      value={currentGrade}
-                      onChange={(e) => {
-                        dispatch({
-                          type: 'set-current-grade',
-                          value: sanitizeNumberInput(e.target.value),
-                        })
-                      }}
-                      className="h-8 rounded-sm border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
-                    />
-                    <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
-                      %
-                    </span>
-                  </div>
-                  <span />
-                </div>
-
-                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-muted/45 min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3">
-                  <div>
-                    <div className="text-sm font-medium text-foreground lg:text-base">Final exam weight</div>
-                    <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
-                      How much the final counts
+                    <div
+                      role="cell"
+                      className="relative w-full max-w-[7.5rem] justify-self-center"
+                    >
+                      <Input
+                        id={row.inputId}
+                        aria-labelledby={row.labelId}
+                        aria-describedby={row.descriptionId}
+                        type="text"
+                        inputMode="decimal"
+                        placeholder={row.placeholder}
+                        value={row.value}
+                        onChange={(event) => {
+                          dispatch({
+                            type: row.action,
+                            value: sanitizeNumberInput(event.target.value),
+                          })
+                        }}
+                        className="h-8 rounded-sm border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
+                      />
+                      <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
+                        %
+                      </span>
                     </div>
+                    <span role="cell" />
                   </div>
-                  <div className="relative w-full max-w-[7.5rem] justify-self-center">
-                    <Input
-                      id="final-weight"
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="40"
-                      value={finalWeight}
-                      onChange={(e) => {
-                        dispatch({
-                          type: 'set-final-weight',
-                          value: sanitizeNumberInput(e.target.value),
-                        })
-                      }}
-                      className="h-8 rounded-sm border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
-                    />
-                    <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
-                      %
-                    </span>
-                  </div>
-                  <span />
-                </div>
-
-                <div className="group grid grid-cols-[minmax(7rem,1.2fr)_minmax(4.5rem,1fr)_1rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-muted/45 min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.2fr)_minmax(12rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3">
-                  <div>
-                    <div className="text-sm font-medium text-foreground lg:text-base">Target grade</div>
-                    <div className="text-[0.7rem] leading-snug text-muted-foreground lg:text-sm">
-                      The overall grade you want
-                    </div>
-                  </div>
-                  <div className="relative w-full max-w-[7.5rem] justify-self-center">
-                    <Input
-                      id="target-grade"
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="90"
-                      value={targetGrade}
-                      onChange={(e) => {
-                        dispatch({
-                          type: 'set-target-grade',
-                          value: sanitizeNumberInput(e.target.value),
-                        })
-                      }}
-                      className="h-8 rounded-sm border-transparent bg-transparent pr-5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:pr-8 lg:text-sm"
-                    />
-                    <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground lg:right-3 lg:text-sm">
-                      %
-                    </span>
-                  </div>
-                  <span />
-                </div>
+                ))}
               </div>
             </div>
           </div>

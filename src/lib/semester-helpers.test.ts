@@ -6,11 +6,14 @@ import {
   calculateCumulativeSemesterStats,
   calculateTermGpa,
   getCourseCredits,
+  getCourseGradeSortValue,
   getCourseLetter,
   getCurrentSemester,
   groupCoursesBySemesterId,
   groupGradesByCourseId,
+  sortSemesterCourses,
   sortSemestersForDisplay,
+  updateSemesterCourseSorts,
 } from './semester-helpers'
 import type { Course, Grade, Semester } from '@/components/calculator/types'
 
@@ -147,6 +150,21 @@ describe('semester course calculations', () => {
     expect(calculateCoursePercent(course('no-grades'), grades)).toBeNull()
   })
 
+  it('returns the calculated percentage for sorting graded courses', () => {
+    const grades = groupGradesByCourseId([
+      grade('g1', 'c1', '90', '40'),
+      grade('g2', 'c1', '80', '60'),
+    ])
+
+    expect(getCourseGradeSortValue(course('c1'), grades)).toBe(84)
+  })
+
+  it('returns null for sorting courses without a calculable grade', () => {
+    expect(
+      getCourseGradeSortValue(course('ungraded'), groupGradesByCourseId([]))
+    ).toBeNull()
+  })
+
   it('uses custom course letter thresholds when present', () => {
     const custom = course('custom', {
       letterGradeThresholds: [
@@ -157,6 +175,161 @@ describe('semester course calculations', () => {
 
     expect(getCourseLetter(custom, 85)).toBe('Pass')
     expect(getCourseLetter(custom, 79)).toBe('No Pass')
+  })
+})
+
+describe('semester course table sorting', () => {
+  const courses = [
+    course('biology', { name: 'Biology', credits: 4 }),
+    course('algebra', { name: 'Algebra', credits: 3 }),
+    course('chemistry', { name: 'chemistry', credits: 2 }),
+    course('ungraded', { name: 'Art', credits: 1 }),
+  ]
+  const gradesByCourseId = groupGradesByCourseId([
+    grade('biology-grade', 'biology', '80', '100'),
+    grade('algebra-grade', 'algebra', '95', '100'),
+    grade('chemistry-grade', 'chemistry', '70', '100'),
+  ])
+
+  const ids = (items: Course[]) => items.map((item) => item._id)
+
+  it('returns courses in source order when unsorted', () => {
+    expect(ids(sortSemesterCourses(courses, gradesByCourseId, null))).toEqual([
+      'biology',
+      'algebra',
+      'chemistry',
+      'ungraded',
+    ])
+  })
+
+  it('sorts course names alphabetically in both directions', () => {
+    expect(
+      ids(
+        sortSemesterCourses(courses, gradesByCourseId, {
+          column: 'course',
+          direction: 'asc',
+        })
+      )
+    ).toEqual(['algebra', 'ungraded', 'biology', 'chemistry'])
+    expect(
+      ids(
+        sortSemesterCourses(courses, gradesByCourseId, {
+          column: 'course',
+          direction: 'desc',
+        })
+      )
+    ).toEqual(['chemistry', 'biology', 'ungraded', 'algebra'])
+  })
+
+  it('sorts credits numerically in both directions', () => {
+    expect(
+      ids(
+        sortSemesterCourses(courses, gradesByCourseId, {
+          column: 'credits',
+          direction: 'asc',
+        })
+      )
+    ).toEqual(['ungraded', 'chemistry', 'algebra', 'biology'])
+    expect(
+      ids(
+        sortSemesterCourses(courses, gradesByCourseId, {
+          column: 'credits',
+          direction: 'desc',
+        })
+      )
+    ).toEqual(['biology', 'algebra', 'chemistry', 'ungraded'])
+  })
+
+  it('sorts grade percentages in both directions with ungraded courses last', () => {
+    expect(
+      ids(
+        sortSemesterCourses(courses, gradesByCourseId, {
+          column: 'grade',
+          direction: 'asc',
+        })
+      )
+    ).toEqual(['chemistry', 'biology', 'algebra', 'ungraded'])
+    expect(
+      ids(
+        sortSemesterCourses(courses, gradesByCourseId, {
+          column: 'grade',
+          direction: 'desc',
+        })
+      )
+    ).toEqual(['algebra', 'biology', 'chemistry', 'ungraded'])
+  })
+
+  it('does not mutate the source and restores source order when sorting clears', () => {
+    const sourceOrder = ids(courses)
+    const sorted = sortSemesterCourses(courses, gradesByCourseId, {
+      column: 'course',
+      direction: 'asc',
+    })
+
+    expect(sorted).not.toBe(courses)
+    expect(ids(courses)).toEqual(sourceOrder)
+    expect(ids(sortSemesterCourses(courses, gradesByCourseId, null))).toEqual(
+      sourceOrder
+    )
+  })
+
+  it('produces independent results for separate table sort states', () => {
+    const courseSorted = sortSemesterCourses(courses, gradesByCourseId, {
+      column: 'course',
+      direction: 'asc',
+    })
+    const gradeSorted = sortSemesterCourses(courses, gradesByCourseId, {
+      column: 'grade',
+      direction: 'desc',
+    })
+
+    expect(ids(courseSorted)).toEqual([
+      'algebra',
+      'ungraded',
+      'biology',
+      'chemistry',
+    ])
+    expect(ids(gradeSorted)).toEqual([
+      'algebra',
+      'biology',
+      'chemistry',
+      'ungraded',
+    ])
+  })
+
+  it('persists keyed sort state through the three-state cycle', () => {
+    const ascending = updateSemesterCourseSorts({}, 'fall', 'course')
+    const descending = updateSemesterCourseSorts(
+      ascending,
+      'fall',
+      'course'
+    )
+    const cleared = updateSemesterCourseSorts(descending, 'fall', 'course')
+
+    expect(ascending.fall).toEqual({
+      column: 'course',
+      direction: 'asc',
+    })
+    expect(descending.fall).toEqual({
+      column: 'course',
+      direction: 'desc',
+    })
+    expect(cleared.fall).toBeUndefined()
+  })
+
+  it('updates one semester sort without changing another', () => {
+    const initial = {
+      fall: { column: 'course', direction: 'asc' } as const,
+      winter: { column: 'grade', direction: 'desc' } as const,
+    }
+    const updated = updateSemesterCourseSorts(initial, 'fall', 'course')
+
+    expect(updated.fall).toEqual({
+      column: 'course',
+      direction: 'desc',
+    })
+    expect(updated.winter).toEqual(initial.winter)
+    expect(initial.fall.direction).toBe('asc')
   })
 })
 

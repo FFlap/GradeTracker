@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { SignInPrompt } from '@/components/SignInPrompt'
+import { SortableHeader } from '@/components/SortableHeader'
 import {
   sanitizeNumberInput,
   type Course,
@@ -32,8 +33,14 @@ import {
   getCurrentSemester,
   groupCoursesBySemesterId,
   groupGradesByCourseId,
+  sortSemesterCourses,
   sortSemestersForDisplay,
+  updateSemesterCourseSorts,
+  type SemesterCourseSort,
+  type SemesterCourseSortColumn,
+  type SemesterCourseSorts,
 } from '@/lib/semester-helpers'
+import type { SortDirection } from '@/lib/table-sorting'
 import {
   CalendarPlus,
   CalendarCheck2,
@@ -1217,6 +1224,16 @@ function SemesterListCard({
   onOpenAddCourse: (semesterId: string) => void
   onOpenAddSemester: () => void
 }) {
+  const [courseSorts, setCourseSorts] = useState<SemesterCourseSorts>({})
+  const handleCourseSort = (
+    tableId: string,
+    column: SemesterCourseSortColumn
+  ) => {
+    setCourseSorts((current) =>
+      updateSemesterCourseSorts(current, tableId, column)
+    )
+  }
+
   return (
     <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
       <CardContent className="p-0">
@@ -1251,6 +1268,8 @@ function SemesterListCard({
             onCourseDrop={onCourseDrop}
             onOpenCourseSettings={onOpenCourseSettings}
             onAssignCourseToCurrent={onAssignCourseToCurrent}
+            sort={courseSorts.unassigned ?? null}
+            onSort={(column) => handleCourseSort('unassigned', column)}
           />
           {semesters.length > 0 ? (
             semesters.map((semester) => {
@@ -1276,6 +1295,8 @@ function SemesterListCard({
                   onToggleSemester={onToggleSemester}
                   onOpenSemesterSettings={onOpenSemesterSettings}
                   onOpenAddCourse={onOpenAddCourse}
+                  sort={courseSorts[semesterId] ?? null}
+                  onSort={(column) => handleCourseSort(semesterId, column)}
                 />
               )
             })
@@ -1317,6 +1338,8 @@ function SemesterCard({
   onToggleSemester,
   onOpenSemesterSettings,
   onOpenAddCourse,
+  sort,
+  onSort,
 }: {
   semester: Semester
   courses: Course[]
@@ -1336,6 +1359,8 @@ function SemesterCard({
   onToggleSemester: (semesterId: string) => void
   onOpenSemesterSettings: (semester: Semester) => void
   onOpenAddCourse: (semesterId: string) => void
+  sort: SemesterCourseSort
+  onSort: (column: SemesterCourseSortColumn) => void
 }) {
   const semesterId = String(semester._id)
   const statusLabel =
@@ -1425,6 +1450,8 @@ function SemesterCard({
           onOpenCourseSettings={onOpenCourseSettings}
           onAssignCourseToCurrent={onAssignCourseToCurrent}
           onOpenAddCourse={() => onOpenAddCourse(semesterId)}
+          sort={sort}
+          onSort={onSort}
         />
       )}
     </section>
@@ -1444,6 +1471,8 @@ function UnassignedCoursesCard({
   onCourseDrop,
   onOpenCourseSettings,
   onAssignCourseToCurrent,
+  sort,
+  onSort,
 }: {
   courses: Course[]
   gradesByCourseId: GradesByCourseId
@@ -1457,6 +1486,8 @@ function UnassignedCoursesCard({
   onCourseDrop: (event: DragEvent, semesterId: string) => void
   onOpenCourseSettings: (course: Course) => void
   onAssignCourseToCurrent: (course: Course) => void
+  sort: SemesterCourseSort
+  onSort: (column: SemesterCourseSortColumn) => void
 }) {
   if (courses.length === 0) return null
 
@@ -1493,6 +1524,8 @@ function UnassignedCoursesCard({
         onCourseDragEnd={onCourseDragEnd}
         onOpenCourseSettings={onOpenCourseSettings}
         onAssignCourseToCurrent={onAssignCourseToCurrent}
+        sort={sort}
+        onSort={onSort}
       />
     </section>
   )
@@ -1509,6 +1542,8 @@ function CourseTable({
   onOpenCourseSettings,
   onAssignCourseToCurrent,
   onOpenAddCourse,
+  sort,
+  onSort,
 }: {
   courses: Course[]
   gradesByCourseId: GradesByCourseId
@@ -1520,33 +1555,48 @@ function CourseTable({
   onOpenCourseSettings: (course: Course) => void
   onAssignCourseToCurrent: (course: Course) => void
   onOpenAddCourse?: () => void
+  sort: SemesterCourseSort
+  onSort: (column: SemesterCourseSortColumn) => void
 }) {
+  const displayedCourses = useMemo(
+    () => sortSemesterCourses(courses, gradesByCourseId, sort),
+    [courses, gradesByCourseId, sort]
+  )
+
   return (
     <div className="pb-5">
       <div>
-        <CourseTableHeader />
+        <MobileCourseSortControls sort={sort} onSort={onSort} />
+        <div role="table" aria-label="Semester courses">
+          <CourseTableHeader sort={sort} onSort={onSort} />
 
-        <div className="divide-y divide-border/60">
-          {courses.length === 0 ? (
-            <div className="px-4 py-5 text-sm text-muted-foreground">
-              No courses in this semester yet.
-            </div>
-          ) : (
-            courses.map((course) => (
-              <CourseRow
-                key={String(course._id)}
-                course={course}
-                gradesByCourseId={gradesByCourseId}
-                currentSemester={currentSemester}
-                draggingCourseId={draggingCourseId}
-                showAssignToCurrent={showAssignToCurrent}
-                onCourseDragStart={onCourseDragStart}
-                onCourseDragEnd={onCourseDragEnd}
-                onOpenCourseSettings={onOpenCourseSettings}
-                onAssignCourseToCurrent={onAssignCourseToCurrent}
-              />
-            ))
-          )}
+          <div role="rowgroup" className="divide-y divide-border/60">
+            {courses.length === 0 ? (
+              <div role="row">
+                <div
+                  role="cell"
+                  className="px-4 py-5 text-sm text-muted-foreground"
+                >
+                  No courses in this semester yet.
+                </div>
+              </div>
+            ) : (
+              displayedCourses.map((course) => (
+                <CourseRow
+                  key={String(course._id)}
+                  course={course}
+                  gradesByCourseId={gradesByCourseId}
+                  currentSemester={currentSemester}
+                  draggingCourseId={draggingCourseId}
+                  showAssignToCurrent={showAssignToCurrent}
+                  onCourseDragStart={onCourseDragStart}
+                  onCourseDragEnd={onCourseDragEnd}
+                  onOpenCourseSettings={onOpenCourseSettings}
+                  onAssignCourseToCurrent={onAssignCourseToCurrent}
+                />
+              ))
+            )}
+          </div>
         </div>
 
         {onOpenAddCourse && (
@@ -1565,14 +1615,99 @@ function CourseTable({
   )
 }
 
-function CourseTableHeader() {
+function getCourseSortActionLabel(
+  label: string,
+  direction: SortDirection | null
+) {
+  if (direction === 'asc') {
+    return `${label}, sorted ascending. Sort descending`
+  }
+  if (direction === 'desc') {
+    return `${label}, sorted descending. Clear sorting`
+  }
+  return `${label}, not sorted. Sort ascending`
+}
+
+function MobileCourseSortControls({
+  sort,
+  onSort,
+}: {
+  sort: SemesterCourseSort
+  onSort: (column: SemesterCourseSortColumn) => void
+}) {
+  const columns: Array<{
+    column: SemesterCourseSortColumn
+    label: string
+  }> = [
+    { column: 'course', label: 'Course' },
+    { column: 'credits', label: 'Credits' },
+    { column: 'grade', label: 'Grade' },
+  ]
+
   return (
-    <div className="hidden grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] gap-3 border-y border-border/70 bg-muted/35 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:grid">
-      <span>Course</span>
-      <span className="text-center">Credits</span>
-      <span className="text-center">Grade</span>
-      <span className="text-center">Action</span>
-      <span></span>
+    <div
+      className="flex items-center gap-1 border-y border-border/70 bg-muted/35 px-3 py-2 sm:hidden"
+      aria-label="Sort courses"
+    >
+      <span className="mr-1 text-xs font-medium text-muted-foreground">
+        Sort:
+      </span>
+      {columns.map(({ column, label }) => {
+        const direction = sort?.column === column ? sort.direction : null
+        return (
+          <button
+            key={column}
+            type="button"
+            onClick={() => onSort(column)}
+            aria-label={getCourseSortActionLabel(label, direction)}
+            aria-pressed={direction !== null}
+            className={cn(
+              'min-w-0 rounded-sm px-2 py-1 text-xs font-medium text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              direction !== null && 'bg-background text-foreground shadow-sm'
+            )}
+          >
+            {label}
+            {direction === 'asc' ? ' ↑' : direction === 'desc' ? ' ↓' : ''}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function CourseTableHeader({
+  sort,
+  onSort,
+}: {
+  sort: SemesterCourseSort
+  onSort: (column: SemesterCourseSortColumn) => void
+}) {
+  return (
+    <div
+      role="row"
+      className="hidden grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] gap-3 border-y border-border/70 bg-muted/35 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:grid"
+    >
+      <SortableHeader
+        label="Course"
+        direction={sort?.column === 'course' ? sort.direction : null}
+        onClick={() => onSort('course')}
+      />
+      <SortableHeader
+        label="Credits"
+        direction={sort?.column === 'credits' ? sort.direction : null}
+        align="center"
+        onClick={() => onSort('credits')}
+      />
+      <SortableHeader
+        label="Grade"
+        direction={sort?.column === 'grade' ? sort.direction : null}
+        align="center"
+        onClick={() => onSort('grade')}
+      />
+      <div role="columnheader" className="text-center">
+        Action
+      </div>
+      <div role="columnheader" aria-label="Course settings" />
     </div>
   )
 }
@@ -1604,6 +1739,7 @@ function CourseRow({
 
   return (
     <div
+      role="row"
       draggable
       onDragStart={(event) => onCourseDragStart(event, courseId)}
       onDragEnd={onCourseDragEnd}
@@ -1612,7 +1748,7 @@ function CourseRow({
         draggingCourseId === courseId && 'opacity-50'
       )}
     >
-      <div className="min-w-0 flex-1">
+      <div role="cell" aria-label="Course" className="min-w-0 flex-1">
         <Link
           to="/grade-calculator"
           search={{ courseId: course._id }}
@@ -1622,14 +1758,14 @@ function CourseRow({
         </Link>
       </div>
 
-      <div className="flex items-center justify-between gap-3 text-sm text-foreground sm:block sm:text-center">
+      <div role="cell" aria-label="Credits" className="flex items-center justify-between gap-3 text-sm text-foreground sm:block sm:text-center">
         <span className="text-xs font-medium text-muted-foreground sm:hidden">
           Credits
         </span>
         <span>{getCourseCredits(course)}</span>
       </div>
 
-      <div className="flex items-center justify-between gap-3 sm:block sm:text-center">
+      <div role="cell" aria-label="Grade" className="flex items-center justify-between gap-3 sm:block sm:text-center">
         <span className="text-xs font-medium text-muted-foreground sm:hidden">
           Grade
         </span>
@@ -1640,7 +1776,7 @@ function CourseRow({
         </span>
       </div>
 
-      <div className="flex justify-stretch sm:justify-center">
+      <div role="cell" aria-label="Action" className="flex justify-stretch sm:justify-center">
         <Button
           type="button"
           variant="outline"
@@ -1657,7 +1793,7 @@ function CourseRow({
         </Button>
       </div>
 
-      <div className="flex items-center justify-end gap-1">
+      <div role="cell" aria-label="Course settings" className="flex items-center justify-end gap-1">
         <Button
           type="button"
           variant="ghost"

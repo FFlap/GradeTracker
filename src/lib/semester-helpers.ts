@@ -9,6 +9,17 @@ import {
   type Semester,
   gradeToRow,
 } from '@/components/calculator/types'
+import {
+  compareNumbers,
+  compareText,
+  cycleSort,
+  stableSort,
+  type SortState,
+} from '@/lib/table-sorting'
+
+export type SemesterCourseSortColumn = 'course' | 'credits' | 'grade'
+export type SemesterCourseSort = SortState<SemesterCourseSortColumn>
+export type SemesterCourseSorts = Record<string, SemesterCourseSort>
 
 export const DEFAULT_LETTER_TO_GPA: Record<string, number> = {
   'A+': 4.0,
@@ -83,6 +94,65 @@ export function calculateCoursePercent(
   const rows = buildCourseRowsForCalc(courseGrades)
   const calc = calculateWeightedAverage(rows)
   return calc?.average ?? null
+}
+
+export function getCourseGradeSortValue(
+  course: Course,
+  gradesByCourseId: Map<string, Grade[]>
+) {
+  return calculateCoursePercent(course, gradesByCourseId)
+}
+
+export function sortSemesterCourses(
+  courses: readonly Course[],
+  gradesByCourseId: Map<string, Grade[]>,
+  sort: SemesterCourseSort
+) {
+  if (!sort) return [...courses]
+
+  if (sort.column === 'course') {
+    return stableSort(
+      courses,
+      sort.direction,
+      (course) => course.name,
+      compareText
+    )
+  }
+
+  if (sort.column === 'credits') {
+    return stableSort(
+      courses,
+      sort.direction,
+      getCourseCredits,
+      compareNumbers
+    )
+  }
+
+  return stableSort(
+    courses,
+    sort.direction,
+    (course) => getCourseGradeSortValue(course, gradesByCourseId),
+    compareNumbers
+  )
+}
+
+export function updateSemesterCourseSorts(
+  sorts: SemesterCourseSorts,
+  tableId: string,
+  column: SemesterCourseSortColumn
+) {
+  const nextSort = cycleSort(sorts[tableId] ?? null, column)
+
+  if (!nextSort) {
+    const remainingSorts = { ...sorts }
+    delete remainingSorts[tableId]
+    return remainingSorts
+  }
+
+  return {
+    ...sorts,
+    [tableId]: nextSort,
+  }
 }
 
 export function getCourseLetter(

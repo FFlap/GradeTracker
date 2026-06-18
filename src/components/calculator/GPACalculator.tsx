@@ -1,4 +1,5 @@
-import { useReducer, useCallback } from 'react'
+import { useReducer, useCallback, useMemo, useState } from 'react'
+import { SortableHeader } from '@/components/SortableHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,6 +11,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Calculator, RotateCcw, SlidersHorizontal, X } from 'lucide-react'
+import {
+  compareNumbers,
+  compareText,
+  cycleSort,
+  stableSort,
+  toFiniteNumber,
+  type SortDirection,
+  type SortState,
+} from '@/lib/table-sorting'
 import { sanitizeNumberInput } from './types'
 
 export interface CourseEntry {
@@ -52,6 +62,30 @@ export const DEFAULT_GPA_SCALE: GPAScaleEntry[] = [
 ]
 
 const GRADE_OPTIONS = DEFAULT_GPA_SCALE.map((entry) => entry.letter)
+
+type GPATableSortColumn = 'course' | 'grade' | 'credits'
+
+export function sortGpaCoursesByGrade(
+  courses: readonly CourseEntry[],
+  direction: SortDirection,
+  gpaScale: readonly GPAScaleEntry[]
+) {
+  const pointsByLetter = new Map(
+    gpaScale.map((entry) => [entry.letter, entry.points])
+  )
+
+  return stableSort(
+    courses,
+    direction,
+    (course) => {
+      const points = pointsByLetter.get(course.grade)
+      return points === undefined
+        ? null
+        : { letter: course.grade, points }
+    },
+    (a, b) => compareNumbers(a.points, b.points) || compareText(a.letter, b.letter)
+  )
+}
 
 function generateId() {
   return Math.random().toString(36).substring(2, 9)
@@ -221,12 +255,38 @@ function gpaCalculatorReducer(
 }
 
 export function GPACalculator() {
+  const [sort, setSort] = useState<SortState<GPATableSortColumn>>(null)
   const [state, dispatch] = useReducer(
     gpaCalculatorReducer,
     undefined,
     createInitialGPACalculatorState
   )
   const { courses, gpaScale, scaleDraft, isEditingScale, result, error } = state
+  const sortedCourses = useMemo(() => {
+    if (!sort) return courses
+
+    switch (sort.column) {
+      case 'course':
+        return stableSort(
+          courses,
+          sort.direction,
+          (course) => course.name,
+          compareText
+        )
+      case 'grade':
+        return sortGpaCoursesByGrade(courses, sort.direction, gpaScale)
+      case 'credits':
+        return stableSort(
+          courses,
+          sort.direction,
+          (course) => toFiniteNumber(course.credits),
+          compareNumbers
+        )
+    }
+  }, [courses, gpaScale, sort])
+
+  const getSortDirection = (column: GPATableSortColumn) =>
+    sort?.column === column ? sort.direction : null
 
   const handleUpdateCourse = useCallback(
     (id: string, field: keyof CourseEntry, value: string) => {
@@ -414,21 +474,43 @@ export function GPACalculator() {
           </div>
 
           <div>
-            <div className="w-full">
-              <div className="grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] gap-1 border-b border-border/70 px-2 py-2.5 text-[0.6rem] font-semibold uppercase tracking-[0.05em] text-muted-foreground min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(4.25rem,1fr)_minmax(3.8rem,1fr)_1.5rem] min-[390px]:gap-1.5 sm:px-3 sm:text-[0.64rem] sm:tracking-[0.08em] xl:grid-cols-[minmax(12rem,1.35fr)_minmax(7.5rem,1fr)_minmax(6rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 xl:text-[0.72rem] xl:tracking-[0.12em] 2xl:gap-3 2xl:tracking-[0.14em]">
-                <span className="pl-1.5 lg:pl-2.5">Course</span>
-                <span className="text-center">Grade</span>
-                <span className="text-center">Credits</span>
-                <span></span>
+            <div role="table" aria-label="GPA courses" className="w-full">
+              <div role="row" className="grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] gap-1 border-b border-border/70 px-2 py-2.5 text-[0.6rem] font-semibold uppercase tracking-[0.05em] text-muted-foreground min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(4.25rem,1fr)_minmax(3.8rem,1fr)_1.5rem] min-[390px]:gap-1.5 sm:px-3 sm:text-[0.64rem] sm:tracking-[0.08em] xl:grid-cols-[minmax(12rem,1.35fr)_minmax(7.5rem,1fr)_minmax(6rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 xl:text-[0.72rem] xl:tracking-[0.12em] 2xl:gap-3 2xl:tracking-[0.14em]">
+                <SortableHeader
+                  label="Course"
+                  direction={getSortDirection('course')}
+                  className="pl-1.5 lg:pl-2.5"
+                  onClick={() =>
+                    setSort((current) => cycleSort(current, 'course'))
+                  }
+                />
+                <SortableHeader
+                  label="Grade"
+                  direction={getSortDirection('grade')}
+                  align="center"
+                  onClick={() =>
+                    setSort((current) => cycleSort(current, 'grade'))
+                  }
+                />
+                <SortableHeader
+                  label="Credits"
+                  direction={getSortDirection('credits')}
+                  align="center"
+                  onClick={() =>
+                    setSort((current) => cycleSort(current, 'credits'))
+                  }
+                />
+                <span role="columnheader" aria-label="Actions"></span>
               </div>
 
-              <div className="divide-y divide-border/70">
-                {courses.map((course) => (
+              <div role="rowgroup" className="divide-y divide-border/70">
+                {sortedCourses.map((course) => (
                   <div
                     key={course.id}
+                    role="row"
                     className="group grid grid-cols-[minmax(5rem,1fr)_4.25rem_3.8rem_1.5rem] items-center gap-1 px-2 py-2.5 transition-colors hover:bg-muted/45 min-[390px]:grid-cols-[minmax(5rem,1.35fr)_minmax(4.25rem,1fr)_minmax(3.8rem,1fr)_1.5rem] min-[390px]:gap-1.5 sm:px-3 xl:grid-cols-[minmax(12rem,1.35fr)_minmax(7.5rem,1fr)_minmax(6rem,1fr)_2.5rem] xl:gap-2.5 xl:px-5 xl:py-3.5 2xl:gap-3"
                   >
-                    <label className="min-w-0">
+                    <label role="cell" className="min-w-0">
                       <span className="sr-only">
                         Course
                       </span>
@@ -442,7 +524,7 @@ export function GPACalculator() {
                         className="h-8 rounded-sm border-transparent bg-transparent px-1.5 text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:px-2.5 lg:text-sm"
                       />
                     </label>
-                    <label className="w-full max-w-[7rem] justify-self-center">
+                    <label role="cell" className="w-full max-w-[7rem] justify-self-center">
                       <span className="sr-only">
                         Grade
                       </span>
@@ -464,7 +546,7 @@ export function GPACalculator() {
                         </SelectContent>
                       </Select>
                     </label>
-                    <label className="w-full max-w-[6.25rem] justify-self-center">
+                    <label role="cell" className="w-full max-w-[6.25rem] justify-self-center">
                       <span className="sr-only">
                         Credits
                       </span>
@@ -483,19 +565,21 @@ export function GPACalculator() {
                         className="h-8 rounded-sm border-transparent bg-transparent px-0.5 text-center text-xs shadow-none placeholder:text-muted-foreground/70 hover:border-border/70 hover:bg-input/90 focus-visible:bg-input lg:h-9 lg:px-1 lg:text-sm"
                       />
                     </label>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteCourse(course.id)}
-                      className={`size-6 rounded-sm text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:h-9 lg:w-9 ${
-                        courses.length > 1
-                          ? 'opacity-100'
-                          : 'opacity-0 group-hover:opacity-100'
-                      }`}
-                      disabled={courses.length <= 1}
-                    >
-                      <X className="size-3 lg:size-4" />
-                    </Button>
+                    <div role="cell">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteCourse(course.id)}
+                        className={`size-6 rounded-sm text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive lg:h-9 lg:w-9 ${
+                          courses.length > 1
+                            ? 'opacity-100'
+                            : 'opacity-0 group-hover:opacity-100'
+                        }`}
+                        disabled={courses.length <= 1}
+                      >
+                        <X className="size-3 lg:size-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>

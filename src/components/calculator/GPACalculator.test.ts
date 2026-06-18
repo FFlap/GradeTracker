@@ -3,6 +3,7 @@ import {
   DEFAULT_GPA_SCALE,
   calculateGPAResult,
   createValidatedGPAScale,
+  sortGpaCoursesByGrade,
   type CourseEntry,
   type GPAScaleDraftEntry,
 } from './GPACalculator'
@@ -121,5 +122,56 @@ describe('GPA scale validation', () => {
       { letter: 'B', points: 0 },
       { letter: 'C', points: 0 },
     ])
+  })
+})
+
+describe('GPA course grade sorting', () => {
+  const courses: CourseEntry[] = [
+    { id: 'empty', name: 'Empty', grade: '', credits: '3' },
+    { id: 'b', name: 'B course', grade: 'B', credits: '3' },
+    { id: 'a', name: 'A course', grade: 'A', credits: '3' },
+    { id: 'a-plus', name: 'A+ course', grade: 'A+', credits: '3' },
+    { id: 'f', name: 'F course', grade: 'F', credits: '3' },
+  ]
+
+  it('sorts by GPA points and uses the displayed letter for equal points', () => {
+    expect(
+      sortGpaCoursesByGrade(courses, 'asc', DEFAULT_GPA_SCALE).map(
+        (entry) => entry.id
+      )
+    ).toEqual(['f', 'b', 'a', 'a-plus', 'empty'])
+  })
+
+  it('sorts descending while keeping empty grades last', () => {
+    expect(
+      sortGpaCoursesByGrade(courses, 'desc', DEFAULT_GPA_SCALE).map(
+        (entry) => entry.id
+      )
+    ).toEqual(['a-plus', 'a', 'b', 'f', 'empty'])
+  })
+
+  it('does not mutate the source course order', () => {
+    const sourceIds = courses.map((entry) => entry.id)
+
+    sortGpaCoursesByGrade(courses, 'asc', DEFAULT_GPA_SCALE)
+
+    expect(courses.map((entry) => entry.id)).toEqual(sourceIds)
+  })
+
+  it('uses the active GPA scale instead of the default scale', () => {
+    const customScale = [
+      { letter: 'A', points: 1 },
+      { letter: 'B', points: 5 },
+    ]
+    const customCourses: CourseEntry[] = [
+      { id: 'a', name: 'A course', grade: 'A', credits: '3' },
+      { id: 'b', name: 'B course', grade: 'B', credits: '3' },
+    ]
+
+    expect(
+      sortGpaCoursesByGrade(customCourses, 'asc', customScale).map(
+        (entry) => entry.id
+      )
+    ).toEqual(['a', 'b'])
   })
 })
