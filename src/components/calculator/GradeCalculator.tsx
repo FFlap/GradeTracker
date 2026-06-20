@@ -653,20 +653,22 @@ function GradeWeightingPanel({
             </h2>
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              Select course
-            </Label>
-            <CourseSelector
-              isSignedIn={isSignedIn}
-              courses={courses}
-              selectedCourseId={selectedCourseId}
-              onSelectCourse={onSelectCourse}
-              onCreateCourse={onCreateCourse}
-              onRenameCourse={onRenameCourse}
-              onDeleteCourse={onDeleteCourse}
-            />
-          </div>
+          {isSignedIn && (
+            <div className="space-y-2">
+              <Label className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Select course
+              </Label>
+              <CourseSelector
+                isSignedIn={isSignedIn}
+                courses={courses}
+                selectedCourseId={selectedCourseId}
+                onSelectCourse={onSelectCourse}
+                onCreateCourse={onCreateCourse}
+                onRenameCourse={onRenameCourse}
+                onDeleteCourse={onDeleteCourse}
+              />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
