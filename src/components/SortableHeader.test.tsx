@@ -33,30 +33,27 @@ describe('SortableHeader', () => {
     expect(renderHeader(direction)).toContain(`aria-sort="${ariaSort}"`)
   })
 
-  it('centers narrow labels without reserving layout width for the indicator', () => {
+  it('centers the label and indicator together', () => {
     const markup = renderHeader('asc')
 
     expect(markup).toContain('<button type="button"')
-    expect(markup).toContain('relative flex justify-center text-center')
-    expect(markup).toContain('w-full text-center')
-    expect(markup).toContain('absolute right-0.5 size-1.5')
-    expect(markup).not.toContain('grid-cols-')
+    expect(markup).toContain('inline-flex justify-center gap-0.5 text-center')
+    expect(markup).toContain('flex size-3 shrink-0')
+    expect(markup.indexOf('Grade')).toBeLessThan(markup.indexOf('lucide-arrow-up'))
   })
 
-  it('keeps the centered indicator dimensions stable while unsorted', () => {
+  it('shows a neutral up-down indicator while unsorted', () => {
     const markup = renderHeader()
 
-    expect(markup).toContain(
-      '<span aria-hidden="true" class="flex items-center justify-center absolute right-0.5 size-1.5"></span>'
-    )
+    expect(markup).toContain('lucide-move-vertical')
+    expect(markup).toContain('opacity-60')
   })
 
   it('keeps left-aligned labels at the original start without a leading spacer', () => {
     const markup = renderLeftHeader('asc')
 
     expect(markup).toContain('inline-flex')
-    expect(markup).not.toContain('relative flex justify-center text-center')
-    expect(markup).not.toContain('absolute right-0.5 size-1.5')
+    expect(markup).not.toContain('justify-center gap-0.5 text-center')
     expect(markup.indexOf('Assignment')).toBeLessThan(
       markup.indexOf('lucide-arrow-up')
     )

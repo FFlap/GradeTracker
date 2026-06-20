@@ -1685,7 +1685,7 @@ function CourseTableHeader({
   return (
     <div
       role="row"
-      className="hidden grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] gap-3 border-y border-border/70 bg-muted/35 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:grid"
+      className="hidden grid-cols-[minmax(12rem,1fr)_5.5rem_7rem_8rem_2.5rem] gap-3 border-y border-border/70 bg-muted/35 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:grid"
     >
       <SortableHeader
         label="Course"
@@ -1744,7 +1744,7 @@ function CourseRow({
       onDragStart={(event) => onCourseDragStart(event, courseId)}
       onDragEnd={onCourseDragEnd}
       className={cn(
-        'grid cursor-grab grid-cols-1 items-start gap-3 px-4 py-3.5 transition-colors hover:bg-muted/45 active:cursor-grabbing sm:grid-cols-[minmax(12rem,1fr)_4rem_7rem_8rem_2.5rem] sm:items-center',
+        'grid cursor-grab grid-cols-1 items-start gap-3 px-4 py-3.5 transition-colors hover:bg-muted/45 active:cursor-grabbing sm:grid-cols-[minmax(12rem,1fr)_5.5rem_7rem_8rem_2.5rem] sm:items-center',
         draggingCourseId === courseId && 'opacity-50'
       )}
     >
