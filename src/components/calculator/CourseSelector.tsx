@@ -1,12 +1,6 @@
 import { useEffect, useReducer, useRef } from 'react'
 import { SignInButton } from '@clerk/clerk-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { CourseDropdown } from './CourseDropdown'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Plus, Check, Pencil, Trash2, X, MoreHorizontal } from 'lucide-react'
@@ -260,29 +254,13 @@ function CourseSelectorInner({
 
   return (
     <div className="flex min-w-0 items-center gap-2">
-      <Select
-        value={selectedCourseId ?? ('none' as const)}
-        onValueChange={(value) =>
-          onSelectCourse(value === 'none' ? null : (value as Course['_id']))
-        }
+      <CourseDropdown
+        courses={courses}
+        selectedCourseId={selectedCourseId}
+        onSelectCourse={onSelectCourse}
         disabled={!isSignedIn || state.isWorking}
-      >
-        <SelectTrigger className="h-9 min-w-0 flex-1 text-sm">
-          <SelectValue
-            placeholder={
-              isSignedIn ? 'Select a course to save grades' : 'Sign in to save grades to a course'
-            }
-          />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="none">No course selected</SelectItem>
-          {courses.map((course) => (
-            <SelectItem key={course._id} value={course._id}>
-              {course.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        placeholder={isSignedIn ? 'Select a course to save grades' : 'Sign in to save grades to a course'}
+      />
 
       {isSignedIn ? (
         <div ref={manageMenuRef} className="relative shrink-0">

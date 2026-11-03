@@ -645,7 +645,7 @@ function GradeWeightingPanel({
   } = summary
   return (
     <div className="min-w-0 space-y-4 sm:space-y-5 xl:sticky xl:top-6">
-      <Card className="gap-0 overflow-hidden rounded-xl border-border/70 py-0 sm:rounded-2xl">
+      <Card className="gap-0 rounded-xl border-border/70 py-0 sm:rounded-2xl">
         <CardContent className="space-y-4 p-4 sm:space-y-6 sm:p-6">
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
