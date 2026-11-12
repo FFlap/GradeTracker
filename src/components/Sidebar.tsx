@@ -276,7 +276,7 @@ export function Sidebar({
               <div
                 className={cn(
                   'overflow-hidden px-3 text-xs leading-5 text-muted-foreground transition-[max-height,opacity] duration-200 ease-out',
-                  collapsed ? 'max-h-0 opacity-0' : 'max-h-16 opacity-100'
+                  collapsed ? 'max-h-0 w-0 px-0 opacity-0' : 'max-h-16 opacity-100'
                 )}
               >
                 Sign in to save courses, semesters, and grades.
