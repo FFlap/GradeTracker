@@ -93,12 +93,27 @@ function SectionLabel({
   return (
     <div
       className={cn(
-        'px-3 pt-5 pb-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground',
-        compact && 'pt-2',
-        collapsed && 'px-0 text-center'
+        'relative h-[2.375rem] overflow-hidden whitespace-nowrap pt-5 pb-2 text-[0.68rem] font-semibold uppercase leading-[0.875rem] tracking-[0.16em] text-muted-foreground',
+        compact && 'h-[1.625rem] pt-2'
       )}
     >
-      {collapsed ? collapsedLabel : label}
+      <span
+        className={cn(
+          'block px-3 transition-opacity duration-200 ease-out',
+          collapsed ? 'opacity-0' : 'opacity-100 delay-100'
+        )}
+      >
+        {label}
+      </span>
+      <span
+        aria-hidden="true"
+        className={cn(
+          'absolute bottom-2 left-0 w-10 text-center tracking-normal transition-opacity duration-200 ease-out',
+          collapsed ? 'opacity-100 delay-100' : 'opacity-0'
+        )}
+      >
+        {collapsedLabel}
+      </span>
     </div>
   )
 }
@@ -121,22 +136,16 @@ export function Sidebar({
 
   const navLinkClass = (active: boolean) =>
     cn(
-      'flex items-center gap-2 rounded-sm text-sm font-medium transition-[background-color,color,box-shadow,padding,gap] duration-300 ease-out',
-      collapsed ? 'justify-center gap-0 px-0 py-2.5' : 'px-3 py-2',
+      'flex items-center gap-2 overflow-hidden rounded-sm px-3 py-2 text-sm font-medium transition-[background-color,color] duration-200 ease-out [&>svg]:shrink-0',
       active
         ? 'bg-primary text-primary-foreground [&>svg]:text-accent-on-ink'
         : 'text-muted-foreground [&>svg]:text-muted-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground hover:[&>svg]:text-sidebar-foreground/80'
     )
 
   const collapsedTextClass = cn(
-    'inline-block overflow-hidden whitespace-nowrap transition-[width,max-width,opacity,transform] duration-200 ease-out',
-    collapsed
-      ? 'w-0 max-w-0 -translate-x-1 opacity-0'
-      : 'w-auto max-w-40 translate-x-0 opacity-100'
+    'whitespace-nowrap transition-opacity duration-200 ease-out',
+    collapsed ? 'opacity-0' : 'opacity-100 delay-100'
   )
-
-  const collapsedAccountTileClass =
-    'mx-auto flex h-11 w-10 items-center justify-center p-0'
 
   return (
     <aside
@@ -164,25 +173,20 @@ export function Sidebar({
       </button>
 
       <nav className="flex h-full flex-col">
-        <div className={cn('pt-2 pb-1', collapsed ? 'px-2' : 'px-4')}>
+        <div className="px-3 pt-2 pb-1">
           <Link
             to="/grade-calculator"
             search={{ courseId: undefined }}
             className={cn(
-              'flex min-w-0 items-center gap-0 rounded-sm font-semibold text-sidebar-foreground transition-[background-color,color,padding,gap] duration-300 ease-out',
-              collapsed
-                ? 'mx-auto h-12 w-12 justify-center gap-0 px-0 py-0'
-                : 'px-0 py-1.5 hover:bg-sidebar-accent'
+              'flex h-12 min-w-0 items-center overflow-hidden rounded-sm font-semibold text-sidebar-foreground transition-colors duration-200 ease-out',
+              !collapsed && 'hover:bg-sidebar-accent'
             )}
             title="Grade Tracker"
           >
-            <AppLogo
-              className={collapsed ? 'size-11' : 'h-10 w-8'}
-              imageClassName={collapsed ? 'h-11 w-8' : 'h-10 w-8'}
-            />
+            <AppLogo className="h-12 w-10" imageClassName="h-10 w-8" />
             <span
               className={cn(
-                'truncate text-[1.35rem] font-semibold leading-none tracking-tight',
+                'text-[1.35rem] font-semibold leading-none tracking-tight',
                 collapsedTextClass
               )}
             >
@@ -233,51 +237,44 @@ export function Sidebar({
 
         <div
           className={cn(
-            'mt-auto p-3 space-y-2',
-            !collapsed && 'border-t border-sidebar-border'
+            'mt-auto space-y-2 border-t p-3 transition-colors duration-300 ease-out',
+            collapsed ? 'border-transparent' : 'border-sidebar-border'
           )}
         >
           <SignedIn>
-            <div
-              className={cn(
-                'flex items-center transition-[padding,gap] duration-300 ease-out',
-                collapsed ? collapsedAccountTileClass : 'gap-3 px-3 py-2'
-              )}
-            >
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    userButtonTrigger: collapsed
-                      ? 'size-8 p-0 flex items-center justify-center'
-                      : 'size-9 p-0 flex items-center justify-center',
-                    avatarBox: 'size-8',
-                  },
-                }}
-              />
-              {!collapsed && (
-                <div
-                  className="min-w-0 flex-1 truncate text-sm font-semibold text-sidebar-foreground"
-                  title={isLoaded ? displayName : undefined}
-                >
-                  {isLoaded ? displayName : '...'}
-                </div>
-              )}
+            <div className="flex items-center gap-3 overflow-hidden px-1 py-2">
+              <span className="flex size-8 shrink-0 items-center justify-center">
+                <UserButton
+                  afterSignOutUrl="/"
+                  appearance={{
+                    elements: {
+                      userButtonTrigger: 'size-8 p-0 flex items-center justify-center',
+                      avatarBox: 'size-8',
+                    },
+                  }}
+                />
+              </span>
+              <div
+                className={cn(
+                  'min-w-0 flex-1 truncate text-sm font-semibold text-sidebar-foreground',
+                  collapsedTextClass
+                )}
+                title={isLoaded ? displayName : undefined}
+                aria-hidden={collapsed}
+              >
+                {isLoaded ? displayName : '...'}
+              </div>
             </div>
           </SignedIn>
 
           <SignedOut>
-            <div
-              className={cn(
-                'transition-[height,padding,width] duration-300 ease-out',
-                collapsed ? collapsedAccountTileClass : 'pb-1'
-              )}
-            >
+            <div className="overflow-hidden pb-1">
               <div
                 className={cn(
-                  'overflow-hidden px-3 text-xs leading-5 text-muted-foreground transition-[max-height,opacity] duration-200 ease-out',
-                  collapsed ? 'max-h-0 w-0 px-0 opacity-0' : 'max-h-16 opacity-100'
+                  'w-[13.5rem] overflow-hidden px-3 text-xs leading-5 text-muted-foreground transition-[max-height,opacity] duration-300 ease-out',
+                  collapsed ? 'max-h-0 opacity-0' : 'max-h-16 opacity-100'
                 )}
+                aria-hidden={collapsed}
               >
                 Sign in to save courses, semesters, and grades.
               </div>
@@ -285,9 +282,13 @@ export function Sidebar({
                 <Button
                   size="sm"
                   variant="default"
-                  className={cn('mt-2 w-full', collapsed && 'm-0 size-8 rounded-full p-0')}
+                  className={cn(
+                    'w-full justify-start gap-2 overflow-hidden px-3 has-[>svg]:px-3 transition-[margin,background-color] duration-300 ease-out',
+                    collapsed ? 'mt-0' : 'mt-2'
+                  )}
+                  title="Sign In"
                 >
-                  <LogIn className={cn('size-4', !collapsed && 'mr-2')} />
+                  <LogIn className="size-4" />
                   <span className={collapsedTextClass}>Sign In</span>
                 </Button>
               </SignInButton>
