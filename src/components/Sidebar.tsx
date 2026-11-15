@@ -271,7 +271,7 @@ export function Sidebar({
             <div className="overflow-hidden pb-1">
               <div
                 className={cn(
-                  'w-[13.5rem] overflow-hidden px-3 text-xs leading-5 text-muted-foreground transition-[max-height,opacity] duration-300 ease-out',
+                  'w-[13.5rem] overflow-hidden pl-3 pr-1 text-xs leading-5 text-muted-foreground transition-[max-height,opacity] duration-300 ease-out',
                   collapsed ? 'max-h-0 opacity-0' : 'max-h-16 opacity-100'
                 )}
                 aria-hidden={collapsed}
