@@ -42,11 +42,11 @@ describe('SortableHeader', () => {
     expect(markup.indexOf('Grade')).toBeLessThan(markup.indexOf('lucide-arrow-up'))
   })
 
-  it('shows a neutral up-down indicator while unsorted', () => {
+  it('shows an up-down indicator while unsorted', () => {
     const markup = renderHeader()
 
-    expect(markup).toContain('lucide-move-vertical')
-    expect(markup).toContain('opacity-60')
+    expect(markup).toContain('lucide-arrow-up-down')
+    expect(markup).not.toContain('opacity-')
   })
 
   it('keeps left-aligned labels at the original start without a leading spacer', () => {

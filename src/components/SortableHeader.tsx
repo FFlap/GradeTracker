@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, MoveVertical } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 
 import type { SortDirection } from '@/lib/table-sorting'
 import { cn } from '@/lib/utils'
@@ -42,7 +42,7 @@ export function SortableHeader({
         onClick={onClick}
         aria-label={accessibleLabel}
         className={cn(
-          'w-full cursor-pointer items-center rounded-sm bg-transparent [font:inherit] [letter-spacing:inherit] [text-transform:inherit] text-inherit transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          'group w-full cursor-pointer items-center rounded-sm bg-transparent [font:inherit] [letter-spacing:inherit] [text-transform:inherit] text-inherit transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           align === 'center'
             ? 'inline-flex justify-center gap-0.5 text-center'
             : 'inline-flex gap-1 text-left'
@@ -58,11 +58,11 @@ export function SortableHeader({
           className="flex size-3 shrink-0 items-center justify-center"
         >
           {direction === 'asc' ? (
-            <ArrowUp className="size-3" />
+            <ArrowUp className="size-3" strokeWidth={2.25} />
           ) : direction === 'desc' ? (
-            <ArrowDown className="size-3" />
+            <ArrowDown className="size-3" strokeWidth={2.25} />
           ) : (
-            <MoveVertical className="size-3 opacity-60" />
+            <ArrowUpDown className="size-3" strokeWidth={2.25} />
           )}
         </span>
       </button>
