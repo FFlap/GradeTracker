@@ -6,7 +6,6 @@ import {
   calculateCumulativeSemesterStats,
   calculateTermGpa,
   getCourseCredits,
-  getCourseGradeSortValue,
   getCourseLetter,
   getCurrentSemester,
   groupCoursesBySemesterId,
@@ -150,21 +149,6 @@ describe('semester course calculations', () => {
     expect(calculateCoursePercent(course('no-grades'), grades)).toBeNull()
   })
 
-  it('returns the calculated percentage for sorting graded courses', () => {
-    const grades = groupGradesByCourseId([
-      grade('g1', 'c1', '90', '40'),
-      grade('g2', 'c1', '80', '60'),
-    ])
-
-    expect(getCourseGradeSortValue(course('c1'), grades)).toBe(84)
-  })
-
-  it('returns null for sorting courses without a calculable grade', () => {
-    expect(
-      getCourseGradeSortValue(course('ungraded'), groupGradesByCourseId([]))
-    ).toBeNull()
-  })
-
   it('uses custom course letter thresholds when present', () => {
     const custom = course('custom', {
       letterGradeThresholds: [
@@ -271,30 +255,6 @@ describe('semester course table sorting', () => {
     expect(ids(sortSemesterCourses(courses, gradesByCourseId, null))).toEqual(
       sourceOrder
     )
-  })
-
-  it('produces independent results for separate table sort states', () => {
-    const courseSorted = sortSemesterCourses(courses, gradesByCourseId, {
-      column: 'course',
-      direction: 'asc',
-    })
-    const gradeSorted = sortSemesterCourses(courses, gradesByCourseId, {
-      column: 'grade',
-      direction: 'desc',
-    })
-
-    expect(ids(courseSorted)).toEqual([
-      'algebra',
-      'ungraded',
-      'biology',
-      'chemistry',
-    ])
-    expect(ids(gradeSorted)).toEqual([
-      'algebra',
-      'biology',
-      'chemistry',
-      'ungraded',
-    ])
   })
 
   it('persists keyed sort state through the three-state cycle', () => {

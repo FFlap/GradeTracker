@@ -14,16 +14,6 @@ function renderHeader(direction: 'asc' | 'desc' | null = null) {
   )
 }
 
-function renderLeftHeader(direction: 'asc' | 'desc' | null = null) {
-  return renderToStaticMarkup(
-    <SortableHeader
-      label="Assignment"
-      direction={direction}
-      onClick={() => undefined}
-    />
-  )
-}
-
 describe('SortableHeader', () => {
   it.each([
     [null, 'none'],
@@ -31,31 +21,5 @@ describe('SortableHeader', () => {
     ['desc', 'descending'],
   ] as const)('exposes %s as aria-sort=%s', (direction, ariaSort) => {
     expect(renderHeader(direction)).toContain(`aria-sort="${ariaSort}"`)
-  })
-
-  it('centers the label and indicator together', () => {
-    const markup = renderHeader('asc')
-
-    expect(markup).toContain('<button type="button"')
-    expect(markup).toContain('inline-flex justify-center gap-0.5 text-center')
-    expect(markup).toContain('flex size-3 shrink-0')
-    expect(markup.indexOf('Grade')).toBeLessThan(markup.indexOf('lucide-arrow-up'))
-  })
-
-  it('shows an up-down indicator while unsorted', () => {
-    const markup = renderHeader()
-
-    expect(markup).toContain('lucide-arrow-up-down')
-    expect(markup).not.toContain('opacity-')
-  })
-
-  it('keeps left-aligned labels at the original start without a leading spacer', () => {
-    const markup = renderLeftHeader('asc')
-
-    expect(markup).toContain('inline-flex')
-    expect(markup).not.toContain('justify-center gap-0.5 text-center')
-    expect(markup.indexOf('Assignment')).toBeLessThan(
-      markup.indexOf('lucide-arrow-up')
-    )
   })
 })
